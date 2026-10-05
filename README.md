@@ -2,14 +2,35 @@
 
 App gratuito de audiolivros espíritas (iOS e Android) com as obras de Allan Kardec em domínio público, narradas com TTS e revisadas por pessoas. Inclui leitura acompanhada, uso offline e perfis Jovem e Kids com a mascote Clara.
 
-Por enquanto o repositório tem só a documentação inicial e a identidade visual. Ainda não há código.
+- Plano e fases: [docs/ROADMAP.md](docs/ROADMAP.md) e [issues](https://github.com/laudofacilappbr/centelha/issues)
+- Decisões: [docs/decisoes/](docs/decisoes/)
+- Especificação, pesquisa e marca: [docs-iniciais/](docs-iniciais/)
 
-## Conteúdo
+## Estrutura
 
-- `docs-iniciais/MDs/` — especificação da plataforma, análise de concorrentes, plano de redes sociais, site e landing page, prompts de logo e mascote.
-- `docs-iniciais/centelho-brand/` — brand package v1: logos, ícones de app, ícones de interface, mockups, templates para redes sociais e design tokens (CSS, JSON, Flutter).
-- `docs-iniciais/imagens/` — referências raster originais.
+| Pasta | O que é |
+| --- | --- |
+| `api/` | API FastAPI + PostgreSQL (modelo de dados, direitos, lista de espera) |
+| `site/` | Site www e landing page em Astro, servido por nginx |
+| `infra/` | Docker Compose de dev e produção (VPS + Cloudflare), Caddyfile |
 
-## Stack prevista
+## Rodar localmente
 
-FastAPI + PostgreSQL + Redis/Celery (API e pipeline de TTS), Next.js (admin), Flutter (app), Cloudflare R2 e CDN.
+Tudo em containers:
+
+```sh
+docker compose -f infra/docker-compose.yml up --build
+# site: http://localhost:8080  ·  api: http://localhost:8000/docs
+```
+
+Só a API, com testes:
+
+```sh
+docker run -d --name centelha-pg-test -e POSTGRES_USER=centelha -e POSTGRES_PASSWORD=centelha \
+  -e POSTGRES_DB=centelha_test -p 55432:5432 postgres:17-alpine
+cd api && uv sync && uv run pytest
+```
+
+## Deploy
+
+VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`.

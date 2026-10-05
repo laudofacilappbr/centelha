@@ -1,0 +1,40 @@
+# Desenvolvimento local: docker compose -f infra/docker-compose.yml up --build
+name: centelha-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: centelha
+      POSTGRES_PASSWORD: centelha
+      POSTGRES_DB: centelha
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U centelha -d centelha"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  api:
+    build: ../api
+    environment:
+      CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:centelha@postgres:5432/centelha
+      CENTELHA_CORS_ORIGINS: '["http://localhost:4321","http://localhost:8080"]'
+      CENTELHA_CONFIAR_CF_CONNECTING_IP: "false"
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  site:
+    build:
+      context: ../site
+      args:
+        PUBLIC_API_URL: http://localhost:8000
+    ports: ["8080:80"]
+
+volumes:
+  pgdata:

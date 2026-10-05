@@ -1,0 +1,61 @@
+# Produção na VPS: um container por serviço, só o Caddy expõe portas.
+# Cloudflare na frente (DNS proxied, SSL Full strict com Origin Certificate).
+# Uso: cp .env.example .env && docker compose -f docker-compose.prod.yml up -d
+name: centelha
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro # origin.pem e origin.key gerados no painel da Cloudflare
+      - caddy_data:/data
+    environment:
+      DOMINIO: ${DOMINIO}
+    depends_on: [site, api]
+    networks: [borda]
+
+  site:
+    image: ghcr.io/laudofacilappbr/centelha-site:${TAG:-latest}
+    restart: unless-stopped
+    networks: [borda]
+
+  api:
+    image: ghcr.io/laudofacilappbr/centelha-api:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:${POSTGRES_PASSWORD}@postgres:5432/centelha
+      CENTELHA_CORS_ORIGINS: '["https://${DOMINIO}","https://www.${DOMINIO}"]'
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [borda, interna]
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: centelha
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: centelha
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U centelha -d centelha"]
+      interval: 10s
+      retries: 10
+    networks: [interna]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks: [interna]
+
+volumes:
+  pgdata:
+  caddy_data:
+
+networks:
+  borda:
+  interna:
+    internal: true
