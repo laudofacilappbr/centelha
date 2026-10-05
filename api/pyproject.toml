@@ -19,9 +19,15 @@ dependencies = [
 
 [project.scripts]
 centelha-ingestao = "centelha_api.pipeline.ingestao.cli:main"
+centelha-lgpd = "centelha_api.lgpd:main"
 
 [dependency-groups]
-dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
+dev = [
+    "pytest>=8",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "imageio-ffmpeg>=0.6.0",
+]
 
 [build-system]
 requires = ["hatchling"]
