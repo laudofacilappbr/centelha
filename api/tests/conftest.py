@@ -5,7 +5,7 @@ os.environ.setdefault(
     "CENTELHA_DATABASE_URL",
     os.environ.get(
         "CENTELHA_TEST_DATABASE_URL",
-        "postgresql+psycopg://centelha:centelha@localhost:55432/centelha_test",
+        "postgresql+psycopg://centelha:centelha@localhost:55432/centelha_test?connect_timeout=5",
     ),
 )
 
