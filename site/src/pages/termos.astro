@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import DraftNotice from '../components/DraftNotice.astro';
+import { SITE } from '../config';
+---
+
+<BaseLayout title="Termos de uso" description="Termos de uso do site e do app Centelha, de audiolivros espíritas gratuitos.">
+  <PageHeader eyebrow="Documentos" title="Termos de uso" />
+  <div class="container">
+    <article class="prose">
+      <DraftNotice />
+      <!-- TODO: revisão jurídica completa. -->
+
+      <h2>1. O serviço</h2>
+      <p>
+        O Centelha oferece, gratuitamente, audiolivros e textos de obras espíritas em domínio público, com narração gerada
+        por inteligência artificial e revisada por pessoas.
+      </p>
+
+      <h2>2. Conteúdo</h2>
+      <p>
+        Os textos de Allan Kardec e as traduções utilizadas estão em domínio público. As gravações, a organização do acervo,
+        a marca Centelha, o símbolo e a mascote Clara pertencem ao projeto. <em>[Licença das gravações a definir.]</em>
+      </p>
+
+      <h2>3. Uso adequado</h2>
+      <ul>
+        <li>Não use o serviço para fins ilegais ou para sobrecarregar os servidores.</li>
+        <li>Não apresente as gravações do Centelha como se fossem de outra origem.</li>
+      </ul>
+
+      <h2>4. Narração por IA</h2>
+      <p>
+        Apesar da revisão humana, a narração pode conter imprecisões. Em caso de dúvida, vale o texto da edição-fonte.
+        Erros podem ser comunicados pelo <a href="/suporte">suporte</a>.
+      </p>
+
+      <h2>5. Doações</h2>
+      <p>
+        O apoio financeiro é voluntário, feito fora do app, e não dá acesso a conteúdo exclusivo. <em>[Condições a definir.]</em>
+      </p>
+
+      <h2>6. Garantias e responsabilidade</h2>
+      <p>O serviço é oferecido como está, sem garantia de disponibilidade contínua. <em>[Redação a definir.]</em></p>
+
+      <h2>7. Contato e foro</h2>
+      <p>
+        Dúvidas: <a href={`mailto:${SITE.emailSuporte}`}>{SITE.emailSuporte}</a>. Estes termos seguem a legislação
+        brasileira. <em>[Foro a definir.]</em>
+      </p>
+    </article>
+  </div>
+</BaseLayout>

@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import dados from '../data/transparencia.json';
+
+const brl = (v: number | null) =>
+  v === null ? 'a definir' : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+---
+
+<BaseLayout
+  title="Transparência: custos e arrecadação"
+  description="Quanto custa manter o Centelha no ar e quanto foi arrecadado. Prestação de contas aberta, mês a mês."
+>
+  <PageHeader
+    eyebrow="Transparência"
+    title="Para onde vai cada real"
+    lede="O Centelha é gratuito e sem anúncios. Aqui mostramos quanto custa mantê-lo e quanto foi arrecadado com apoio voluntário."
+  />
+  <div class="container">
+    <article class="prose">
+      {
+        dados.placeholder && (
+          <div class="notice" role="note">
+            <strong>Valores provisórios.</strong>{' '}O app ainda não foi lançado. Os números abaixo são marcadores de posição
+            e serão substituídos pelos custos reais a partir do primeiro mês de operação.
+          </div>
+        )
+      }
+
+      <h2>Custos mensais</h2>
+      <p class="muted">{dados.referencia}</p>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Custos mensais do Centelha</caption>
+          <thead>
+            <tr>
+              <th scope="col">Item</th>
+              <th scope="col">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              dados.custos.map((c) => (
+                <tr>
+                  <td>{c.item}</td>
+                  <td>
+                    <span class="placeholder">{brl(c.valor)}</span>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Arrecadação</h2>
+      <p>
+        {
+          dados.arrecadacao === null
+            ? 'Ainda não recebemos doações. As formas de apoio serão publicadas aqui quando o app for lançado.'
+            : `Arrecadado no mês: ${brl(dados.arrecadacao)}.`
+        }
+      </p>
+
+      <h2 id="apoie">Como apoiar</h2>
+      <p>
+        Por enquanto, a melhor ajuda é entrar na <a href="/#lista-espera">lista de espera</a> e contar para quem pode gostar.
+        As formas de apoio financeiro (feitas sempre fora do app, por um meio de pagamento externo) serão anunciadas aqui.
+      </p>
+
+      <h2>Nossos compromissos</h2>
+      <ul>
+        <li>O app continuará gratuito e sem anúncios.</li>
+        <li>Publicaremos os custos e a arrecadação de cada mês.</li>
+        <li>Resultados de campanhas de caridade serão divulgados com comprovação.</li>
+      </ul>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .placeholder {
+    white-space: nowrap;
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+</style>

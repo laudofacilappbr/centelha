@@ -1,0 +1,276 @@
+---
+/**
+ * Player de demonstração: questão 88 de O Livro dos Espíritos com o texto
+ * destacado acompanhando o áudio. As marcações de tempo ficam em
+ * src/data/q88.json. O áudio (public/audio/q88.mp3) é opcional: se faltar,
+ * o player mostra "áudio de demonstração em breve" e o texto continua legível.
+ * O arquivo de áudio só é baixado quando a pessoa toca em play.
+ */
+import q88 from '../data/q88.json';
+
+const segmentos = q88.segmentos;
+---
+
+<div class="player card" data-player data-audio={q88.audio}>
+  <div class="player-head">
+    <img src="/brand/symbol-flat.svg" alt="" width="40" height="40" class="spark" />
+    <div>
+      <p class="obra">{q88.obra}</p>
+      <p class="ref muted">Questão 88 · {q88.referencia}</p>
+    </div>
+  </div>
+
+  {/* TODO: conferir redação na edição-fonte (Guillon Ribeiro, domínio público) */}
+  <blockquote class="texto" lang="pt-BR" data-texto>
+    {
+      segmentos.map((s, i) => (
+        <span class:list={['seg', `seg-${s.papel}`]} data-i={i} data-inicio={s.inicio} data-fim={s.fim}>
+          {s.texto}{' '}
+        </span>
+      ))
+    }
+  </blockquote>
+  <p class="fonte muted">{q88.traducao}. Texto em domínio público.</p>
+
+  <div class="controls" data-controls hidden>
+    <button type="button" class="play" data-play aria-label="Ouvir a questão 88">
+      <svg class="i-play" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+        <path d="M8 5.5v13l11-6.5z" fill="currentColor"></path>
+      </svg>
+      <svg class="i-pause" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+        <path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"></path>
+      </svg>
+    </button>
+    <div class="track">
+      <label class="visually-hidden" for="q88-pos">Posição do áudio</label>
+      <input id="q88-pos" type="range" min="0" max="100" step="0.1" value="0" data-seek disabled />
+      <div class="times muted" aria-hidden="true">
+        <span data-cur>0:00</span>
+        <span data-dur>0:00</span>
+      </div>
+    </div>
+  </div>
+  <p class="status" data-status role="status" aria-live="polite"></p>
+  <noscript><p class="status">Ative o JavaScript para ouvir a demonstração. O texto acima pode ser lido normalmente.</p></noscript>
+</div>
+
+<script>
+  const fmt = (t: number) => {
+    if (!Number.isFinite(t) || t < 0) t = 0;
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-player]').forEach((root) => {
+    const src = root.dataset.audio ?? '';
+    const controls = root.querySelector<HTMLElement>('[data-controls]')!;
+    const play = root.querySelector<HTMLButtonElement>('[data-play]')!;
+    const seek = root.querySelector<HTMLInputElement>('[data-seek]')!;
+    const cur = root.querySelector<HTMLElement>('[data-cur]')!;
+    const dur = root.querySelector<HTMLElement>('[data-dur]')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const segs = Array.from(root.querySelectorAll<HTMLElement>('.seg'));
+    const tempos = segs.map((el) => ({
+      el,
+      inicio: Number(el.dataset.inicio),
+      fim: Number(el.dataset.fim),
+    }));
+    const total = tempos.length ? tempos[tempos.length - 1].fim : 0;
+    dur.textContent = fmt(total);
+    controls.hidden = false;
+
+    let audio: HTMLAudioElement | null = null;
+    let indisponivel = false;
+
+    const marcarIndisponivel = () => {
+      indisponivel = true;
+      play.disabled = true;
+      seek.disabled = true;
+      root.classList.remove('is-playing');
+      status.textContent = 'Áudio de demonstração em breve. Enquanto isso, leia o trecho acima.';
+    };
+
+    const destacar = (t: number) => {
+      let ativo: HTMLElement | null = null;
+      for (const s of tempos) {
+        if (t >= s.inicio && t < s.fim) ativo = s.el;
+      }
+      for (const s of tempos) {
+        if (s.el === ativo) s.el.setAttribute('aria-current', 'true');
+        else s.el.removeAttribute('aria-current');
+      }
+    };
+
+    const atualizar = () => {
+      if (!audio) return;
+      const d = Number.isFinite(audio.duration) ? audio.duration : total;
+      cur.textContent = fmt(audio.currentTime);
+      dur.textContent = fmt(d);
+      seek.value = d ? String((audio.currentTime / d) * 100) : '0';
+      seek.setAttribute('aria-valuetext', `${fmt(audio.currentTime)} de ${fmt(d)}`);
+      destacar(audio.currentTime);
+    };
+
+    const criarAudio = () => {
+      const a = new Audio();
+      a.preload = 'none';
+      a.addEventListener('error', marcarIndisponivel);
+      a.addEventListener('timeupdate', atualizar);
+      a.addEventListener('loadedmetadata', atualizar);
+      a.addEventListener('play', () => {
+        root.classList.add('is-playing');
+        play.setAttribute('aria-label', 'Pausar');
+        seek.disabled = false;
+      });
+      a.addEventListener('pause', () => {
+        root.classList.remove('is-playing');
+        play.setAttribute('aria-label', 'Ouvir a questão 88');
+      });
+      a.addEventListener('ended', () => destacar(-1));
+      a.src = src;
+      return a;
+    };
+
+    play.addEventListener('click', async () => {
+      if (indisponivel) return;
+      if (!audio) {
+        // Confere se o arquivo existe antes de criar o player (só no primeiro toque).
+        try {
+          const r = await fetch(src, { method: 'HEAD' });
+          const tipo = r.headers.get('content-type') ?? '';
+          if (!r.ok || !tipo.startsWith('audio')) return marcarIndisponivel();
+        } catch {
+          return marcarIndisponivel();
+        }
+        audio = criarAudio();
+      }
+      if (audio.paused) {
+        audio.play().catch(() => {
+          if (audio && audio.error) marcarIndisponivel();
+        });
+      } else {
+        audio.pause();
+      }
+    });
+
+    seek.addEventListener('input', () => {
+      if (!audio || !Number.isFinite(audio.duration)) return;
+      audio.currentTime = (Number(seek.value) / 100) * audio.duration;
+      atualizar();
+    });
+  });
+</script>
+
+<style>
+  .player {
+    padding: var(--space-6);
+    background: var(--surface);
+  }
+  .player-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .player-head p {
+    margin: 0;
+  }
+  .spark {
+    flex: none;
+  }
+  .obra {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+  .ref {
+    font-size: 0.9rem;
+  }
+  .texto {
+    margin: 0 0 var(--space-3);
+    font-size: 1.2rem;
+    line-height: 1.75;
+  }
+  .seg {
+    border-radius: 4px;
+    padding: 0.05em 0.1em;
+    transition: background-color 0.2s ease;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .seg-numero {
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .seg-pergunta {
+    font-weight: 700;
+  }
+  .seg-numero:not(:first-child)::before {
+    content: '';
+    display: block;
+    height: var(--space-3);
+  }
+  .seg[aria-current='true'] {
+    background: var(--highlight-bg);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+  .fonte {
+    font-size: 0.85rem;
+    margin-bottom: var(--space-5);
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .controls[hidden] {
+    display: none;
+  }
+  .play {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--accent);
+    color: var(--accent-text);
+    cursor: pointer;
+  }
+  .play:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .i-pause {
+    display: none;
+  }
+  .is-playing .i-pause {
+    display: block;
+  }
+  .is-playing .i-play {
+    display: none;
+  }
+  .track {
+    flex: 1;
+    min-width: 0;
+  }
+  input[type='range'] {
+    width: 100%;
+    accent-color: var(--accent);
+    min-height: 24px;
+  }
+  .times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .status {
+    margin: var(--space-3) 0 0;
+    color: var(--text-secondary);
+  }
+  .status:empty {
+    display: none;
+  }
+</style>

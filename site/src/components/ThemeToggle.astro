@@ -1,0 +1,75 @@
+---
+/** Alternância claro/escuro. Sem JS, o botão fica oculto e vale o tema escuro. */
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle hidden aria-pressed="false">
+  <span class="visually-hidden">Tema claro</span>
+  <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+    <path
+      d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"></path>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+    <path
+      d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linejoin="round"></path>
+  </svg>
+</button>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  if (btn) {
+    const root = document.documentElement;
+    const sync = () => {
+      const light = root.getAttribute('data-theme') === 'light';
+      btn.setAttribute('aria-pressed', String(light));
+    };
+    btn.hidden = false;
+    sync();
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('centelha-tema', next);
+      } catch {
+        /* armazenamento indisponível: vale só nesta visita */
+      }
+      sync();
+    });
+  }
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .theme-toggle[hidden] {
+    display: none;
+  }
+  .theme-toggle:hover {
+    border-color: var(--accent);
+  }
+  .icon-moon {
+    display: none;
+  }
+  :global([data-theme='light']) .icon-sun {
+    display: none;
+  }
+  :global([data-theme='light']) .icon-moon {
+    display: block;
+  }
+</style>

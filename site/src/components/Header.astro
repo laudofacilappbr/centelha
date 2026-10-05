@@ -1,0 +1,130 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const links = [
+  { href: '/sobre', label: 'Sobre' },
+  { href: '/como-fazemos', label: 'Como fazemos' },
+  { href: '/kids', label: 'Kids' },
+  { href: '/transparencia', label: 'Transparência' },
+];
+const atual = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+---
+
+<header class="site-header">
+  <div class="container bar">
+    <a href="/" class="brand" aria-label="Centelha — página inicial">
+      <Logo width={140} />
+    </a>
+    <nav aria-label="Principal" class="nav">
+      <ul>
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} aria-current={atual === l.href ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="actions">
+      <ThemeToggle />
+      <a class="btn btn-primary cta" href="/#lista-espera">Lista de espera</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 50;
+    background: color-mix(in srgb, var(--background) 90%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'brand actions'
+      'nav nav';
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-3);
+  }
+  .brand {
+    grid-area: brand;
+    display: inline-flex;
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+  }
+  .brand :global(img) {
+    width: 120px;
+    height: auto;
+  }
+  .nav {
+    grid-area: nav;
+    min-width: 0;
+  }
+  .nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+  }
+  .nav a {
+    display: inline-block;
+    padding: var(--space-2) 0;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .nav a:hover,
+  .nav a[aria-current='page'] {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+  .actions {
+    grid-area: actions;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .cta {
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  @media (max-width: 350px) {
+    .cta {
+      display: none;
+    }
+  }
+  @media (min-width: 900px) {
+    .site-header {
+      position: sticky;
+      top: 0;
+    }
+    .bar {
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: 'brand nav actions';
+    }
+    .brand :global(img) {
+      width: 170px;
+    }
+    .nav ul {
+      justify-content: center;
+      gap: var(--space-6);
+    }
+  }
+</style>

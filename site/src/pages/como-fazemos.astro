@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+
+<BaseLayout
+  title="Como fazemos: IA, revisão humana e direitos autorais"
+  description="Como o Centelha produz os audiolivros espíritas: só obras em domínio público, narração por inteligência artificial e revisão de cada trecho por pessoas."
+>
+  <PageHeader
+    eyebrow="Como fazemos"
+    title="Tecnologia a serviço do texto"
+    lede="Usamos inteligência artificial para narrar e pessoas para conferir. E só publicamos o que está em domínio público."
+  />
+  <div class="container">
+    <article class="prose">
+      <h2>1. Só obras em domínio público</h2>
+      <p>
+        As obras de Allan Kardec foram publicadas no século XIX e estão em domínio público. Usamos traduções para o
+        português que também já estão em domínio público, como a de Guillon Ribeiro. Antes de entrar no acervo, cada
+        edição-fonte é registrada com sua origem.
+      </p>
+      <p>
+        Por isso o Centelha não tem obras psicografadas por Chico Xavier, Divaldo Franco e outros autores contemporâneos:
+        elas ainda estão protegidas por direitos autorais. Também não usamos traduções recentes protegidas.
+      </p>
+
+      <h2>2. Narração por inteligência artificial</h2>
+      <p>
+        A voz que você ouve é sintética. Ela permite narrar obras longas com qualidade constante e custo baixo, o que
+        mantém o app gratuito. Escolhemos vozes calmas e claras, com ritmo pensado para o estudo.
+      </p>
+
+      <h2>3. Revisão feita por pessoas</h2>
+      <p>Nenhum trecho chega ao app sem passar por gente. Na revisão, conferimos:</p>
+      <ul>
+        <li>se o texto narrado corresponde exatamente à edição-fonte;</li>
+        <li>a pronúncia de nomes, termos da doutrina e palavras em outros idiomas;</li>
+        <li>pausas, ritmo e entonação de perguntas e respostas;</li>
+        <li>a sincronia entre o áudio e o texto destacado na tela.</li>
+      </ul>
+      <p>
+        Nas adaptações infantis do perfil Kids, há também revisão doutrinária humana antes de publicar.
+      </p>
+
+      <h2>4. Encontrou um erro?</h2>
+      <p>
+        Mesmo com revisão, algo pode escapar. Se ouvir uma palavra trocada ou uma pronúncia estranha, conte para a gente
+        pela página de <a href="/suporte">suporte</a>, informando a obra e o número da questão ou do capítulo.
+      </p>
+    </article>
+  </div>
+</BaseLayout>

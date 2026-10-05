@@ -1,0 +1,90 @@
+---
+/**
+ * Página para pais e evangelizadores. NENHUMA analítica aqui (semAnalitica).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+
+<BaseLayout
+  title="Centelha Kids: histórias espíritas para crianças, sem anúncios"
+  description="Centelha Kids, para pais e evangelizadores: histórias curtas e questionários com a Clara, a luzinha do Centelha. Sem anúncios e sem coleta de dados das crianças."
+  semAnalitica
+>
+  <PageHeader
+    eyebrow="Centelha Kids · para pais e evangelizadores"
+    title="Clara, a luzinha do Centelha"
+    lede="Um cantinho seguro no app para as crianças ouvirem histórias inspiradas nos ensinamentos espíritas."
+  />
+  <div class="container">
+    <div class="kids-intro">
+      <!-- TODO: substituir pelo desenho oficial da Clara quando a ilustração estiver aprovada -->
+      <img src="/brand/app-icon-kids.svg" alt="Ícone do Centelha Kids: a centelha dourada sobre fundo azul" width="200" height="200" />
+      <blockquote class="fala">
+        <p>“Oi! Eu sou a Clara. Quer ouvir uma história comigo? Depois eu faço umas perguntinhas, tá bom?”</p>
+      </blockquote>
+    </div>
+
+    <article class="prose">
+      <h2>O que tem no perfil Kids</h2>
+      <ul>
+        <li><strong>Histórias curtas</strong>, adaptadas para crianças a partir dos ensinamentos das obras de Kardec.</li>
+        <li>
+          <strong>Questionários simples</strong> sobre o que foi ouvido. A Clara pergunta mais do que responde e comemora
+          cada acerto. Quando a resposta não sai, ela convida a tentar de outro jeito.
+        </li>
+        <li><strong>Revisão doutrinária humana</strong> em todas as adaptações, antes de publicar.</li>
+      </ul>
+
+      <h2>Nossos compromissos com as crianças</h2>
+      <ul>
+        <li><strong>Sem anúncios.</strong> Nunca.</li>
+        <li><strong>Sem coleta de dados das crianças.</strong> O perfil Kids não pede nome, foto, e-mail nem localização.</li>
+        <li><strong>Sem medição de uso.</strong> Nenhuma ferramenta de análise roda no perfil Kids, nem nesta página do site.</li>
+        <li><strong>Sem links para fora do app</strong> dentro do perfil Kids.</li>
+      </ul>
+
+      <h2>Para evangelizadores</h2>
+      <p>
+        As histórias podem apoiar aulas de evangelização infantil espírita: são curtas, citam a fonte e terminam com
+        perguntas para conversar em grupo.
+      </p>
+
+      <p class="muted">
+        Dúvidas sobre o perfil Kids? Escreva pela página de <a href="/suporte">suporte</a> ou leia a
+        <a href="/privacidade">política de privacidade</a>.
+      </p>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .kids-intro {
+    display: grid;
+    gap: var(--space-6);
+    align-items: center;
+    margin-bottom: var(--space-8);
+    max-width: 72ch;
+  }
+  @media (min-width: 640px) {
+    .kids-intro {
+      grid-template-columns: auto 1fr;
+    }
+  }
+  .kids-intro img {
+    width: 160px;
+    border-radius: 40px;
+  }
+  .fala {
+    margin: 0;
+    padding: var(--space-5) var(--space-6);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    font-size: 1.2rem;
+    font-family: var(--font-display);
+  }
+  .fala p {
+    margin: 0;
+  }
+</style>

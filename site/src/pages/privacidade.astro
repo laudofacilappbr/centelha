@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import DraftNotice from '../components/DraftNotice.astro';
+import { SITE } from '../config';
+---
+
+<BaseLayout
+  title="Política de privacidade"
+  description="Como o Centelha trata dados pessoais no site e no app, conforme a LGPD: o mínimo necessário, sem anúncios e sem coleta de dados de crianças."
+>
+  <PageHeader eyebrow="Documentos" title="Política de privacidade" lede="Coletamos o mínimo possível. Explicamos aqui o quê, por quê e como pedir a exclusão." />
+  <div class="container">
+    <article class="prose">
+      <DraftNotice />
+      <!-- TODO: revisão jurídica; preencher controlador (razão social/CNPJ ou pessoa responsável) e encarregado (DPO). -->
+
+      <h2>1. Quem somos</h2>
+      <p>
+        O Centelha é um projeto de audiolivros espíritas gratuitos. Controlador dos dados: <em>[a definir]</em>. Contato do
+        encarregado pelo tratamento de dados: <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a>.
+      </p>
+
+      <h2>2. Dados que tratamos no site</h2>
+      <ul>
+        <li>
+          <strong>Lista de espera:</strong> seu e-mail, a origem do cadastro (“site”) e a data. Finalidade: avisar sobre o
+          lançamento do app. Base legal: consentimento (art. 7º, I, da LGPD).
+        </li>
+        <li>
+          <strong>Mensagens de suporte:</strong> o e-mail e o conteúdo que você enviar. Finalidade: responder ao seu pedido.
+        </li>
+        <li>
+          <strong>Registros técnicos:</strong> o servidor registra dados de acesso (como endereço IP e data) por motivos de
+          segurança, pelo prazo legal.
+        </li>
+      </ul>
+      <p>
+        O site não usa cookies de rastreamento nem anúncios. As fontes tipográficas são servidas pelo próprio site, sem
+        chamadas a terceiros. Se adotarmos medição de acesso, será uma ferramenta sem cookies e sem identificação pessoal,
+        e nunca na página do Centelha Kids.
+      </p>
+
+      <h2>3. Dados no app</h2>
+      <p>
+        O app funciona sem login. Preferências e progresso de escuta ficam guardados no próprio aparelho.
+        <!-- TODO: detalhar quando a especificação do app for fechada (relatórios de erro, notificações etc.). -->
+      </p>
+
+      <h2>4. Crianças</h2>
+      <p>
+        O perfil Centelha Kids não coleta dados pessoais das crianças, não exibe anúncios e não usa ferramentas de análise.
+      </p>
+
+      <h2>5. Compartilhamento</h2>
+      <p>
+        Não vendemos nem compartilhamos dados para publicidade. Usamos fornecedores de infraestrutura (hospedagem e envio de
+        e-mail) apenas para operar o serviço. <em>[Lista de operadores a definir.]</em>
+      </p>
+
+      <h2>6. Por quanto tempo guardamos</h2>
+      <p>
+        O e-mail da lista de espera é guardado até o lançamento e o envio do aviso, ou até você pedir a exclusão, o que
+        vier primeiro. <em>[Prazo exato a definir.]</em>
+      </p>
+
+      <h2>7. Seus direitos</h2>
+      <p>
+        Você pode pedir a confirmação, o acesso, a correção, a exclusão dos seus dados e revogar o consentimento a qualquer
+        momento, escrevendo para <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a>. Também pode
+        reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
+      </p>
+
+      <h2>8. Alterações</h2>
+      <p>Avisaremos aqui qualquer mudança nesta política. Última atualização: <em>[data a definir]</em>.</p>
+    </article>
+  </div>
+</BaseLayout>

@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+
+<BaseLayout
+  title="Sobre o projeto e a centelha no espiritismo"
+  description="O que é o Centelha, por que ele é gratuito e de onde vem o nome: a questão 88 de O Livro dos Espíritos, em que o Espírito é descrito como uma centelha etérea."
+>
+  <PageHeader
+    eyebrow="Sobre"
+    title="Uma centelha acende outra"
+    lede="O Centelha transforma as obras de Allan Kardec em audiolivros gratuitos, para ouvir no carro, no ônibus, antes de dormir ou quando ler é difícil."
+  />
+  <div class="container">
+    <article class="prose">
+      <h2>O que é o Centelha</h2>
+      <p>
+        Um app gratuito, sem anúncios, que reúne as obras básicas do espiritismo em áudio. Todo o acervo vem de obras em
+        domínio público, com narração gerada por inteligência artificial e revisão feita por pessoas. Você pode baixar os
+        capítulos para ouvir offline e acompanhar o texto destacado enquanto ouve.
+      </p>
+      <p>
+        O projeto foi pensado para adultos curiosos sobre a doutrina, para quem já estuda e quer aproveitar o tempo no
+        trânsito, para pessoas com dificuldade de leitura e para pais e evangelizadores, com o perfil Kids.
+      </p>
+
+      <h2>A centelha no espiritismo</h2>
+      <p>
+        O nome vem de <cite>O Livro dos Espíritos</cite>. Na questão 88, Kardec pergunta se os Espíritos têm forma
+        determinada, limitada e constante. A resposta:
+      </p>
+      <!-- TODO: conferir redação na edição-fonte (Guillon Ribeiro, domínio público) -->
+      <blockquote>
+        <p>“Para vós, não; para nós, sim. O Espírito é, se quiserdes, uma chama, um clarão, ou uma centelha etérea.”</p>
+        <footer class="muted">— <cite>O Livro dos Espíritos</cite>, questão 88. Tradução de Guillon Ribeiro.</footer>
+      </blockquote>
+      <p>
+        Logo em seguida, na questão 88a, a cor dessa centelha vai do escuro e opaco ao brilho do rubi, conforme o Espírito
+        seja mais ou menos puro. Mais adiante, na questão 92, a imagem volta: o Espírito irradia como uma centelha que
+        projeta sua claridade ao longe.
+      </p>
+      <p>Daí a ideia da marca:</p>
+      <ul>
+        <li><strong>Cada pessoa é uma centelha:</strong> uma luz que existe antes do corpo e continua depois dele.</li>
+        <li>
+          <strong>A luz cresce com o aprendizado:</strong> quanto mais o Espírito se depura, mais brilha. Estudar é uma forma
+          de acender essa luz.
+        </li>
+        <li><strong>Uma centelha acende outra:</strong> o app espalha o conhecimento de graça, de ouvido em ouvido.</li>
+      </ul>
+      <p class="muted">
+        Uma nota sobre palavras: a expressão de Kardec é “centelha etérea”. “Centelha divina” é a forma popular, usada por
+        autores posteriores e no meio espírita.
+      </p>
+
+      <h2>Como o projeto se mantém</h2>
+      <p>
+        O Centelha é gratuito para quem ouve. Os custos (servidores, armazenamento de áudio e geração da narração) são
+        cobertos por apoio voluntário, com prestação de contas aberta na página de <a href="/transparencia">transparência</a>.
+      </p>
+      <p><a class="link-arrow" href="/como-fazemos">Veja como fazemos os audiolivros</a></p>
+    </article>
+  </div>
+</BaseLayout>

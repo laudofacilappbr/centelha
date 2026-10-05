@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Página não encontrada" description="Esta página não existe no site do Centelha." noindex>
+  <section class="page-header">
+    <div class="container nf">
+      <img src="/brand/symbol-color.svg" alt="" width="120" height="120" />
+      <span class="eyebrow">Erro 404</span>
+      <h1>Esta página se apagou</h1>
+      <p class="lede">O endereço pode ter mudado ou nunca ter existido. Vamos voltar para a luz?</p>
+      <a class="btn btn-primary" href="/">Ir para a página inicial</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    padding-block: var(--space-12);
+    text-align: center;
+    display: grid;
+    justify-items: center;
+  }
+</style>

@@ -1,0 +1,17 @@
+{
+  "_comentario": "TODO: conferir redação na edição-fonte (tradução de Guillon Ribeiro, FEB, domínio público). As marcações de tempo são estimativas e devem ser regeradas a partir do áudio final (public/audio/q88.mp3).",
+  "obra": "O Livro dos Espíritos",
+  "referencia": "Parte Segunda, Capítulo I — Forma e ubiquidade dos Espíritos",
+  "traducao": "Tradução de Guillon Ribeiro",
+  "audio": "/audio/q88.mp3",
+  "segmentos": [
+    { "inicio": 0.0, "fim": 2.2, "papel": "numero", "texto": "88." },
+    { "inicio": 2.2, "fim": 6.6, "papel": "pergunta", "texto": "Os Espíritos têm forma determinada, limitada e constante?" },
+    { "inicio": 6.6, "fim": 9.4, "papel": "resposta", "texto": "“Para vós, não; para nós, sim." },
+    { "inicio": 9.4, "fim": 15.8, "papel": "resposta", "texto": "O Espírito é, se quiserdes, uma chama, um clarão, ou uma centelha etérea.”" },
+    { "inicio": 15.8, "fim": 18.0, "papel": "numero", "texto": "88a." },
+    { "inicio": 18.0, "fim": 20.6, "papel": "pergunta", "texto": "Essa chama ou centelha tem cor?" },
+    { "inicio": 20.6, "fim": 27.4, "papel": "resposta", "texto": "“Para vós, ela varia do colorido escuro e opaco a uma cor brilhante, qual a do rubi," },
+    { "inicio": 27.4, "fim": 31.0, "papel": "resposta", "texto": "conforme o Espírito é mais ou menos puro.”" }
+  ]
+}

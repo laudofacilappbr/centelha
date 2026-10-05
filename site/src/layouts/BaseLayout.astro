@@ -1,0 +1,97 @@
+---
+import '@fontsource/comfortaa/latin-400.css';
+import '@fontsource/comfortaa/latin-700.css';
+import '@fontsource/atkinson-hyperlegible/latin-400.css';
+import '@fontsource/atkinson-hyperlegible/latin-700.css';
+import '@fontsource/atkinson-hyperlegible/latin-400-italic.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../config';
+import { organizationLd } from '../lib/jsonld';
+
+interface Props {
+  /** Título da página (sem o sufixo "| Centelha"). Na home, use o título completo. */
+  title: string;
+  description?: string;
+  /** Imagem de compartilhamento (caminho absoluto no site). */
+  ogImage?: string;
+  ogImageAlt?: string;
+  /** Blocos adicionais de JSON-LD (Organization já é incluída em todas as páginas). */
+  jsonLd?: Record<string, unknown>[];
+  /** Desliga qualquer analítica nesta página (obrigatório em /kids). */
+  semAnalitica?: boolean;
+  /** Título já completo (não acrescenta " | Centelha"). */
+  tituloCompleto?: boolean;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE.descricaoPadrao,
+  ogImage = '/og/share-1200x630.png',
+  ogImageAlt = 'Centelha — as obras de Kardec para ouvir, grátis',
+  jsonLd = [],
+  semAnalitica = false,
+  tituloCompleto = false,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = tituloCompleto ? title : `${title} | ${SITE.nome}`;
+const pathname = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+const canonical = new URL(pathname, Astro.site).href;
+const ogImageUrl = new URL(ogImage, Astro.site).href;
+const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
+const comAnalitica = Boolean(plausibleDomain) && !semAnalitica;
+const ld = [organizationLd(Astro.site!), ...jsonLd];
+---
+
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline src="/theme-init.js"></script>
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#000F3B" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/brand/app-icon-1024.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.nome} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+
+    {
+      comAnalitica && (
+        <script is:inline defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js" />
+      )
+    }
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <Header />
+    <main id="conteudo" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

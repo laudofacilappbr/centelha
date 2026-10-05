@@ -1,0 +1,36 @@
+---
+/**
+ * Wordmark oficial (SVG vetorizado do guia da marca — não recompor com texto).
+ * Tema escuro: assinatura colorida; tema claro: mono escuro, como no guia.
+ */
+interface Props {
+  width?: number;
+  class?: string;
+}
+const { width = 150, class: className = '' } = Astro.props;
+const height = Math.round((width * 420) / 1600);
+---
+
+<span class:list={['logo', className]}>
+  <img
+    class="logo-on-dark"
+    src="/brand/horizontal-color-transparent.svg"
+    alt="Centelha"
+    width={width}
+    height={height}
+  />
+  <img
+    class="logo-on-light"
+    src="/brand/horizontal-mono-dark-transparent.svg"
+    alt="Centelha"
+    width={width}
+    height={height}
+  />
+</span>
+
+<style>
+  .logo {
+    display: inline-block;
+    line-height: 0;
+  }
+</style>

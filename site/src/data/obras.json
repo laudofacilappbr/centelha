@@ -1,0 +1,7 @@
+[
+  { "slug": "o-livro-dos-espiritos", "titulo": "O Livro dos Espíritos", "ano": 1857, "status": "lancamento", "resumo": "As 1.019 perguntas e respostas que formam a base da doutrina espírita." },
+  { "slug": "o-evangelho-segundo-o-espiritismo", "titulo": "O Evangelho Segundo o Espiritismo", "ano": 1864, "status": "lancamento", "resumo": "Os ensinamentos morais de Jesus explicados à luz do espiritismo, com as preces." },
+  { "slug": "o-livro-dos-mediuns", "titulo": "O Livro dos Médiuns", "ano": 1861, "status": "em-breve", "resumo": "O guia prático sobre a mediunidade e as comunicações com o mundo espiritual." },
+  { "slug": "o-ceu-e-o-inferno", "titulo": "O Céu e o Inferno", "ano": 1865, "status": "em-breve", "resumo": "A justiça divina segundo o espiritismo, com relatos de Espíritos." },
+  { "slug": "a-genese", "titulo": "A Gênese", "ano": 1868, "status": "em-breve", "resumo": "Os milagres e as predições segundo o espiritismo." }
+]

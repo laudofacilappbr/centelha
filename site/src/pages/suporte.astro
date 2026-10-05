@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import DraftNotice from '../components/DraftNotice.astro';
+import { SITE } from '../config';
+---
+
+<BaseLayout
+  title="Suporte"
+  description="Precisa de ajuda com o Centelha? Fale com a equipe por e-mail para dúvidas, erros de texto ou narração e pedidos sobre seus dados."
+>
+  <PageHeader eyebrow="Ajuda" title="Suporte" lede="Estamos aqui para ajudar. Respondemos por e-mail, sem precisar de cadastro." />
+  <div class="container">
+    <article class="prose">
+      <DraftNotice />
+
+      <h2>Fale com a gente</h2>
+      <p>
+        Escreva para <a href={`mailto:${SITE.emailSuporte}`}>{SITE.emailSuporte}</a>.
+        <!-- TODO: confirmar a caixa de e-mail após o registro do domínio. -->
+      </p>
+      <p>Para agilizar, conte:</p>
+      <ul>
+        <li>o modelo do celular e a versão do sistema (iOS ou Android);</li>
+        <li>a obra e o número da questão ou do capítulo, se for um erro de texto ou de narração;</li>
+        <li>o que aconteceu e o que você esperava que acontecesse.</li>
+      </ul>
+
+      <h2>Perguntas comuns</h2>
+      <h3>O app já está disponível?</h3>
+      <p>Ainda não. Entre na <a href="/#lista-espera">lista de espera</a> para ser avisado do lançamento.</p>
+      <h3>Como apago meus dados?</h3>
+      <p>
+        Escreva para <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a> pedindo a exclusão. Veja a
+        <a href="/privacidade">política de privacidade</a>.
+      </p>
+      <h3>Encontrei um erro na narração</h3>
+      <p>Obrigado! Envie a obra, o trecho e, se possível, o minuto do áudio. Toda correção passa por revisão humana.</p>
+    </article>
+  </div>
+</BaseLayout>

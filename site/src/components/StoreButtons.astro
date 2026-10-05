@@ -1,0 +1,66 @@
+---
+import { SITE } from '../config';
+
+/** Botões das lojas. Enquanto o app não for publicado, aparecem como "Em breve". */
+const lojas = [
+  { nome: 'App Store', prefixo: 'Baixar na', url: SITE.lojas.appStore },
+  { nome: 'Google Play', prefixo: 'Disponível no', url: SITE.lojas.googlePlay },
+];
+---
+
+<ul class="stores" aria-label="Lojas de aplicativos">
+  {
+    lojas.map((l) => (
+      <li>
+        {l.url ? (
+          <a class="store" href={l.url} rel="noopener">
+            <span class="pre">{l.prefixo}</span>
+            <span class="name">{l.nome}</span>
+          </a>
+        ) : (
+          <span class="store soon">
+            <span class="pre">Em breve na</span>
+            <span class="name">{l.nome}</span>
+          </span>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .stores {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .store {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 160px;
+    min-height: 56px;
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  .store .pre {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .store .name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .soon {
+    border-style: dashed;
+  }
+</style>

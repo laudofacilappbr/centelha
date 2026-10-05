@@ -1,0 +1,170 @@
+---
+/**
+ * Lista de espera. Envia POST JSON {email, origem:"site"} para
+ * `${PUBLIC_API_URL}/v1/waitlist`. Honeypot: campo "website" escondido;
+ * se vier preenchido, fingimos sucesso e nada é enviado.
+ */
+import { API_URL } from '../config';
+
+interface Props {
+  id?: string;
+}
+const { id = 'waitlist' } = Astro.props;
+---
+
+<form class="waitlist" data-waitlist data-api={API_URL} novalidate>
+  <div class="row">
+    <label for={`${id}-email`} class="label">Seu e-mail</label>
+    <div class="field">
+      <input
+        id={`${id}-email`}
+        name="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        required
+        maxlength="254"
+        placeholder="voce@exemplo.com"
+        aria-describedby={`${id}-consent ${id}-msg`}
+      />
+      <button type="submit" class="btn btn-primary">Quero ser avisado</button>
+    </div>
+  </div>
+  <div class="hp" aria-hidden="true">
+    <label for={`${id}-website`}>Não preencha este campo</label>
+    <input id={`${id}-website`} name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+  <p id={`${id}-consent`} class="consent">
+    Usaremos seu e-mail só para avisar quando o Centelha for lançado. Você pode pedir a exclusão a qualquer
+    momento. Saiba mais na <a href="/privacidade">política de privacidade</a>.
+  </p>
+  <p id={`${id}-msg`} class="msg" data-msg role="status" aria-live="polite"></p>
+  <noscript><p class="msg">Ative o JavaScript para entrar na lista de espera.</p></noscript>
+</form>
+
+<script>
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  document.querySelectorAll<HTMLFormElement>('[data-waitlist]').forEach((form) => {
+    const api = form.dataset.api ?? '';
+    const email = form.querySelector<HTMLInputElement>('input[name="email"]')!;
+    const hp = form.querySelector<HTMLInputElement>('input[name="website"]')!;
+    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const msg = form.querySelector<HTMLElement>('[data-msg]')!;
+
+    const mostrar = (texto: string, tipo: 'ok' | 'erro' | '') => {
+      msg.textContent = texto;
+      msg.dataset.tipo = tipo;
+      email.setAttribute('aria-invalid', tipo === 'erro' ? 'true' : 'false');
+    };
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const valor = email.value.trim();
+
+      if (hp.value) {
+        // Robô preencheu o honeypot: resposta neutra, nada enviado.
+        mostrar('Pronto! Você está na lista de espera.', 'ok');
+        form.reset();
+        return;
+      }
+      if (!EMAIL_RE.test(valor)) {
+        mostrar('Confira o e-mail: parece que falta alguma coisa.', 'erro');
+        email.focus();
+        return;
+      }
+      if (!api) {
+        mostrar('A lista de espera ainda não está disponível. Tente novamente em breve.', 'erro');
+        return;
+      }
+
+      btn.disabled = true;
+      mostrar('Enviando…', '');
+      try {
+        const r = await fetch(`${api}/v1/waitlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ email: valor, origem: 'site' }),
+        });
+        if (r.ok) {
+          mostrar('Pronto! Você está na lista de espera. Avisaremos quando o app sair.', 'ok');
+          form.reset();
+        } else if (r.status === 422 || r.status === 400) {
+          mostrar('Não conseguimos aceitar este e-mail. Confira se ele está correto.', 'erro');
+        } else if (r.status === 429) {
+          mostrar('Muitas tentativas seguidas. Aguarde um pouco e tente de novo.', 'erro');
+        } else {
+          mostrar('Algo deu errado do nosso lado. Tente novamente em alguns minutos.', 'erro');
+        }
+      } catch {
+        mostrar('Não foi possível conectar. Verifique sua internet e tente de novo.', 'erro');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .waitlist {
+    max-width: 560px;
+  }
+  .label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  @media (min-width: 560px) {
+    .field {
+      flex-direction: row;
+    }
+  }
+  input[type='email'] {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    padding: var(--space-3) var(--space-4);
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--text-primary);
+    font: inherit;
+  }
+  input[type='email']::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.8;
+  }
+  input[aria-invalid='true'] {
+    border-color: var(--err);
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .consent {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: var(--space-3) 0 0;
+  }
+  .msg {
+    margin: var(--space-3) 0 0;
+    font-weight: 700;
+  }
+  .msg:empty {
+    display: none;
+  }
+  .msg[data-tipo='ok'] {
+    color: var(--ok);
+  }
+  .msg[data-tipo='erro'] {
+    color: var(--err);
+  }
+</style>

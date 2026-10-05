@@ -1,0 +1,463 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StoreButtons from '../components/StoreButtons.astro';
+import WaitlistForm from '../components/WaitlistForm.astro';
+import DemoPlayer from '../components/DemoPlayer.astro';
+import obras from '../data/obras.json';
+import faq from '../data/faq.json';
+import campanhas from '../data/campanhas.json';
+import { mobileApplicationLd, faqLd } from '../lib/jsonld';
+import playerDark from '../assets/player-dark.svg?raw';
+import playerLight from '../assets/player-light.svg?raw';
+
+// Mockups inline (não via <img>) para que o texto do SVG use as fontes da página.
+const prepSvg = (svg: string) =>
+  svg.replace('<svg ', '<svg aria-hidden="true" focusable="false" width="300" height="649" ');
+const mockDark = prepSvg(playerDark);
+const mockLight = prepSvg(playerLight);
+const mockAlt = 'Tela do player do Centelha tocando O Livro dos Espíritos, com controles de velocidade e temporizador';
+
+interface Campanha {
+  titulo: string;
+  descricao: string;
+  meta: number;
+  arrecadado: number;
+  unidade?: string;
+  url?: string;
+}
+// Seção 8 só aparece se houver campanha ativa em src/data/campanhas.json
+const campanha = (campanhas as Campanha[])[0] ?? null;
+const pct = campanha ? Math.min(100, Math.round((campanha.arrecadado / campanha.meta) * 100)) : 0;
+const fmtNum = (n: number) => n.toLocaleString('pt-BR');
+
+const statusLabel: Record<string, string> = {
+  lancamento: 'No lançamento',
+  disponivel: 'Disponível',
+  'em-breve': 'Em breve',
+};
+
+const site = Astro.site!;
+---
+
+<BaseLayout
+  title="Centelha — As obras de Allan Kardec para ouvir, grátis"
+  tituloCompleto
+  description="Audiolivros espíritas grátis: O Livro dos Espíritos, O Evangelho Segundo o Espiritismo e outras obras de Allan Kardec narradas em português. Ouça offline e acompanhe o texto. Sem anúncios."
+  jsonLd={[mobileApplicationLd(site), faqLd(faq)]}
+>
+  <!-- 1. Topo -->
+  <section class="hero" aria-labelledby="hero-titulo">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <span class="eyebrow">Audiolivros espíritas gratuitos</span>
+        <h1 id="hero-titulo">As obras de Allan Kardec para ouvir, grátis.</h1>
+        <p class="lede">
+          O Livro dos Espíritos, O Evangelho Segundo o Espiritismo e outras obras narradas em português, para ouvir onde
+          estiver.
+        </p>
+        <StoreButtons />
+        <div id="lista-espera" class="waitlist-box">
+          <h2 class="h-small">O app está chegando. Quer ser avisado?</h2>
+          <WaitlistForm id="hero" />
+        </div>
+      </div>
+      <div class="hero-art">
+        <img class="hero-glow" src="/brand/symbol-color.svg" alt="" width="520" height="520" />
+        <div class="phone logo-on-dark" role="img" aria-label={mockAlt} set:html={mockDark} />
+        <div class="phone logo-on-light" role="img" aria-label={mockAlt} set:html={mockLight} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Ouça agora -->
+  <section class="section" aria-labelledby="ouca-titulo">
+    <div class="container two-col">
+      <div>
+        <span class="eyebrow">Ouça agora</span>
+        <h2 id="ouca-titulo">A questão que deu nome ao app</h2>
+        <p class="lede">
+          Aperte o play e acompanhe o texto: cada trecho se ilumina enquanto é narrado, do jeito que funciona no app.
+        </p>
+      </div>
+      <DemoPlayer />
+    </div>
+  </section>
+
+  <!-- 3. Por que Centelha -->
+  <section class="section" aria-labelledby="porque-titulo">
+    <div class="container">
+      <span class="eyebrow">Por que Centelha</span>
+      <h2 id="porque-titulo">Feito para estudar no seu ritmo</h2>
+      <ul class="grid grid-3 cards" role="list">
+        <li class="card">
+          <h3>Grátis e sem anúncios</h3>
+          <p>Nada de assinatura, propaganda ou pedido de cartão. As obras são de todos, e o app também.</p>
+        </li>
+        <li class="card">
+          <h3>Ouça offline</h3>
+          <p>Baixe os capítulos e ouça no carro, no ônibus ou antes de dormir, mesmo sem internet.</p>
+        </li>
+        <li class="card">
+          <h3>Acompanhe o texto</h3>
+          <p>O trecho narrado aparece destacado na tela. Ótimo para estudar e para quem tem dificuldade de leitura.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. De onde vem o nome -->
+  <section class="section nome" aria-labelledby="nome-titulo">
+    <div class="container two-col">
+      <div>
+        <span class="eyebrow">De onde vem o nome</span>
+        <h2 id="nome-titulo">Cada pessoa é uma centelha</h2>
+        <p>
+          Na questão 88 de <cite>O Livro dos Espíritos</cite>, Kardec pergunta se os Espíritos têm forma determinada. A
+          resposta descreve o Espírito como “uma chama, um clarão, ou uma centelha etérea”. Logo depois (88a), a cor dessa
+          centelha vai do escuro e opaco ao brilho do rubi, conforme o Espírito seja mais ou menos puro.
+        </p>
+        <p>Quanto mais aprendemos, mais a luz cresce. E uma centelha acende outra.</p>
+        <a class="link-arrow" href="/sobre">Conheça o projeto</a>
+      </div>
+      <img class="nome-spark" src="/brand/symbol-color.svg" alt="" width="280" height="280" loading="lazy" />
+    </div>
+  </section>
+
+  <!-- 5. Obras disponíveis -->
+  <section class="section" aria-labelledby="obras-titulo">
+    <div class="container">
+      <span class="eyebrow">Obras</span>
+      <h2 id="obras-titulo">As obras básicas de Allan Kardec</h2>
+      <p class="muted">Começamos pelas duas mais procuradas. As demais chegam ao longo do caminho.</p>
+      <ul class="obras" role="list">
+        {
+          obras.map((o) => (
+            <li class:list={['obra', `obra-${o.status}`]}>
+              <div class="capa" aria-hidden="true">
+                <img src="/brand/symbol-flat.svg" alt="" width="36" height="36" loading="lazy" />
+                <span class="capa-titulo">{o.titulo}</span>
+                <span class="capa-autor">Allan Kardec</span>
+              </div>
+              <div class="obra-info">
+                <h3>{o.titulo}</h3>
+                <p class="muted">
+                  {o.ano} · {o.resumo}
+                </p>
+                <span class="badge">{statusLabel[o.status] ?? o.status}</span>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. Centelha Kids -->
+  <section class="section kids" aria-labelledby="kids-titulo">
+    <div class="container two-col">
+      <img class="kids-icon" src="/brand/app-icon-kids.svg" alt="" width="220" height="220" loading="lazy" />
+      <div>
+        <span class="eyebrow">Centelha Kids</span>
+        <h2 id="kids-titulo">Oi! Eu sou a Clara, a luzinha do Centelha.</h2>
+        <p>
+          No perfil Kids, a Clara conta histórias curtas inspiradas nos ensinamentos e faz perguntas simples sobre o que a
+          criança ouviu. Sem anúncios e sem coleta de dados das crianças.
+        </p>
+        <a class="link-arrow" href="/kids">Para pais e evangelizadores</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Como fazemos -->
+  <section class="section" aria-labelledby="como-titulo">
+    <div class="container">
+      <span class="eyebrow">Como fazemos</span>
+      <h2 id="como-titulo">Tecnologia a serviço do texto</h2>
+      <ol class="grid grid-3 steps" role="list">
+        <li class="card">
+          <span class="step">1</span>
+          <h3>Só domínio público</h3>
+          <p>Usamos apenas obras e traduções que já estão em domínio público. Nada de textos protegidos.</p>
+        </li>
+        <li class="card">
+          <span class="step">2</span>
+          <h3>Narração por IA</h3>
+          <p>Uma voz sintética, clara e serena, narra o texto da edição-fonte, trecho por trecho.</p>
+        </li>
+        <li class="card">
+          <span class="step">3</span>
+          <h3>Revisão por pessoas</h3>
+          <p>Cada trecho é ouvido e conferido por voluntários antes de chegar ao app.</p>
+        </li>
+      </ol>
+      <a class="link-arrow" href="/como-fazemos">Veja como trabalhamos</a>
+    </div>
+  </section>
+
+  <!-- 8. Campanha ativa (só se houver) -->
+  {
+    campanha && (
+      <section class="section" aria-labelledby="campanha-titulo">
+        <div class="container">
+          <div class="card campanha">
+            <span class="eyebrow">Campanha ativa</span>
+            <h2 id="campanha-titulo">{campanha.titulo}</h2>
+            <p>{campanha.descricao}</p>
+            <label for="campanha-progresso" class="muted">
+              {fmtNum(campanha.arrecadado)} de {fmtNum(campanha.meta)} {campanha.unidade ?? ''} ({pct}%)
+            </label>
+            <progress id="campanha-progresso" max="100" value={pct}>
+              {pct}%
+            </progress>
+            {campanha.url && (
+              <p>
+                <a class="link-arrow" href={campanha.url}>
+                  Saiba como participar
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 9. Perguntas frequentes -->
+  <section class="section" aria-labelledby="faq-titulo">
+    <div class="container narrow">
+      <span class="eyebrow">Perguntas frequentes</span>
+      <h2 id="faq-titulo">Ficou alguma dúvida?</h2>
+      <div class="faq">
+        {
+          faq.map((f) => (
+            <details>
+              <summary>
+                <span class="q">{f.pergunta}</span>
+              </summary>
+              <p>{f.resposta}</p>
+            </details>
+          ))
+        }
+      </div>
+      <p class="muted">Não achou sua resposta? Fale com a gente pela página de <a href="/suporte">suporte</a>.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-10) var(--space-12);
+    background-image: var(--hero-glow);
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid;
+    gap: var(--space-10);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1.15fr 0.85fr;
+    }
+  }
+  .hero-text :global(.stores) {
+    margin-block: var(--space-6);
+  }
+  .waitlist-box {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+  .h-small {
+    font-size: 1.15rem;
+    margin-bottom: var(--space-3);
+  }
+  .hero-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 360px;
+  }
+  .hero-glow {
+    position: absolute;
+    width: min(110%, 520px);
+    opacity: 0.55;
+    filter: blur(2px);
+    pointer-events: none;
+  }
+  .phone {
+    position: relative;
+    width: min(70vw, 300px);
+    border-radius: 36px;
+    box-shadow: var(--shadow-2), var(--spark-glow);
+  }
+  .phone :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+  .phone :global(text[font-family='Arial']) {
+    font-family: var(--font-body);
+  }
+
+  .two-col {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .cards,
+  .steps,
+  .obras {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-6) 0;
+  }
+  .step {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 700;
+    margin-bottom: var(--space-3);
+  }
+
+  .nome-spark {
+    justify-self: center;
+    width: min(60vw, 280px);
+  }
+
+  .obras {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  }
+  .obra {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .capa {
+    aspect-ratio: 3 / 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background: linear-gradient(160deg, #0b2270, #000f3b);
+    color: #fbf5e6;
+  }
+  .capa-titulo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.25;
+  }
+  .capa-autor {
+    font-size: 0.8rem;
+    color: #dcd5c9;
+  }
+  .obra-em-breve .capa {
+    background: linear-gradient(160deg, #12368d, #06184d);
+  }
+  .obra-info {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1;
+  }
+  .obra-info h3 {
+    font-size: 1rem;
+    margin: 0;
+  }
+  .obra-info p {
+    font-size: 0.9rem;
+    margin: 0;
+    flex: 1;
+  }
+  .badge {
+    align-self: flex-start;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: var(--space-1) var(--space-3);
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .obra-lancamento .badge,
+  .obra-disponivel .badge {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: transparent;
+  }
+
+  .kids-icon {
+    justify-self: center;
+    width: min(50vw, 220px);
+    border-radius: 48px;
+  }
+  @media (min-width: 900px) {
+    .kids .two-col {
+      grid-template-columns: 0.6fr 1.4fr;
+    }
+  }
+
+  .campanha progress {
+    width: 100%;
+    height: 14px;
+    accent-color: var(--accent);
+    margin-block: var(--space-2) var(--space-4);
+  }
+
+  .narrow {
+    max-width: 820px;
+  }
+  .faq {
+    margin-block: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+  details {
+    border-bottom: 1px solid var(--border);
+  }
+  summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    min-height: 48px;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--accent);
+    flex: none;
+  }
+  details[open] summary::after {
+    content: '−';
+  }
+  summary .q {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  details p {
+    color: var(--text-secondary);
+  }
+</style>

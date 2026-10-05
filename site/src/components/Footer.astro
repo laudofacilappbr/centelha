@@ -1,0 +1,103 @@
+---
+import Logo from './Logo.astro';
+import StoreButtons from './StoreButtons.astro';
+import { SITE } from '../config';
+
+const ano = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="top">
+      <div class="about">
+        <Logo width={150} />
+        <p class="muted">{SITE.slogan} Obras em domínio público, narração por IA com revisão humana.</p>
+        <StoreButtons />
+      </div>
+
+      <nav aria-label="Projeto" class="col">
+        <h2>Projeto</h2>
+        <ul>
+          <li><a href="/sobre">Sobre o Centelha</a></li>
+          <li><a href="/como-fazemos">Como fazemos</a></li>
+          <li><a href="/kids">Centelha Kids</a></li>
+          <li><a href="/transparencia">Transparência</a></li>
+          <li><span class="muted">Apoie (em breve)</span></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Ajuda e documentos legais" class="col">
+        <h2>Ajuda</h2>
+        <ul>
+          <li><a href="/suporte">Suporte</a></li>
+          <li><a href="/privacidade">Privacidade</a></li>
+          <li><a href="/termos">Termos de uso</a></li>
+        </ul>
+      </nav>
+
+      <div class="col">
+        <h2>Redes</h2>
+        {
+          SITE.redes.length ? (
+            <ul>
+              {SITE.redes.map((r) => (
+                <li>
+                  <a href={r.url} rel="noopener me">
+                    {r.nome}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="muted">Perfis nas redes sociais em breve.</p>
+          )
+        }
+      </div>
+    </div>
+    <p class="legal muted">
+      © {ano} Centelha. Textos de Allan Kardec em domínio público. Feito com cuidado e sem anúncios.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding-block: var(--space-12) var(--space-8);
+  }
+  .top {
+    display: grid;
+    gap: var(--space-8);
+  }
+  @media (min-width: 820px) {
+    .top {
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+    }
+  }
+  .about :global(.logo) {
+    margin-bottom: var(--space-4);
+  }
+  .col h2 {
+    font-size: 1rem;
+    margin-bottom: var(--space-3);
+  }
+  .col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .col li {
+    margin-bottom: var(--space-2);
+  }
+  .col a {
+    color: var(--text-primary);
+  }
+  .legal {
+    margin-top: var(--space-10);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+    max-width: none;
+  }
+</style>

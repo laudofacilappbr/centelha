@@ -1,0 +1,12 @@
+{
+  "placeholder": true,
+  "referencia": "Mês de referência — a definir",
+  "custos": [
+    { "item": "Servidores e banco de dados", "valor": null },
+    { "item": "Armazenamento e entrega de áudio (CDN)", "valor": null },
+    { "item": "Geração de narração por IA", "valor": null },
+    { "item": "Domínio e e-mail", "valor": null },
+    { "item": "Contas de desenvolvedor nas lojas (Apple e Google)", "valor": null }
+  ],
+  "arrecadacao": null
+}
