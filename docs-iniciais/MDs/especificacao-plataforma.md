@@ -2,7 +2,7 @@
 
 Oct 5, 2026 · @Ricardo
 
-*Versão 2 (5 out. 2026): nome do app definido como Centelha, mascote Clara e nova seção de [Monetização](#m0kmnap80z3.15293).*
+*Versão 2 (5 out. 2026): nome do app definido como Centelha, mascote Clara e nova seção de [Monetização](#monetização).*
 
 ## Visão geral
 
@@ -96,7 +96,20 @@ Fora do MVP: obras psicografadas por Chico Xavier e Divaldo Franco, que exigem l
 
 O admin é a porta única de publicação: coleta e ingestão alimentam a revisão, e só o que for aprovado vira áudio e chega ao app.
 
-&#91;embedded content: arquitetura · 7 componentes, do texto ao ouvinte\]
+```mermaid
+flowchart LR
+  A[Coleta de textos<br>EPUB, PDF, DOCX, TXT] --> B[Ingestão<br>capítulos e segmentos]
+  B --> C[Admin<br>revisão e direitos]
+  C -->|texto aprovado| D[Pipeline de áudio<br>normalização, TTS, ffmpeg]
+  D -->|faixa para revisão| C
+  D --> E[Storage + CDN]
+  C -->|publicado| F[API do catálogo]
+  E --> G[App iOS/Android]
+  F --> G
+  H[(PostgreSQL)] --- C
+  H --- D
+  H --- F
+```
 
 O pipeline devolve cada faixa ao admin para revisão de áudio antes de a API expô-la; o PostgreSQL guarda texto, metadados e direitos e é lido pelo admin, pelo pipeline e pela API.
 
@@ -326,7 +339,12 @@ Infra inicial: um servidor para API, admin e workers, com o banco gerenciado. Os
 
 A entrega vai em quatro fases, e cada uma só começa quando a anterior passa no seu portão; as datas ficam para quando a equipe e o motor de TTS estiverem definidos.
 
-&#91;embedded content: roadmap · 4 fases, 3 portões\]
+```mermaid
+flowchart LR
+  F0[Fase 0<br>Validação] -->|voz, edição-fonte<br>e parecer| F1[Fase 1<br>MVP em teste fechado]
+  F1 -->|teste fechado<br>aprovado| F2[Fase 2<br>Catálogo e lojas públicas]
+  F2 -->|catálogo pt-BR<br>validado| F3[Fase 3<br>Multilíngue]
+```
 
 A fase 0 é curta e barata, mas decide o custo e o risco de todo o resto: a voz, a edição-fonte e o parecer jurídico.
 
@@ -350,10 +368,10 @@ Perguntas abertas:
 
 ## Documentos relacionados
 
-- [Centelha: prompts de logo e mascote](https://claude.ai/code/artifact/cd9e9db2-641a-4bb9-9249-a5c8e55090f3)
-- [Centelha: análise de concorrentes](https://claude.ai/code/artifact/96bdd8c6-019c-4144-95c2-cbb2ab776a5d)
-- [Centelha: plano de redes sociais](https://claude.ai/code/artifact/60cfcbac-7ec7-4100-9f01-d78884078f1d) — atenção à colisão do nome Centelha nas redes (Centelha Divina, Programa Centelha)
-- [Centelha: site e landing page](https://claude.ai/code/artifact/a25f7f12-d06b-472f-8589-746cd4a3ce72) — projeto do www, separado do app e do admin
+- [Centelha: prompts de logo e mascote](prompts-logo-mascote.md)
+- [Centelha: análise de concorrentes](analise-concorrentes.md)
+- [Centelha: plano de redes sociais](plano-redes-sociais.md) — atenção à colisão do nome Centelha nas redes (Centelha Divina, Programa Centelha)
+- [Centelha: site e landing page](site-landing-page.md) — projeto do www, separado do app e do admin
 
 Regras citadas na monetização:
 
