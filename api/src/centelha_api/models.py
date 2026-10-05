@@ -156,6 +156,8 @@ class Segmento(Base):
     tipo: Mapped[TipoSegmento] = mapped_column(_enum(TipoSegmento))
     texto: Mapped[str] = mapped_column(Text)
     numero_questao: Mapped[int | None] = mapped_column(Integer, index=True)
+    # Letra da subquestão: 88a → numero_questao=88, subquestao="a" (referência LE-88a).
+    subquestao: Mapped[str | None] = mapped_column(String(4))
 
     capitulo: Mapped[Capitulo] = relationship(back_populates="segmentos")
 
