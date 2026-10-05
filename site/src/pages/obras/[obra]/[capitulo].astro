@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import Segmentos from '../../../components/Segmentos.astro';
+import StoreButtons from '../../../components/StoreButtons.astro';
+import {
+  obrasPublicadas,
+  edicaoDoSite,
+  edicao,
+  capitulo,
+  slugCapitulo,
+  nomeCapitulo,
+  resumir,
+  type Obra,
+  type Edicao,
+  type CapituloResumo,
+} from '../../../lib/catalogo';
+import { OBRA_COM_QUESTOES, urlQuestao } from '../../../lib/questoes';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const obra of (await obrasPublicadas()).filter((o) => edicaoDoSite(o))) {
+    const ed = await edicao(edicaoDoSite(obra)!.id);
+    for (const [i, c] of ed.capitulos.entries()) {
+      paths.push({
+        params: { obra: obra.slug, capitulo: slugCapitulo(c) },
+        props: { obra, ed, resumoCap: c, anterior: ed.capitulos[i - 1], proximo: ed.capitulos[i + 1] },
+      });
+    }
+  }
+  return paths;
+}
+
+interface Props {
+  obra: Obra;
+  ed: Edicao;
+  resumoCap: CapituloResumo;
+  anterior?: CapituloResumo;
+  proximo?: CapituloResumo;
+}
+const { obra, ed, resumoCap, anterior, proximo } = Astro.props;
+const cap = await capitulo(resumoCap.id);
+const base = `/obras/${obra.slug}`;
+const url = new URL(`${base}/${slugCapitulo(cap)}`, Astro.site).href;
+const primeiroTexto = cap.segmentos.find((s) => s.tipo !== 'titulo')?.texto ?? cap.titulo;
+const linkQuestao = obra.slug === OBRA_COM_QUESTOES ? urlQuestao : undefined;
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Chapter',
+    name: cap.titulo,
+    position: cap.ordem,
+    url,
+    inLanguage: ed.idioma,
+    isPartOf: { '@type': 'Book', name: ed.titulo, url: new URL(base, Astro.site).href },
+    ...(cap.faixa ? { audio: { '@type': 'AudioObject', contentUrl: cap.faixa.url, encodingFormat: 'audio/mp4' } } : {}),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Obras', item: new URL('/obras', Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: ed.titulo, item: new URL(base, Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: nomeCapitulo(cap.titulo), item: url },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`${nomeCapitulo(cap.titulo)} — ${ed.titulo}`}
+  description={resumir(`${ed.titulo}, ${cap.titulo.toLowerCase()}: ${primeiroTexto}`)}
+  jsonLd={ld}
+>
+  <PageHeader eyebrow={ed.titulo} title={cap.titulo} />
+  <div class="container section">
+    <nav aria-label="Trilha" class="muted trilha">
+      <a href="/obras">Obras</a>{' › '}<a href={base}>{ed.titulo}</a>
+    </nav>
+    {
+      cap.faixa && (
+        <figure class="card audio">
+          <figcaption>Ouça este capítulo</figcaption>
+          <audio controls preload="none" src={cap.faixa.url}>
+            <a href={cap.faixa.url}>Baixar o áudio</a>
+          </audio>
+        </figure>
+      )
+    }
+    <Segmentos segmentos={cap.segmentos} linkQuestao={linkQuestao} />
+    <nav class="paginacao" aria-label="Capítulos">
+      {anterior ? <a href={`${base}/${slugCapitulo(anterior)}`} rel="prev">← {nomeCapitulo(anterior.titulo)}</a> : <span />}
+      {proximo && <a href={`${base}/${slugCapitulo(proximo)}`} rel="next">{nomeCapitulo(proximo.titulo)} →</a>}
+    </nav>
+    <aside class="card cta">
+      <h2>Ouça a obra completa no app</h2>
+      <p>Com o texto acompanhando a narração e download para ouvir offline.</p>
+      <StoreButtons />
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .audio {
+    margin: 0 0 var(--space-8);
+  }
+  .audio audio {
+    width: 100%;
+    margin-top: var(--space-3);
+  }
+  .paginacao {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-top: var(--space-10);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+</style>

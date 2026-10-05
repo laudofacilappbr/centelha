@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import Segmentos from '../../../components/Segmentos.astro';
+import StoreButtons from '../../../components/StoreButtons.astro';
+import { slugCapitulo, nomeCapitulo, resumir, type Obra, type Edicao } from '../../../lib/catalogo';
+import { questoesDoLivroDosEspiritos, urlQuestao, type Questao } from '../../../lib/questoes';
+
+export async function getStaticPaths() {
+  const dados = await questoesDoLivroDosEspiritos();
+  if (!dados) return [];
+  const { obra, ed, questoes } = dados;
+  return questoes.map((q, i) => ({
+    params: { n: String(q.numero) },
+    props: { obra, ed, q, anterior: questoes[i - 1]?.numero, proxima: questoes[i + 1]?.numero },
+  }));
+}
+
+interface Props {
+  obra: Obra;
+  ed: Edicao;
+  q: Questao;
+  anterior?: number;
+  proxima?: number;
+}
+const { obra, ed, q, anterior, proxima } = Astro.props;
+const pergunta = q.segmentos.find((s) => s.tipo === 'pergunta' && !s.subquestao);
+const resposta = q.segmentos.find((s) => s.tipo === 'resposta' && !s.subquestao);
+const capUrl = `/obras/${obra.slug}/${slugCapitulo(q.capitulo)}`;
+const url = new URL(urlQuestao(q.numero), Astro.site).href;
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Quotation',
+    name: `Questão ${q.numero} — ${ed.titulo}`,
+    url,
+    inLanguage: ed.idioma,
+    text: [pergunta?.texto, resposta?.texto].filter(Boolean).join(' '),
+    isPartOf: { '@type': 'Book', name: ed.titulo, author: { '@type': 'Person', name: obra.autor } },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: ed.titulo, item: new URL(`/obras/${obra.slug}`, Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: `Questão ${q.numero}`, item: url },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`Questão ${q.numero} — ${ed.titulo}`}
+  description={resumir(`Questão ${q.numero} de ${ed.titulo}: ${pergunta?.texto ?? ''} ${resposta?.texto ?? ''}`)}
+  jsonLd={ld}
+>
+  <PageHeader eyebrow={ed.titulo} title={`Questão ${q.numero}`} />
+  <div class="container section">
+    <nav aria-label="Trilha" class="muted trilha">
+      <a href={`/obras/${obra.slug}`}>{ed.titulo}</a>{' › '}
+      <a href={`${capUrl}#q${q.numero}`}>{nomeCapitulo(q.capitulo.titulo)}</a>
+    </nav>
+    <Segmentos segmentos={q.segmentos} />
+    <nav class="paginacao" aria-label="Questões">
+      {anterior ? <a href={urlQuestao(anterior)} rel="prev">← Questão {anterior}</a> : <span />}
+      {proxima && <a href={urlQuestao(proxima)} rel="next">Questão {proxima} →</a>}
+    </nav>
+    <aside class="card cta">
+      <h2>Ouça O Livro dos Espíritos completo</h2>
+      <p>No app Centelha, grátis, com o texto acompanhando a narração.</p>
+      <StoreButtons />
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .paginacao {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-top: var(--space-10);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+</style>

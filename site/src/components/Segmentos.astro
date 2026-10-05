@@ -1,0 +1,73 @@
+---
+import type { Segmento } from '../lib/catalogo';
+
+interface Props {
+  segmentos: Segmento[];
+  /** Questões viram link para a página própria (só O Livro dos Espíritos). */
+  linkQuestao?: (n: number) => string | undefined;
+}
+const { segmentos, linkQuestao } = Astro.props;
+
+const rotulo = (s: Segmento) => (s.numero_questao ? `${s.numero_questao}${s.subquestao ?? ''}` : '');
+---
+
+<div class="segmentos">
+  {
+    segmentos.map((s) => {
+      if (s.tipo === 'titulo') return null;
+      if (s.tipo === 'pergunta') {
+        const href = s.numero_questao && !s.subquestao ? linkQuestao?.(s.numero_questao) : undefined;
+        return (
+          <p class="seg seg-pergunta" id={`q${rotulo(s)}`} data-segmento={s.id}>
+            {s.numero_questao &&
+              (href ? (
+                <a class="num" href={href}>{rotulo(s)}.</a>
+              ) : (
+                <span class="num">{rotulo(s)}.</span>
+              ))}{' '}
+            {s.texto}
+          </p>
+        );
+      }
+      return (
+        <p class={`seg seg-${s.tipo}`} data-segmento={s.id}>
+          {s.texto}
+        </p>
+      );
+    })
+  }
+</div>
+
+<style>
+  .segmentos {
+    max-width: 68ch;
+  }
+  .seg {
+    margin: 0 0 1em;
+    line-height: 1.7;
+  }
+  .seg-pergunta {
+    font-weight: 700;
+    margin-top: 1.75em;
+  }
+  .num {
+    font-family: inherit;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  a.num:hover,
+  a.num:focus-visible {
+    text-decoration: underline;
+  }
+  .seg-resposta {
+    padding-left: 1em;
+    border-left: 3px solid var(--accent);
+  }
+  .seg-comentario,
+  .seg-nota {
+    color: var(--text-secondary);
+  }
+  .seg-nota {
+    font-size: 0.9em;
+  }
+</style>
