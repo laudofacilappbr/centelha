@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     confiar_cf_connecting_ip: bool = True
     waitlist_limite_por_ip: int = 5
     waitlist_janela_segundos: int = 3600
+    # Validade absoluta da sessão do admin; não renova com uso.
+    admin_sessao_horas: int = 12
+    # Tentativas de login por IP e por e-mail na janela. Por e-mail barra a força bruta
+    # distribuída contra uma conta; por IP barra a varredura de muitas contas.
+    admin_login_limite: int = 10
+    admin_login_janela_segundos: int = 900
 
 
 @lru_cache

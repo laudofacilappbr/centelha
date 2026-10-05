@@ -31,6 +31,19 @@ docker run -d --name centelha-pg-test -e POSTGRES_USER=centelha -e POSTGRES_PASS
 cd api && uv sync && uv run pytest
 ```
 
+Os testes apagam e recriam as tabelas a cada caso. Com duas sessões rodando testes ao mesmo tempo, aponte cada uma para um banco próprio com `CENTELHA_TEST_DATABASE_URL`.
+
+## Admin: contas e papéis
+
+A API do admin fica em `/v1/admin` e exige `Authorization: Bearer <token>` (token de `POST /v1/admin/sessoes`, válido por 12 h). Os papéis seguem a [especificação](docs-iniciais/MDs/especificacao-plataforma.md): administrador, revisor de texto e revisor de áudio; as permissões de cada um estão em `api/src/centelha_api/dominio/permissoes.py`. Toda ação fica em `registro_auditoria` (`GET /v1/admin/auditoria`).
+
+Não há cadastro aberto. A primeira conta sai da linha de comando, no servidor:
+
+```sh
+cd api && uv run centelha-admin criar --email voce@exemplo.org --nome "Seu nome"
+# senha pedida no terminal, ou em CENTELHA_ADMIN_SENHA (mínimo 12 caracteres)
+```
+
 ## Deploy
 
 VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`.
