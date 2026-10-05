@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import obrasPlanejadas from '../../data/obras.json';
+import { obrasPublicadas, edicaoDoSite, edicao, slugCapitulo, type Obra } from '../../lib/catalogo';
+
+export async function getStaticPaths() {
+  const obras = (await obrasPublicadas()).filter((o) => edicaoDoSite(o));
+  return obras.map((obra) => ({ params: { obra: obra.slug }, props: { obra } }));
+}
+
+const { obra } = Astro.props as { obra: Obra };
+const ed = await edicao(edicaoDoSite(obra)!.id);
+const resumo =
+  obrasPlanejadas.find((o) => o.slug === obra.slug)?.resumo ??
+  `${ed.titulo}, de ${obra.autor}, narrado em português.`;
+const url = new URL(`/obras/${obra.slug}`, Astro.site).href;
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': ['Book', 'Audiobook'],
+    name: ed.titulo,
+    url,
+    author: { '@type': 'Person', name: obra.autor },
+    ...(ed.tradutor ? { translator: { '@type': 'Person', name: ed.tradutor } } : {}),
+    inLanguage: ed.idioma,
+    ...(obra.ano ? { datePublished: String(obra.ano) } : {}),
+    isAccessibleForFree: true,
+    readBy: { '@type': 'Person', name: 'Voz sintética' },
+    hasPart: ed.capitulos.map((c) => ({
+      '@type': 'Chapter',
+      name: c.titulo,
+      position: c.ordem,
+      url: `${url}/${slugCapitulo(c)}`,
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Obras', item: new URL('/obras', Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: ed.titulo, item: url },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`${ed.titulo} — audiolivro completo`}
+  description={`Ouça ${ed.titulo}, de ${obra.autor}, completo e grátis, em português. ${resumo}`}
+  jsonLd={ld}
+>
+  <PageHeader eyebrow={obra.autor} title={ed.titulo} lede={resumo} />
+  <div class="container section">
+    <p class="muted creditos">
+      {ed.tradutor && <>Tradução de {ed.tradutor}. </>}Fonte: {ed.fonte}. Narração por voz sintética, revisada por
+      pessoas.
+    </p>
+    <h2>Capítulos</h2>
+    <ol class="capitulos" role="list">
+      {
+        ed.capitulos.map((c) => (
+          <li>
+            <a href={`/obras/${obra.slug}/${slugCapitulo(c)}`}>{c.titulo}</a>
+          </li>
+        ))
+      }
+    </ol>
+    <aside class="card cta">
+      <h2>Ouça a obra completa no app</h2>
+      <p>Grátis, sem anúncios, com download para ouvir offline.</p>
+      <StoreButtons />
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .capitulos {
+    list-style: none;
+    padding: 0;
+    columns: 2 22rem;
+    column-gap: var(--space-8);
+  }
+  .capitulos li {
+    break-inside: avoid;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+  .creditos {
+    margin-bottom: var(--space-8);
+  }
+</style>
