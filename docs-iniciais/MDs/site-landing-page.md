@@ -207,10 +207,10 @@ Domínio: verificar centelha.com.br e variações (centelhaapp.com.br, ouvircent
 
 ### Documentos do projeto
 
-- [Plataforma de audiolivros espíritas: especificação](https://claude.ai/code/artifact/b71130a0-0e0e-4da4-8484-673e3c1c52a8)
-- [Centelha: prompts de logo e mascote](https://claude.ai/code/artifact/cd9e9db2-641a-4bb9-9249-a5c8e55090f3)
-- [Centelha: análise de concorrentes](https://claude.ai/code/artifact/96bdd8c6-019c-4144-95c2-cbb2ab776a5d)
-- [Centelha: plano de redes sociais](https://claude.ai/code/artifact/60cfcbac-7ec7-4100-9f01-d78884078f1d)
+- [Plataforma de audiolivros espíritas: especificação](especificacao-plataforma.md)
+- [Centelha: prompts de logo e mascote](prompts-logo-mascote.md)
+- [Centelha: análise de concorrentes](analise-concorrentes.md)
+- [Centelha: plano de redes sociais](plano-redes-sociais.md)
 
 ### Referências
 
