@@ -33,8 +33,11 @@ jobs:
       - run: uv run pytest -q
       - name: Migrações batem com os modelos
         env:
-          CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:centelha@localhost:55432/centelha_test
+          CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:centelha@localhost:55432/centelha_mig
+          PGPASSWORD: centelha
         run: |
+          # Banco limpo: os testes criam tabelas com create_all no centelha_test.
+          psql -h localhost -p 55432 -U centelha -d centelha_test -c "create database centelha_mig"
           uv run alembic upgrade head
           uv run alembic check
           uv run alembic downgrade base
