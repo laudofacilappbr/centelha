@@ -12,6 +12,13 @@ try {
 } catch {
   apiOrigin = '';
 }
+// Origem do storage de áudio (faixas dos capítulos), ex.: https://audio.centelha.com.br
+let audioOrigin = '';
+try {
+  audioOrigin = env.AUDIO_URL ? new URL(env.AUDIO_URL).origin : '';
+} catch {
+  audioOrigin = '';
+}
 const plausible = env.PUBLIC_PLAUSIBLE_DOMAIN ? ' https://plausible.io' : '';
 
 export default defineConfig({
@@ -35,7 +42,7 @@ export default defineConfig({
         "default-src 'self'",
         "img-src 'self' data:",
         "font-src 'self'",
-        "media-src 'self'",
+        `media-src 'self'${audioOrigin ? ' ' + audioOrigin : ''}`,
         `connect-src 'self'${apiOrigin ? ' ' + apiOrigin : ''}${plausible}`,
         "base-uri 'self'",
         "form-action 'self'",

@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import obrasPlanejadas from '../../data/obras.json';
+import { obrasPublicadas, edicaoDoSite } from '../../lib/catalogo';
+
+const publicadas = (await obrasPublicadas()).filter((o) => edicaoDoSite(o));
+const slugsPublicados = new Set(publicadas.map((o) => o.slug));
+const emBreve = obrasPlanejadas.filter((o) => !slugsPublicados.has(o.slug));
+const resumoPlanejado = new Map(obrasPlanejadas.map((o) => [o.slug, o.resumo]));
+---
+
+<BaseLayout
+  title="Obras para ouvir"
+  description="As obras de Allan Kardec narradas em português: O Livro dos Espíritos, O Evangelho Segundo o Espiritismo e as demais obras básicas, grátis."
+>
+  <PageHeader
+    eyebrow="Acervo"
+    title="Obras para ouvir"
+    lede="Todas em domínio público, narradas com voz sintética e revisadas por pessoas."
+  />
+  <div class="container section">
+    {
+      publicadas.length > 0 && (
+        <section aria-labelledby="disponiveis">
+          <h2 id="disponiveis">Disponíveis</h2>
+          <ul class="grid lista-obras" role="list">
+            {publicadas.map((o) => (
+              <li class="card">
+                <h3>
+                  <a href={`/obras/${o.slug}`}>{edicaoDoSite(o)!.titulo}</a>
+                </h3>
+                <p class="muted">
+                  {o.autor}
+                  {o.ano && `, ${o.ano}`}
+                </p>
+                {resumoPlanejado.get(o.slug) && <p>{resumoPlanejado.get(o.slug)}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+    {
+      emBreve.length > 0 && (
+        <section aria-labelledby="em-breve">
+          <h2 id="em-breve">{publicadas.length ? 'Em breve' : 'Em preparação'}</h2>
+          <ul class="grid lista-obras" role="list">
+            {emBreve.map((o) => (
+              <li class="card">
+                <h3>{o.titulo}</h3>
+                <p class="muted">Allan Kardec, {o.ano}</p>
+                <p>{o.resumo}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .lista-obras {
+    list-style: none;
+    padding: 0;
+  }
+  .lista-obras h3 {
+    margin-top: 0;
+  }
+  section + section {
+    margin-top: var(--space-10);
+  }
+</style>
