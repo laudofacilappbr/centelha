@@ -43,7 +43,7 @@ src/
   components/            Header, Footer, Logo, ThemeToggle, DemoPlayer, WaitlistForm…
   layouts/BaseLayout.astro  SEO (title, description, OG, canonical, JSON-LD), fontes
   pages/                 rotas; robots.txt.ts gera o robots com a URL do sitemap
-  styles/tokens.css      cópia de docs-iniciais/.../tokens/tokens.css (não editar aqui)
+  styles/tokens.css      cópia de docs-iniciais/centelha-brand/tokens/tokens.css (não editar aqui)
   styles/global.css      estilos base, acessibilidade, tokens complementares
 public/
   brand/                 logos e ícones oficiais (SVG do guia da marca)

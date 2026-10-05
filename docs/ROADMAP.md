@@ -1,6 +1,6 @@
 # Roadmap
 
-Fases da [especificação](../docs-iniciais/MDs/Plataforma%20de%20audiolivros%20espíritas%20especificação.md). Cada fase só começa quando a anterior passa no portão. As tarefas estão nas [issues](https://github.com/laudofacilappbr/centelha/issues), agrupadas por [milestone](https://github.com/laudofacilappbr/centelha/milestones).
+Fases da [especificação](../docs-iniciais/MDs/especificacao-plataforma.md). Cada fase só começa quando a anterior passa no portão. As tarefas estão nas [issues](https://github.com/laudofacilappbr/centelha/issues), agrupadas por [milestone](https://github.com/laudofacilappbr/centelha/milestones).
 
 | Fase | Entrega | Portão |
 | --- | --- | --- |
