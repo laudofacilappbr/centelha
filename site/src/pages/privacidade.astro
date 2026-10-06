@@ -9,69 +9,127 @@ import { SITE } from '../config';
   title="Política de privacidade"
   description="Como o Centelha trata dados pessoais no site e no app, conforme a LGPD: o mínimo necessário, sem anúncios e sem coleta de dados de crianças."
 >
-  <PageHeader eyebrow="Documentos" title="Política de privacidade" lede="Coletamos o mínimo possível. Explicamos aqui o quê, por quê e como pedir a exclusão." />
+  <PageHeader eyebrow="Documentos" title="Política de privacidade" lede="Coletamos o mínimo possível. Explicamos aqui o quê, por quê, com quem e como pedir a exclusão." />
   <div class="container">
     <article class="prose">
       <DraftNotice />
-      <!-- TODO: revisão jurídica; preencher controlador (razão social/CNPJ ou pessoa responsável) e encarregado (DPO). -->
+      <!--
+        Rascunho para a revisão jurídica (#17). Itens entre colchetes são definidos pelo dono ou pelo revisor.
+        Fontes das decisões: #4 (titular pessoa física), #27 (Sentry na API), #40 (apoio), #73 e ADR 0004
+        (áudio cifrado e atestação), dossiê da #3. O e-mail de contato vem de src/config.ts e depende do domínio (#5).
+      -->
 
       <h2>1. Quem somos</h2>
       <p>
-        O Centelha é um projeto de audiolivros espíritas gratuitos. Controlador dos dados: <em>[a definir]</em>. Contato do
-        encarregado pelo tratamento de dados: <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a>.
+        O Centelha é um projeto de audiolivros espíritas gratuitos, mantido por uma pessoa física: <em>[nome do
+        responsável]</em>, que é a controladora dos dados. Encarregado pelo tratamento de dados (DPO): <em>[nome]</em>,
+        pelo e-mail <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a>.
       </p>
 
       <h2>2. Dados que tratamos no site</h2>
       <ul>
         <li>
           <strong>Lista de espera:</strong> seu e-mail, a origem do cadastro (“site”) e a data. Finalidade: avisar sobre o
-          lançamento do app. Base legal: consentimento (art. 7º, I, da LGPD).
+          lançamento do app. Base legal: consentimento (LGPD, art. 7º, I).
         </li>
         <li>
           <strong>Mensagens de suporte:</strong> o e-mail e o conteúdo que você enviar. Finalidade: responder ao seu pedido.
+          Base legal: procedimento a seu pedido (art. 7º, V).
         </li>
         <li>
-          <strong>Registros técnicos:</strong> o servidor registra dados de acesso (como endereço IP e data) por motivos de
-          segurança, pelo prazo legal.
+          <strong>Registros de acesso:</strong> endereço IP, data, hora e página acessada, guardados por <em>[prazo]</em>{' '}
+          para segurança e investigação de abusos. Base legal: legítimo interesse (art. 7º, IX). <em>[Revisor: o art. 15
+          do Marco Civil (Lei 12.965/2014), que exige 6 meses, vale para pessoa jurídica com fins econômicos; confirmar se
+          se aplica ao titular atual (#4).]</em>
+        </li>
+        <li>
+          <strong>Proteção contra abuso:</strong> para impedir cadastros em massa, contamos por uma hora, só na memória do
+          servidor, quantos cadastros saem do mesmo IP. Esse contador não é gravado.
         </li>
       </ul>
       <p>
-        O site não usa cookies de rastreamento nem anúncios. As fontes tipográficas são servidas pelo próprio site, sem
-        chamadas a terceiros. Se adotarmos medição de acesso, será uma ferramenta sem cookies e sem identificação pessoal,
-        e nunca na página do Centelha Kids.
+        O site não usa cookies de rastreamento, anúncios nem ferramentas de análise. As fontes tipográficas são servidas
+        pelo próprio site, sem chamadas a terceiros.
       </p>
 
       <h2>3. Dados no app</h2>
+      <ul>
+        <li><strong>Sem login.</strong> Preferências, progresso de escuta e marcadores ficam só no seu aparelho.</li>
+        <li>
+          <strong>Downloads:</strong> os audiolivros baixados ficam guardados cifrados no aparelho e só tocam no app. Para
+          continuar ouvindo offline, o app precisa se conectar à internet uma vez a cada 90 dias.
+        </li>
+        <li>
+          <strong>Verificação do app:</strong> para entregar o áudio só ao app legítimo, o aparelho pede à Apple (App Attest)
+          ou ao Google (Play Integrity) um atestado de que o app é original e não foi alterado. Esse atestado não traz
+          seu nome, e-mail nem identificador de publicidade. Base legal: legítimo interesse em proteger o serviço contra
+          cópia em massa (art. 7º, IX). <em>[Revisor: confirmar a base legal e o teor do atestado.]</em>
+        </li>
+        <li>
+          <strong>Erros do servidor:</strong> quando a nossa API falha, um relatório técnico do erro vai para o Sentry, sem
+          dados pessoais. O app não envia relatórios de erro. <em>[Atualizar se isso mudar.]</em>
+        </li>
+      </ul>
+
+      <h2>4. Apoio ao projeto</h2>
+      <ul>
+        <li>
+          <strong>Pelo app:</strong> o pagamento é feito pela Apple ou pelo Google, que tratam seus dados de pagamento
+          segundo as próprias políticas. Recebemos só a confirmação da compra, sem nome nem cartão.
+        </li>
+        <li>
+          <strong>Por Pix:</strong> como em qualquer Pix, o seu banco nos informa seu nome e parte do seu CPF. Usamos esses
+          dados só para conferir o recebimento e fazer a prestação de contas, que publica valores totais, nunca nomes.
+          Base legal: obrigação legal e exercício regular de direitos (art. 7º, II e VI). <em>[Revisor: confirmar.]</em>
+        </li>
+      </ul>
+      <p>Doações para caridade, nas campanhas, vão direto para a instituição parceira, que é a controladora desses dados.</p>
+
+      <h2>5. Crianças</h2>
       <p>
-        O app funciona sem login. Preferências e progresso de escuta ficam guardados no próprio aparelho.
-        <!-- TODO: detalhar quando a especificação do app for fechada (relatórios de erro, notificações etc.). -->
+        O Centelha Kids não coleta dados pessoais das crianças, não exibe anúncios, não pede apoio, não tem links para fora
+        do app e não usa ferramentas de análise. A verificação do app (seção 3) também vale no Kids, porque não identifica
+        quem usa.
       </p>
 
-      <h2>4. Crianças</h2>
+      <h2>6. Com quem compartilhamos</h2>
+      <p>Não vendemos dados nem os usamos para publicidade. Os operadores abaixo tratam dados só para fazer o serviço funcionar:</p>
+      <ul>
+        <li><strong>Cloudflare:</strong> rede de entrega e proteção do site e da API; vê o IP de quem acessa.</li>
+        <li><strong><em>[Provedor do servidor]</em>:</strong> hospeda o site, a API e o banco de dados.</li>
+        <li><strong>Sentry:</strong> relatórios técnicos de erro da API, sem dados pessoais.</li>
+        <li><strong>Apple e Google:</strong> lojas de apps, pagamentos dentro do app e verificação do app.</li>
+        <li><strong><em>[Provedor de e-mail]</em>:</strong> envio do aviso de lançamento e respostas de suporte.</li>
+      </ul>
       <p>
-        O perfil Centelha Kids não coleta dados pessoais das crianças, não exibe anúncios e não usa ferramentas de análise.
+        A narração é gerada nos nossos próprios servidores: o texto das obras não é enviado a terceiros.{' '}
+        <em>[Revisar se o motor de voz mudar (#1).]</em>
       </p>
 
-      <h2>5. Compartilhamento</h2>
+      <h2>7. Transferência internacional</h2>
       <p>
-        Não vendemos nem compartilhamos dados para publicidade. Usamos fornecedores de infraestrutura (hospedagem e envio de
-        e-mail) apenas para operar o serviço. <em>[Lista de operadores a definir.]</em>
+        Cloudflare, Sentry, Apple e Google podem tratar dados fora do Brasil. Essas transferências seguem o art. 33 da
+        LGPD. <em>[Revisor: indicar o mecanismo de cada operador.]</em>
       </p>
 
-      <h2>6. Por quanto tempo guardamos</h2>
+      <h2>8. Por quanto tempo guardamos</h2>
+      <ul>
+        <li>Lista de espera: até o envio do aviso de lançamento, mais <em>[prazo]</em>, ou até você pedir a exclusão.</li>
+        <li>Registros de acesso: <em>[prazo; ver seção 2]</em>.</li>
+        <li>Mensagens de suporte: <em>[prazo]</em> após a resposta.</li>
+        <li>Dados do Pix: o prazo exigido pela legislação fiscal. <em>[Revisor: confirmar.]</em></li>
+      </ul>
+
+      <h2>9. Seus direitos</h2>
       <p>
-        O e-mail da lista de espera é guardado até o lançamento e o envio do aviso, ou até você pedir a exclusão, o que
-        vier primeiro. <em>[Prazo exato a definir.]</em>
+        Você pode pedir a confirmação do tratamento, o acesso, a correção, a portabilidade e a exclusão dos seus dados, e
+        revogar o consentimento a qualquer momento (LGPD, art. 18), escrevendo para{' '}
+        <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a>. Antes de atender, confirmamos que o pedido
+        veio do próprio titular, respondendo ao mesmo e-mail. Também pode reclamar à Autoridade Nacional de Proteção de
+        Dados (ANPD).
       </p>
 
-      <h2>7. Seus direitos</h2>
-      <p>
-        Você pode pedir a confirmação, o acesso, a correção, a exclusão dos seus dados e revogar o consentimento a qualquer
-        momento, escrevendo para <a href={`mailto:${SITE.emailPrivacidade}`}>{SITE.emailPrivacidade}</a>. Também pode
-        reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
-      </p>
-
-      <h2>8. Alterações</h2>
+      <h2>10. Alterações</h2>
       <p>Avisaremos aqui qualquer mudança nesta política. Última atualização: <em>[data a definir]</em>.</p>
     </article>
   </div>
