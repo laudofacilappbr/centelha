@@ -30,7 +30,26 @@ Map<String, dynamic> _segmento(
 final capituloLongo = {
   ..._capitulo(10, 1, 'Capítulo I — De Deus'),
   'edicao_id': 1,
-  'faixa': null,
+  'faixa': {
+    'url': 'https://audio.exemplo.org/le/pt-BR/e1/le-c001-v2.m4a',
+    'versao': 2,
+    'duracao_ms': 2500000,
+    // A pergunta n começa em n * 20 s; a resposta, 10 s depois.
+    'marcacoes': [
+      for (var n = 1; n <= 120; n++) ...[
+        {
+          'segmento_id': n * 10,
+          'inicio_ms': n * 20000,
+          'fim_ms': n * 20000 + 9000,
+        },
+        {
+          'segmento_id': n * 10 + 1,
+          'inicio_ms': n * 20000 + 10000,
+          'fim_ms': n * 20000 + 19000,
+        },
+      ],
+    ],
+  },
   'segmentos': [
     _segmento(1, 'titulo', 'De Deus'),
     for (var n = 1; n <= 120; n++) ...[

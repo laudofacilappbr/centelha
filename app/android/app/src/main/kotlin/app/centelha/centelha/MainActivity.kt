@@ -1,5 +1,6 @@
 package app.centelha.centelha
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 
-class MainActivity : FlutterActivity()
+// AudioServiceActivity: o player continua tocando com a tela desligada ou o app fechado.
+class MainActivity : AudioServiceActivity()
