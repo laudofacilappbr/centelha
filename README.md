@@ -64,6 +64,8 @@ Apoio ao projeto em `PUT /v1/admin/apoio` (só administrador): liga e desliga, q
 
 Glossário em `/v1/admin/glossario` (só administrador). Cada termo tem uma definição curta e as referências dos trechos de Kardec que a fundamentam (`LE-93`, `LE-C001`). A resposta lista em `nao_resolvidas` as referências que ainda não apontam para trecho publicado. Só se publica um termo com ao menos uma referência resolvida. O slug vira a URL `/glossario/<slug>` e não muda depois de publicado. O site lê `GET /v1/glossario` e monta o índice, a página de cada termo e "Termos desta questão".
 
+Campos de SEO (título até 60 caracteres e descrição até 160, ambos opcionais) em `PUT /v1/admin/edicoes/{id}/seo` e `PUT /v1/admin/capitulos/{id}/seo` (administrador). No post, os mesmos campos vão no corpo do próprio post e passam pela revisão como o texto. Vazio volta ao modelo da página. O SEO fica na edição, não na obra, porque o texto que responde a uma busca é de um idioma só.
+
 Campanhas de caridade em `/v1/admin/instituicoes` e `/v1/admin/campanhas` (só administrador). A instituição parceira tem CNPJ (o dígito verificador é conferido), descrição, chave Pix e página de doação. O dinheiro vai direto para ela. Regras para publicar uma campanha:
 
 - a instituição precisa ter Pix ou página de doação;

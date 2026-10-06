@@ -10,6 +10,7 @@ from .routers import (
     admin_direitos,
     admin_editorial,
     admin_pronuncia,
+    admin_seo,
     apoio,
     campanhas,
     catalogo,
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_editorial.router)
     app.include_router(admin_audio.router)
     app.include_router(admin_pronuncia.router)
+    app.include_router(admin_seo.router)
     app.include_router(admin_custos.router)
     app.include_router(transparencia.publico)
     app.include_router(transparencia.admin)

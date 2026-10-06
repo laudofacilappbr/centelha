@@ -10,7 +10,13 @@
 
 export type TipoSegmento = 'titulo' | 'paragrafo' | 'pergunta' | 'resposta' | 'comentario' | 'nota';
 
-export interface EdicaoResumo {
+/** SEO opcional do admin (#42). Ausente ou vazio: a página usa o próprio modelo. */
+export interface CamposSeo {
+  seo_titulo?: string | null;
+  seo_descricao?: string | null;
+}
+
+export interface EdicaoResumo extends CamposSeo {
   id: number;
   idioma: string;
   publico: 'adulto' | 'juvenil' | 'infantil';
@@ -28,7 +34,7 @@ export interface Obra {
   edicoes: EdicaoResumo[];
 }
 
-export interface CapituloResumo {
+export interface CapituloResumo extends CamposSeo {
   id: number;
   ordem: number;
   titulo: string;

@@ -4,9 +4,10 @@
  * A API só devolve post que passou pela revisão e cita ao menos um trecho publicado;
  * as fontes já vêm resolvidas. Sem API, o blog fica vazio.
  */
+import type { CamposSeo } from './catalogo';
 import type { ItemTema } from './temas';
 
-export interface PostResumo {
+export interface PostResumo extends CamposSeo {
   slug: string;
   titulo: string;
   resumo: string;
@@ -68,5 +69,10 @@ export function urlPost(slug: string): string {
 }
 
 export function dataPost(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' });
+  return new Date(iso).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'America/Sao_Paulo',
+  });
 }

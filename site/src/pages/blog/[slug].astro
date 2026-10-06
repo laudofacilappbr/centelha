@@ -33,7 +33,7 @@ const ld = [
 ];
 ---
 
-<BaseLayout title={p.titulo} description={p.resumo} jsonLd={ld}>
+<BaseLayout title={p.seo_titulo || p.titulo} description={p.seo_descricao || p.resumo} jsonLd={ld}>
   <PageHeader eyebrow={NOMES_LINHA[p.linha] ?? 'Blog'} title={p.titulo} />
   <div class="container section">
     <nav aria-label="Trilha" class="muted trilha">

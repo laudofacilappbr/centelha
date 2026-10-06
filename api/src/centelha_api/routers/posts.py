@@ -12,13 +12,14 @@ from dataclasses import asdict
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import Field, HttpUrl, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_session
 from ..dominio import contas, temas
 from ..dominio.permissoes import Permissao
+from ..dominio.seo import CamposSeo
 from ..models import EstadoPost, LinhaEditorial, Post, PostReferencia, Usuario
 from ..ratelimit import ip_do_cliente
 from .admin import exigir, pode_ver_admin
@@ -32,7 +33,7 @@ pode_editar = exigir(Permissao.EDITAR_CONTEUDO)
 pode_revisar = exigir(Permissao.APROVAR_TEXTO)
 
 
-class PostEntrada(BaseModel):
+class PostEntrada(CamposSeo):
     slug: str = Field(min_length=2, max_length=100, pattern=SLUG)
     titulo: str = Field(min_length=1, max_length=200)
     resumo: str = Field(min_length=1, max_length=300)
@@ -50,7 +51,7 @@ class PostEntrada(BaseModel):
         return v
 
 
-class PostResumo(BaseModel):
+class PostResumo(CamposSeo):
     slug: str
     titulo: str
     resumo: str
@@ -66,7 +67,7 @@ class PostPublico(PostResumo):
     fontes: list[Item]
 
 
-class PostAdmin(BaseModel):
+class PostAdmin(CamposSeo):
     id: int
     slug: str
     titulo: str
@@ -91,6 +92,7 @@ def _admin(session: Session, p: Post) -> PostAdmin:
         capa_url=p.capa_url, idioma=p.idioma, estado=p.estado, autor_id=p.autor_id,
         revisado_por_id=p.revisado_por_id, publicado_em=p.publicado_em, referencias=refs,
         nao_resolvidas=[r for r in refs if r not in ok],
+        seo_titulo=p.seo_titulo, seo_descricao=p.seo_descricao,
     )  # fmt: skip
 
 
@@ -98,6 +100,7 @@ def _resumo(p: Post) -> PostResumo:
     return PostResumo(
         slug=p.slug, titulo=p.titulo, resumo=p.resumo, linha=p.linha, capa_url=p.capa_url,
         publicado_em=p.publicado_em, atualizado_em=p.atualizado_em,
+        seo_titulo=p.seo_titulo, seo_descricao=p.seo_descricao,
     )  # fmt: skip
 
 
@@ -119,6 +122,7 @@ def _aplicar(session: Session, p: Post, dados: PostEntrada, refs: list[str]) -> 
     p.slug, p.titulo, p.resumo = dados.slug, dados.titulo, dados.resumo.strip()
     p.texto, p.linha, p.idioma = dados.texto.strip(), dados.linha, dados.idioma
     p.capa_url = str(dados.capa_url) if dados.capa_url else None
+    p.seo_titulo, p.seo_descricao = dados.seo_titulo, dados.seo_descricao
     # Apaga antes de inserir: no mesmo flush o SQLAlchemy insere primeiro, e uma
     # referência mantida bateria no UNIQUE (post_id, referencia).
     p.referencias.clear()

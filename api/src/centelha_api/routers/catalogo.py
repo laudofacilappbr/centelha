@@ -13,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_session
+from ..dominio.seo import CamposSeo
 from ..models import (
     Campanha,
     Capitulo,
@@ -41,7 +42,7 @@ class _Base(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class EdicaoResumo(_Base):
+class EdicaoResumo(_Base, CamposSeo):
     id: int
     idioma: str
     publico: Publico
@@ -59,7 +60,7 @@ class ObraOut(_Base):
     edicoes: list[EdicaoResumo]
 
 
-class CapituloResumo(_Base):
+class CapituloResumo(_Base, CamposSeo):
     id: int
     ordem: int
     titulo: str
