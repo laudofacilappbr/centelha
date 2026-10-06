@@ -6,14 +6,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_falsa.dart';
+import 'reprodutor_falso.dart';
 
-Future<void> _abrirApp(WidgetTester tester, CatalogoApi api) async {
+Future<ReprodutorFalso> _abrirApp(
+  WidgetTester tester,
+  CatalogoApi api, [
+  Map<String, Object> salvo = const {},
+]) async {
   tester.platformDispatcher.localesTestValue = const [Locale('pt', 'BR')];
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-  SharedPreferences.setMockInitialValues({});
+  SharedPreferences.setMockInitialValues(salvo);
   final idioma = await PreferenciaIdioma.carregar();
-  await tester.pumpWidget(CentelhaApp(api: api, idioma: idioma));
+  final (player, motor) = await playerFalso();
+  await tester.pumpWidget(
+    CentelhaApp(api: api, idioma: idioma, player: player),
+  );
   await tester.pumpAndSettle();
+  return motor;
 }
 
 Future<void> _abrirObra(WidgetTester tester) async {

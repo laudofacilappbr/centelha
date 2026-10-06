@@ -222,11 +222,82 @@ class Segmento {
   final String? subquestao;
 }
 
+/// Onde cada segmento começa e termina na faixa (leitura acompanhada e retomada).
+class Marcacao {
+  Marcacao({
+    required this.segmentoId,
+    required this.inicioMs,
+    required this.fimMs,
+  });
+
+  factory Marcacao.deJson(Map<String, dynamic> j) => Marcacao(
+    segmentoId: j['segmento_id'] as int,
+    inicioMs: j['inicio_ms'] as int,
+    fimMs: j['fim_ms'] as int,
+  );
+
+  final int segmentoId;
+  final int inicioMs;
+  final int fimMs;
+}
+
+class Faixa {
+  Faixa({
+    required this.url,
+    required this.versao,
+    required this.duracaoMs,
+    required this.marcacoes,
+    this.formato = 'm4a',
+  });
+
+  factory Faixa.deJson(Map<String, dynamic> j) => Faixa(
+    url: j['url'] as String,
+    versao: j['versao'] as int,
+    duracaoMs: j['duracao_ms'] as int,
+    marcacoes: [
+      for (final m in j['marcacoes'] as List)
+        Marcacao.deJson(m as Map<String, dynamic>),
+    ],
+    formato: j['formato'] as String? ?? 'm4a',
+  );
+
+  final String url;
+
+  /// "m4a" (aberto) ou "cent1" (cifrado, #73). Sem o campo, a API é anterior à #73.
+  final String formato;
+
+  /// Este app só toca o formato aberto; a decifragem do .cent vem depois.
+  bool get tocavel => formato == 'm4a';
+
+  /// Regenerar o áudio cria versão nova, com outros tempos.
+  final int versao;
+  final int duracaoMs;
+  final List<Marcacao> marcacoes;
+
+  /// Segmento tocando em [ms]; null antes do primeiro ou sem marcações.
+  int? segmentoEm(int ms) {
+    int? atual;
+    for (final m in marcacoes) {
+      if (m.inicioMs > ms) break;
+      atual = m.segmentoId;
+    }
+    return atual;
+  }
+
+  int? inicioDoSegmento(int segmentoId) {
+    for (final m in marcacoes) {
+      if (m.segmentoId == segmentoId) return m.inicioMs;
+    }
+    return null;
+  }
+}
+
 class Capitulo {
   Capitulo({
     required this.resumo,
     required this.edicaoId,
     required this.segmentos,
+    this.faixa,
   });
 
   factory Capitulo.deJson(Map<String, dynamic> j) => Capitulo(
@@ -236,11 +307,17 @@ class Capitulo {
       for (final s in j['segmentos'] as List)
         Segmento.deJson(s as Map<String, dynamic>),
     ],
+    faixa: j['faixa'] == null
+        ? null
+        : Faixa.deJson(j['faixa'] as Map<String, dynamic>),
   );
 
   final CapituloResumo resumo;
   final int edicaoId;
   final List<Segmento> segmentos;
+
+  /// null enquanto o capítulo não tem áudio.
+  final Faixa? faixa;
 }
 
 /// Resultado de "questão 88": em que capítulo ela está.
