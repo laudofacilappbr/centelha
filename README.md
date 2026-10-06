@@ -50,6 +50,8 @@ Fluxo editorial do capítulo: `importado → texto_revisado → audio_gerado →
 
 Para gerar o áudio, `POST /v1/admin/capitulos/{id}/gerar-audio` com as vozes (`GET /v1/admin/vozes`), por um administrador ou revisor de áudio. A rota só enfileira; o worker sintetiza e leva o capítulo a `audio_gerado`. O motor de TTS sai da voz escolhida, e a resposta traz `caracteres_estimados`, que é a base de cobrança dos motores em nuvem.
 
+Dicionário de pronúncia em `/v1/admin/pronuncias` (revisor de áudio ou administrador). Criar, alterar ou apagar uma entrada devolve `capitulos_afetados`: os capítulos com áudio cuja síntese usaria a entrada, pela mesma regra da pipeline (termo mais longo primeiro, palavra inteira). `POST /v1/admin/pronuncias/{id}/regenerar` enfileira esses capítulos de novo, com as vozes da última geração. Capítulos publicados ficam de fora até alguém despublicar.
+
 ## Deploy
 
 VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`.
