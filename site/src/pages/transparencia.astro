@@ -2,9 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import dados from '../data/transparencia.json';
+import { mesesPublicados, nomeMes, reais } from '../lib/transparencia';
 
 const brl = (v: number | null) =>
   v === null ? 'a definir' : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+// Meses publicados no admin, do mais recente ao mais antigo. Vazio: conteúdo provisório.
+const meses = await mesesPublicados();
+const [atual, ...anteriores] = meses;
 ---
 
 <BaseLayout
@@ -19,48 +24,130 @@ const brl = (v: number | null) =>
   <div class="container">
     <article class="prose">
       {
-        dados.placeholder && (
-          <div class="notice" role="note">
-            <strong>Valores provisórios.</strong>{' '}O app ainda não foi lançado. Os números abaixo são marcadores de posição
-            e serão substituídos pelos custos reais a partir do primeiro mês de operação.
-          </div>
+        atual ? (
+          <>
+            <h2>Custos de {nomeMes(atual.mes)}</h2>
+            <div class="table-wrap">
+              <table>
+                <caption class="visually-hidden">Custos de {nomeMes(atual.mes)}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col" class="valor">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {atual.custos.map((c) => (
+                    <tr>
+                      <td>
+                        {c.item}
+                        {c.nota && <span class="nota muted">{c.nota}</span>}
+                      </td>
+                      <td class="valor">{reais(c.valor_centavos)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th scope="row">Total</th>
+                    <td class="valor">{reais(atual.total_custos_centavos)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <h2>Arrecadação de {nomeMes(atual.mes)}</h2>
+            {atual.arrecadacao.length ? (
+              <ul>
+                {atual.arrecadacao.map((a) => (
+                  <li>
+                    {a.item}: {reais(a.valor_centavos)}
+                    {a.nota && <span class="muted"> ({a.nota})</span>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Nenhuma arrecadação neste mês.</p>
+            )}
+            <p>
+              Total arrecadado: <strong>{reais(atual.total_arrecadacao_centavos)}</strong>.
+            </p>
+
+            {anteriores.length > 0 && (
+              <>
+                <h2>Meses anteriores</h2>
+                <div class="table-wrap">
+                  <table>
+                    <caption class="visually-hidden">Custos e arrecadação dos meses anteriores</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Mês</th>
+                        <th scope="col" class="valor">Custos</th>
+                        <th scope="col" class="valor">Arrecadação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {anteriores.map((m) => (
+                        <tr>
+                          <td>{nomeMes(m.mes)}</td>
+                          <td class="valor">{reais(m.total_custos_centavos)}</td>
+                          <td class="valor">{reais(m.total_arrecadacao_centavos)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+        {
+          dados.placeholder && (
+            <div class="notice" role="note">
+              <strong>Valores provisórios.</strong>{' '}O app ainda não foi lançado. Os números abaixo são marcadores de posição
+              e serão substituídos pelos custos reais a partir do primeiro mês de operação.
+            </div>
+          )
+        }
+
+        <h2>Custos mensais</h2>
+        <p class="muted">{dados.referencia}</p>
+        <div class="table-wrap">
+          <table>
+            <caption class="visually-hidden">Custos mensais do Centelha</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                dados.custos.map((c) => (
+                  <tr>
+                    <td>{c.item}</td>
+                    <td>
+                      <span class="placeholder">{brl(c.valor)}</span>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Arrecadação</h2>
+        <p>
+          {
+            dados.arrecadacao === null
+              ? 'Ainda não recebemos doações. As formas de apoio serão publicadas aqui quando o app for lançado.'
+              : `Arrecadado no mês: ${brl(dados.arrecadacao)}.`
+          }
+        </p>
+          </>
         )
       }
-
-      <h2>Custos mensais</h2>
-      <p class="muted">{dados.referencia}</p>
-      <div class="table-wrap">
-        <table>
-          <caption class="visually-hidden">Custos mensais do Centelha</caption>
-          <thead>
-            <tr>
-              <th scope="col">Item</th>
-              <th scope="col">Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              dados.custos.map((c) => (
-                <tr>
-                  <td>{c.item}</td>
-                  <td>
-                    <span class="placeholder">{brl(c.valor)}</span>
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <h2>Arrecadação</h2>
-      <p>
-        {
-          dados.arrecadacao === null
-            ? 'Ainda não recebemos doações. As formas de apoio serão publicadas aqui quando o app for lançado.'
-            : `Arrecadado no mês: ${brl(dados.arrecadacao)}.`
-        }
-      </p>
 
       <h2 id="apoie">Como apoiar</h2>
       <p>
@@ -79,6 +166,14 @@ const brl = (v: number | null) =>
 </BaseLayout>
 
 <style>
+  .valor {
+    white-space: nowrap;
+    text-align: right;
+  }
+  .nota {
+    display: block;
+    font-size: 0.85rem;
+  }
   .placeholder {
     white-space: nowrap;
     font-style: italic;

@@ -9,6 +9,8 @@ from datetime import date, datetime
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
+    CheckConstraint,
     Date,
     DateTime,
     Enum,
@@ -319,3 +321,43 @@ class JobAudio(Base):
     concluido_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     capitulo: Mapped[Capitulo] = relationship()
+
+
+class TipoLancamento(enum.StrEnum):
+    CUSTO = "custo"
+    ARRECADACAO = "arrecadacao"
+
+
+class MesTransparencia(Base):
+    """Um mês da prestação de contas pública (#36).
+
+    Só aparece no site depois de publicado: um mês com metade dos lançamentos daria
+    um custo menor que o real, e é exatamente a conta que a página existe para mostrar.
+    """
+
+    __tablename__ = "mes_transparencia"
+    # Primeiro dia do mês; o dia não significa nada além disso.
+    __table_args__ = (CheckConstraint("extract(day from mes) = 1", name="mes_no_dia_1"),)
+
+    mes: Mapped[date] = mapped_column(Date, primary_key=True)
+    publicado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    publicado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+
+    lancamentos: Mapped[list["LancamentoTransparencia"]] = relationship(
+        back_populates="mes_ref", order_by="LancamentoTransparencia.id"
+    )
+
+
+class LancamentoTransparencia(Timestamps, Base):
+    __tablename__ = "lancamento_transparencia"
+    __table_args__ = (CheckConstraint("valor_centavos >= 0", name="valor_nao_negativo"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    mes: Mapped[date] = mapped_column(ForeignKey("mes_transparencia.mes"), index=True)
+    tipo: Mapped[TipoLancamento] = mapped_column(_enum(TipoLancamento))
+    item: Mapped[str] = mapped_column(String(120))
+    # Centavos inteiros: float some e soma errado (0,1 + 0,2), e a página é de conta.
+    valor_centavos: Mapped[int] = mapped_column(BigInteger)
+    nota: Mapped[str | None] = mapped_column(String(300))
+
+    mes_ref: Mapped[MesTransparencia] = relationship(back_populates="lancamentos")
