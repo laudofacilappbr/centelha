@@ -1,3 +1,5 @@
+import base64
+import binascii
 from functools import lru_cache
 from typing import Literal
 
@@ -24,6 +26,10 @@ class Settings(BaseSettings):
     # com a Cloudflare na frente fazendo cache.
     audio_dir: str = "./audio"
     audio_url_base: str = "http://localhost:8000/audio"
+    # Faixa cifrada no formato .cent (ADR 0004). Desligado até o app decifrar. Ligado,
+    # exige a chave-mestra: 32 bytes em base64, só no .env da VPS e no backup.
+    audio_cifrar: bool = False
+    audio_chave_mestra: str = ""
     # Worker: intervalo de consulta da fila e prazo para um job "executando" ser
     # considerado abandonado (worker que morreu) e voltar à fila.
     worker_intervalo_segundos: float = 5.0
@@ -44,6 +50,15 @@ class Settings(BaseSettings):
     # juntos, entonação contínua; só em motor com marcadores). O padrão sai da escuta (#77).
     tts_modo: Literal["segmento", "bloco"] = "segmento"
     tts_limite_bloco_bytes: int = 4500
+
+    def chave_mestra(self) -> bytes:
+        try:
+            chave = base64.b64decode(self.audio_chave_mestra, validate=True)
+        except binascii.Error as e:
+            raise ValueError("CENTELHA_AUDIO_CHAVE_MESTRA não é base64 válido") from e
+        if len(chave) != 32:
+            raise ValueError("CENTELHA_AUDIO_CHAVE_MESTRA precisa ter 32 bytes em base64")
+        return chave
 
 
 @lru_cache

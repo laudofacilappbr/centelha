@@ -18,6 +18,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -189,6 +190,10 @@ class FaixaAudio(Base):
     duracao_ms: Mapped[int]
     # [{"segmento_id": 1, "inicio_ms": 0, "fim_ms": 4200}, ...] para a leitura acompanhada.
     marcacoes: Mapped[list[dict]] = mapped_column(JSON, default=list)
+    # "m4a" aberto ou "cent1" cifrado (ADR 0004). A chave da faixa fica embrulhada pela
+    # chave-mestra e nunca sai na API pública: só o app atestado a recebe.
+    formato: Mapped[str] = mapped_column(String(10), default="m4a", server_default="m4a")
+    chave_cifrada: Mapped[bytes | None] = mapped_column(LargeBinary)
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     capitulo: Mapped[Capitulo] = relationship(back_populates="faixas")

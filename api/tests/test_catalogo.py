@@ -113,6 +113,9 @@ def test_capitulo_traz_segmentos_e_faixa_mais_recente(client, catalogo):
     assert r["segmentos"][3]["subquestao"] == "a"
     assert r["faixa"]["versao"] == 2
     assert r["faixa"]["marcacoes"][0]["fim_ms"] == 500
+    assert r["faixa"]["formato"] == "m4a"
+    # A chave da faixa nunca sai na API pública, nem com a faixa cifrada.
+    assert "chave_cifrada" not in r["faixa"]
 
 
 def test_capitulo_nao_publicado_e_404(client, catalogo):

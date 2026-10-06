@@ -26,6 +26,7 @@ from ..models import (
     Usuario,
     Voz,
 )
+from . import cifra
 from .armazenamento import Armazenamento
 from .pronuncia import EntradaPronuncia
 from .tts.gerar import SegmentoParaVoz, Vozes, gerar_capitulo
@@ -159,9 +160,12 @@ def executar(
         )
         or 0
     ) + 1
-    chave = (
+    settings = get_settings()
+    # Cifrar exige a chave-mestra; falhar aqui, antes de gastar TTS, e não depois.
+    mestra = settings.chave_mestra() if settings.audio_cifrar else None
+    base = (
         f"{edicao.obra.sigla.lower()}/{edicao.idioma}/e{edicao.id}/"
-        f"{capitulo.referencia_canonica.lower()}-v{versao}.m4a"
+        f"{capitulo.referencia_canonica.lower()}-v{versao}"
     )
     with tempfile.TemporaryDirectory() as tmp:
         resultado = gerar_capitulo(
@@ -171,10 +175,16 @@ def executar(
             _dicionario(session, edicao.idioma),
             Path(tmp) / "capitulo.m4a",
             idioma=edicao.idioma,
-            modo=get_settings().tts_modo,
-            limite_bloco_bytes=get_settings().tts_limite_bloco_bytes,
+            modo=settings.tts_modo,
+            limite_bloco_bytes=settings.tts_limite_bloco_bytes,
         )
-        url = armazenamento.salvar(resultado.faixa.arquivo, chave)
+        arquivo, formato, chave_cifrada = resultado.faixa.arquivo, "m4a", None
+        if mestra is not None:
+            chave_faixa = cifra.nova_chave()
+            arquivo = Path(tmp) / "capitulo.cent"
+            arquivo.write_bytes(cifra.cifrar(resultado.faixa.arquivo.read_bytes(), chave_faixa))
+            formato, chave_cifrada = cifra.FORMATO, cifra.embrulhar(chave_faixa, mestra)
+        url = armazenamento.salvar(arquivo, f"{base}.{'m4a' if formato == 'm4a' else 'cent'}")
     faixa = FaixaAudio(
         capitulo_id=capitulo.id,
         voz_id=job.voz_narrador_id,
@@ -182,6 +192,8 @@ def executar(
         url=url,
         duracao_ms=resultado.faixa.duracao_ms,
         marcacoes=resultado.faixa.marcacoes,
+        formato=formato,
+        chave_cifrada=chave_cifrada,
     )
     session.add(faixa)
     session.flush()
