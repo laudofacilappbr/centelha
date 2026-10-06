@@ -220,6 +220,7 @@ def test_tabela_de_papeis_da_especificacao():
             Permissao.EDITAR_DIREITOS,
             Permissao.GERIR_USUARIOS,
             Permissao.VER_AUDITORIA,
+            Permissao.VER_CUSTOS,
         ):
             assert not pode(revisor, p), (revisor, p)
 
@@ -232,6 +233,7 @@ def test_tabela_de_papeis_da_especificacao():
         ("post", "/v1/admin/usuarios"),
         ("get", "/v1/admin/auditoria"),
         ("post", "/v1/admin/edicoes/1/publicar"),
+        ("get", "/v1/admin/edicoes/1/custo"),
     ],
 )
 def test_revisor_barrado_nas_rotas_de_administrador(client, session, papel, metodo, rota):
