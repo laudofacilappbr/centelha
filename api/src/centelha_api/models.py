@@ -397,3 +397,62 @@ class TemaReferencia(Base):
     ordem: Mapped[int]
 
     tema: Mapped[Tema] = relationship(back_populates="referencias")
+
+
+class LinhaEditorial(enum.StrEnum):
+    """Linhas do blog (site-landing-page.md, "Linhas editoriais")."""
+
+    KARDEC_RESPONDE = "kardec_responde"
+    ESTUDO_GUIADO = "estudo_guiado"
+    VIDA_PRATICA = "vida_pratica"
+    PAIS_E_EVANGELIZADORES = "pais_e_evangelizadores"
+    BASTIDORES = "bastidores"
+    CAMPANHAS = "campanhas"
+    NOVIDADES = "novidades"
+
+
+class EstadoPost(enum.StrEnum):
+    RASCUNHO = "rascunho"
+    # Revisão doutrinária humana feita por outra pessoa; só daqui se publica.
+    REVISADO = "revisado"
+    PUBLICADO = "publicado"
+
+
+class Post(Timestamps, Base):
+    __tablename__ = "post"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # URL permanente: /blog/<slug>. Não muda depois de publicado.
+    slug: Mapped[str] = mapped_column(String(100), unique=True)
+    titulo: Mapped[str] = mapped_column(String(200))
+    # Uma ou duas frases: lista do blog e <meta description>.
+    resumo: Mapped[str] = mapped_column(String(300))
+    # Markdown restrito (parágrafos, subtítulos, listas, ênfase e links); o site
+    # escapa o HTML antes de interpretar.
+    texto: Mapped[str] = mapped_column(Text)
+    linha: Mapped[LinhaEditorial] = mapped_column(_enum(LinhaEditorial))
+    capa_url: Mapped[str | None] = mapped_column(Text)
+    idioma: Mapped[str] = mapped_column(String(35), default="pt-BR")
+    estado: Mapped[EstadoPost] = mapped_column(_enum(EstadoPost), default=EstadoPost.RASCUNHO)
+    autor_id: Mapped[int] = mapped_column(ForeignKey("usuario.id"))
+    revisado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+    revisado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    publicado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    referencias: Mapped[list["PostReferencia"]] = relationship(
+        back_populates="post", order_by="PostReferencia.ordem", cascade="all, delete-orphan"
+    )
+
+
+class PostReferencia(Base):
+    """Fonte citada pelo post, como nos temas: referência canônica ("LE-88")."""
+
+    __tablename__ = "post_referencia"
+    __table_args__ = (UniqueConstraint("post_id", "referencia"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id", ondelete="CASCADE"), index=True)
+    referencia: Mapped[str] = mapped_column(String(40))
+    ordem: Mapped[int]
+
+    post: Mapped[Post] = relationship(back_populates="referencias")

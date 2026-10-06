@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { postsPublicados, urlPost, dataPost, NOMES_LINHA } from '../../lib/posts';
+
+const posts = await postsPublicados();
+---
+
+<BaseLayout
+  title="Blog: Kardec para o dia a dia"
+  description="Textos curtos sobre O Livro dos Espíritos, O Evangelho Segundo o Espiritismo e a vida prática, sempre com a fonte e o áudio do trecho."
+>
+  <PageHeader eyebrow="Blog" title="Kardec para o dia a dia" lede="Textos curtos, sempre com a fonte exata e o trecho para ouvir." />
+  <div class="container section">
+    {
+      posts.length ? (
+        <ul class="lista-posts" role="list">
+          {posts.map((p) => (
+            <li class="card">
+              <p class="eyebrow">{NOMES_LINHA[p.linha] ?? p.linha}</p>
+              <h2>
+                <a href={urlPost(p.slug)}>{p.titulo}</a>
+              </h2>
+              <p>{p.resumo}</p>
+              <p class="muted data">
+                <time datetime={p.publicado_em}>{dataPost(p.publicado_em)}</time>
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Os primeiros textos serão publicados junto com as obras.</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .lista-posts {
+    display: grid;
+    gap: var(--space-6);
+    padding: 0;
+  }
+  .lista-posts h2 {
+    font-size: 1.35rem;
+    margin: var(--space-2) 0;
+  }
+  .data {
+    font-size: 0.9rem;
+  }
+</style>
