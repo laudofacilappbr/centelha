@@ -19,9 +19,10 @@ COPY docker-entrypoint.sh /usr/local/bin/
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 CENTELHA_AUDIO_DIR=/data/audio
 
 # Worker da fila de áudio: precisa de ffmpeg; a API não. docker build --target worker
+# fonts-comfortaa: fonte da marca na legenda dos vídeos curtos (libass, #44).
 FROM base AS worker
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg \
+ && apt-get install -y --no-install-recommends ffmpeg fonts-comfortaa \
  && rm -rf /var/lib/apt/lists/*
 COPY worker-entrypoint.sh /usr/local/bin/
 # Começa como root só para o chown do volume; o entrypoint troca para "centelha".
