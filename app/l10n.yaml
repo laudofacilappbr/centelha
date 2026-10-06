@@ -1,0 +1,6 @@
+# Strings da interface: lib/l10n/app_<idioma>.arb. Nenhum texto fixo no código.
+arb-dir: lib/l10n
+template-arb-file: app_pt.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

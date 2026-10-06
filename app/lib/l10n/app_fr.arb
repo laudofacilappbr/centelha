@@ -1,0 +1,16 @@
+{
+  "@@locale": "fr",
+  "appTitulo": "Centelha",
+  "obras": "Œuvres",
+  "configuracoes": "Réglages",
+  "carregando": "Chargement…",
+  "erroCatalogo": "Impossible de charger le catalogue. Vérifiez la connexion.",
+  "tentarNovamente": "Réessayer",
+  "catalogoVazio": "Aucune œuvre publiée pour le moment.",
+  "edicoes": "{quantidade, plural, =1{1 édition} other{{quantidade} éditions}}",
+  "idioma": "Langue",
+  "idiomaDoAparelho": "Langue de l’appareil",
+  "sobre": "À propos",
+  "avisoVozSintetica": "La narration est produite par une voix de synthèse, à partir d’éditions du domaine public ou autorisées. Chaque édition crédite l’auteur, le traducteur et la source.",
+  "licencas": "Licences"
+}

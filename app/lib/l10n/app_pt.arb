@@ -1,0 +1,19 @@
+{
+  "@@locale": "pt",
+  "appTitulo": "Centelha",
+  "obras": "Obras",
+  "configuracoes": "Configurações",
+  "carregando": "Carregando…",
+  "erroCatalogo": "Não foi possível carregar o catálogo. Confira a conexão.",
+  "tentarNovamente": "Tentar de novo",
+  "catalogoVazio": "Nenhuma obra publicada ainda.",
+  "edicoes": "{quantidade, plural, =1{1 edição} other{{quantidade} edições}}",
+  "@edicoes": {
+    "placeholders": { "quantidade": { "type": "int" } }
+  },
+  "idioma": "Idioma",
+  "idiomaDoAparelho": "Idioma do aparelho",
+  "sobre": "Sobre",
+  "avisoVozSintetica": "A narração é gerada por voz sintética, a partir de edições em domínio público ou com autorização. Cada edição credita autor, tradutor e fonte.",
+  "licencas": "Licenças"
+}

@@ -48,7 +48,7 @@ gh issue list -R laudofacilappbr/centelha --state open \
 Ordem: `p0` → `p1` → `p2` → `p3`; dentro da mesma prioridade, a de número menor. Pule (sem rotular) a que:
 
 - é de **área que outra sessão está tocando agora** (veja `em-andamento` e os comentários de reivindicação; ex.: admin com outra sessão no admin);
-- depende de ferramenta ausente: app (`area:app`) só se `flutter --version` funcionar;
+- depende de ferramenta ausente: app (`area:app`) precisa do Flutter local (`C:/src/flutter/bin/flutter --version`; no Git Bash, ponha `/c/src/flutter/bin` no PATH);
 - depende de outra issue aberta e elegível — faça a outra primeiro.
 
 Ao ler a issue, se descobrir que ela precisa de **decisão humana** (negócio, legal, financeiro, segurança, irreversível) ou de **ação fora do computador** (conta, cartão, painel, chave): aplique `decisao` ou `manual`, comente as **opções com risco e reversibilidade** (ou o que exatamente o dono precisa fazer) e escolha outra tarefa. O agente nunca escolhe sozinho.
@@ -89,13 +89,13 @@ Trabalhe só dentro de `../CENTELHA-$N`.
 A validação é local, em Docker — o CI do GitHub não é usado. Antes da PR, na worktree:
 
 ```sh
-bash ci/validar.sh            # api (lint, testes, migrações) + site (build, astro check) + infra
+bash ci/validar.sh            # api (lint, testes, migrações) + site (build, astro check) + infra + app (format, analyze, testes)
 bash ci/validar.sh imagens    # se mexeu em Dockerfile: build das imagens api, worker e site
 ```
 
 Tem que terminar com `ok` em todos os alvos e código de saída 0. Teste verde não basta:
 
-E rode a coisa: API/worker em containers (`docker compose -p centelha$N -f infra/docker-compose.yml up -d --build ...`), site com `npm run preview` e captura em Chrome headless (`--user-data-dir` próprio no scratchpad; o navegador do DevTools pode estar com outra sessão). Ao terminar, derrube o que subiu (`docker compose -p centelha$N down -v`) e apague o banco de teste — só o que for seu.
+E rode a coisa: API/worker em containers (`docker compose -p centelha$N -f infra/docker-compose.yml up -d --build ...`), site com `npm run preview` e captura em Chrome headless, app numa cópia no scratchpad com `flutter create --platforms web .` + `flutter build web --dart-define=CENTELHA_API_URL=...` e captura em Chrome headless (que não desce de ~500 px de largura; largura de celular fica no teste de widget) (`--user-data-dir` próprio no scratchpad; o navegador do DevTools pode estar com outra sessão). Ao terminar, derrube o que subiu (`docker compose -p centelha$N down -v`) e apague o banco de teste — só o que for seu.
 
 Se não conseguiu verificar algo, diga na PR o quê e por quê. Nunca afirme verificação que não fez.
 

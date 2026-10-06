@@ -57,6 +57,18 @@ services:
       - cache:/cache
     command: ["sh", "-c", "npm ci --no-audit --no-fund && npm run build && npx astro check"]
 
+  app:
+    build: { context: ., dockerfile: app.Dockerfile }
+    working_dir: /app
+    volumes:
+      - ../app:/app
+      - ./app.sh:/ci/app.sh:ro
+      # Saídas do Linux fora da worktree, como no site.
+      - /app/.dart_tool
+      - /app/build
+      - cache:/cache
+    command: ["bash", "/ci/app.sh"]
+
 volumes:
   venv:
   cache:

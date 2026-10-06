@@ -1,0 +1,42 @@
+name: centelha
+description: "Centelha: audiolivros espíritas"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  http: ^1.6.0
+  intl: ^0.20.3
+  shared_preferences: ^2.5.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  # Gera lib/l10n/app_localizations.dart a partir dos .arb (l10n.yaml).
+  generate: true
+
+  assets:
+    - assets/fonts/OFL-Comfortaa.txt
+    - assets/fonts/OFL-AtkinsonHyperlegible.txt
+
+  # Fontes da marca empacotadas (SIL OFL): nada é baixado do Google em tempo de uso,
+  # o que importa para o perfil infantil e para quem ouve offline.
+  fonts:
+    - family: Comfortaa
+      fonts:
+        - asset: assets/fonts/Comfortaa.ttf
+    - family: AtkinsonHyperlegible
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegible-Regular.ttf
+        - asset: assets/fonts/AtkinsonHyperlegible-Bold.ttf
+          weight: 700
