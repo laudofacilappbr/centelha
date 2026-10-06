@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { campanhasPublicadas, dataCampanha, urlCampanha } from '../../lib/campanhas';
+import { paragrafos } from '../../lib/temas';
+import { reais } from '../../lib/transparencia';
+
+const campanhas = await campanhasPublicadas();
+const ROTULO = { futura: 'Em breve', ativa: 'Acontecendo agora', encerrada: 'Encerrada' };
+---
+
+<BaseLayout
+  title="Campanhas de caridade"
+  description="Campanhas de doação para instituições espíritas parceiras. O Pix vai direto para a instituição; o Centelha só divulga e publica o resultado."
+>
+  <PageHeader
+    eyebrow="Campanhas"
+    title="Caridade com data marcada"
+    lede="Poucas campanhas por ano, cada uma com uma instituição parceira. A doação vai direto para ela, e o resultado aparece aqui no fim."
+  />
+  <div class="container section">
+    {
+      campanhas.length ? (
+        <ul class="grid lista" role="list">
+          {campanhas.map((c) => (
+            <li class="card" data-inicio={c.inicio} data-fim={c.fim}>
+              <p class="eyebrow situacao">{ROTULO[c.situacao]}</p>
+              <h2>
+                <a href={urlCampanha(c.slug)}>{c.titulo}</a>
+              </h2>
+              <p class="muted">
+                {c.instituicao.nome} · de {dataCampanha(c.inicio)} a {dataCampanha(c.fim)}
+              </p>
+              <p>{paragrafos(c.texto)[0]}</p>
+              {c.arrecadado_centavos != null && (
+                <p class="muted">Arrecadado, segundo a instituição: {reais(c.arrecadado_centavos)}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          Nenhuma campanha publicada ainda. Enquanto isso, a página de <a href="/transparencia">transparência</a> mostra
+          os custos do projeto.
+        </p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<script>
+  // Mesma conta da página da campanha: o rótulo segue a data de hoje, não a do build.
+  const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+  const rotulo = { futura: 'Em breve', ativa: 'Acontecendo agora', encerrada: 'Encerrada' };
+  document.querySelectorAll<HTMLElement>('[data-inicio]').forEach((li) => {
+    const s = hoje < li.dataset.inicio! ? 'futura' : hoje <= li.dataset.fim! ? 'ativa' : 'encerrada';
+    const el = li.querySelector('.situacao');
+    if (el) el.textContent = rotulo[s];
+  });
+</script>
+
+<style>
+  .lista {
+    list-style: none;
+    padding: 0;
+  }
+  .lista h2 {
+    font-size: 1.25rem;
+    margin-top: 0;
+  }
+  .situacao {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+</style>

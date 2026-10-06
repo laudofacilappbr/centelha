@@ -3,9 +3,13 @@ import Logo from './Logo.astro';
 import StoreButtons from './StoreButtons.astro';
 import { SITE } from '../config';
 import { apoio } from '../lib/apoio';
+import { campanhasPublicadas } from '../lib/campanhas';
 
 const ano = new Date().getFullYear();
 const { ligado: apoioLigado } = await apoio();
+const temCampanha = (await campanhasPublicadas()).length > 0;
+// Na página dos pais do Kids, nada de pedido de dinheiro, nem no rodapé.
+const kids = Astro.url.pathname.startsWith('/kids');
 ---
 
 <footer class="site-footer">
@@ -26,7 +30,8 @@ const { ligado: apoioLigado } = await apoio();
           <li><a href="/glossario">Glossário</a></li>
           <li><a href="/kids">Centelha Kids</a></li>
           <li><a href="/transparencia">Transparência</a></li>
-          <li>{apoioLigado ? <a href="/apoie">Apoie</a> : <span class="muted">Apoie (em breve)</span>}</li>
+          {!kids && <li>{apoioLigado ? <a href="/apoie">Apoie</a> : <span class="muted">Apoie (em breve)</span>}</li>}
+          {!kids && temCampanha && <li><a href="/campanhas">Campanhas</a></li>}
         </ul>
       </nav>
 

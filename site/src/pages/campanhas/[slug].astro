@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { resumir } from '../../lib/catalogo';
+import { campanhasPublicadas, dataCampanha, formatarCnpj, urlCampanha, type Campanha } from '../../lib/campanhas';
+import { paragrafos } from '../../lib/temas';
+import { reais } from '../../lib/transparencia';
+
+export async function getStaticPaths() {
+  return (await campanhasPublicadas()).map((c) => ({ params: { slug: c.slug }, props: { c } }));
+}
+
+interface Props {
+  c: Campanha;
+}
+const { c } = Astro.props;
+const i = c.instituicao;
+const url = new URL(urlCampanha(c.slug), Astro.site).href;
+const periodo = `de ${dataCampanha(c.inicio)} a ${dataCampanha(c.fim)}`;
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: c.titulo,
+    description: resumir(c.texto),
+    url,
+    startDate: c.inicio,
+    endDate: c.fim,
+    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+    location: { '@type': 'VirtualLocation', url },
+    organizer: { '@type': 'Organization', name: i.nome, ...(i.site ? { url: i.site } : {}) },
+    ...(c.imagem_url ? { image: c.imagem_url } : {}),
+  },
+];
+---
+
+<BaseLayout title={`${c.titulo} — campanha com ${i.nome}`} description={resumir(c.texto)} jsonLd={ld}>
+  <PageHeader eyebrow="Campanha" title={c.titulo} lede={periodo} />
+  <div class="container section">
+    <nav aria-label="Trilha" class="muted trilha"><a href="/campanhas">Campanhas</a></nav>
+    <article class="prose" data-inicio={c.inicio} data-fim={c.fim} id="campanha">
+      {c.imagem_url && <img src={c.imagem_url} alt="" class="capa" loading="lazy" />}
+      {paragrafos(c.texto).map((p) => <p>{p}</p>)}
+      {c.meta_centavos && <p><strong>Meta:</strong> {reais(c.meta_centavos)}</p>}
+
+      <div class="card instituicao">
+        <p>
+          A doação vai direto para <strong>{i.nome}</strong>, CNPJ {formatarCnpj(i.cnpj)}. O Centelha não recebe nem
+          repassa nada: só divulga a campanha.
+        </p>
+        <p class="muted">{i.descricao}</p>
+        {
+          i.site && (
+            <p>
+              <a href={i.site} rel="noopener noreferrer">
+                Site da instituição
+              </a>
+            </p>
+          )
+        }
+      </div>
+
+      <section id="doar" aria-labelledby="como-doar" hidden={c.situacao !== 'ativa'}>
+        <h2 id="como-doar">Como doar</h2>
+        {
+          i.chave_pix && (
+            <>
+              <p>Pix da instituição. Copie a chave e escolha o valor no app do seu banco.</p>
+              <p class="pix">
+                <code>{i.chave_pix}</code>
+                <button type="button" class="btn btn-ghost" id="copiar-pix" data-chave={i.chave_pix}>
+                  Copiar chave
+                </button>
+                <span id="pix-copiado" class="muted" role="status" />
+              </p>
+            </>
+          )
+        }
+        {
+          i.pagina_doacao && (
+            <p>
+              <a class="btn btn-primary" href={i.pagina_doacao} rel="noopener noreferrer">
+                Doar pela página da instituição
+              </a>
+            </p>
+          )
+        }
+      </section>
+
+      <p id="aviso-futura" class="card" hidden={c.situacao !== 'futura'}>
+        A campanha começa em {dataCampanha(c.inicio)}. Volte nessa data para doar.
+      </p>
+
+      <section id="encerrada" aria-labelledby="resultado" hidden={c.situacao !== 'encerrada'}>
+        <h2 id="resultado">Campanha encerrada</h2>
+        {
+          c.resultado ? (
+            <>
+              {c.arrecadado_centavos != null && (
+                <p>
+                  <strong>Arrecadado, segundo a instituição:</strong> {reais(c.arrecadado_centavos)}
+                </p>
+              )}
+              {paragrafos(c.resultado).map((p) => (
+                <p>{p}</p>
+              ))}
+            </>
+          ) : (
+            <p>O resultado será publicado aqui assim que a instituição prestar contas.</p>
+          )
+        }
+      </section>
+    </article>
+  </div>
+</BaseLayout>
+
+<script>
+  // O site é gerado no build; a situação muda com a data. Refaz a conta no navegador
+  // para não oferecer o Pix de uma campanha que já terminou.
+  const el = document.getElementById('campanha');
+  if (el) {
+    const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+    const situacao = hoje < el.dataset.inicio! ? 'futura' : hoje <= el.dataset.fim! ? 'ativa' : 'encerrada';
+    document.getElementById('doar')!.hidden = situacao !== 'ativa';
+    document.getElementById('aviso-futura')!.hidden = situacao !== 'futura';
+    document.getElementById('encerrada')!.hidden = situacao !== 'encerrada';
+  }
+  const botao = document.getElementById('copiar-pix');
+  const aviso = document.getElementById('pix-copiado');
+  botao?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(botao.dataset.chave ?? '');
+      if (aviso) aviso.textContent = 'Chave copiada.';
+    } catch {
+      if (aviso) aviso.textContent = 'Não deu para copiar; selecione a chave acima.';
+    }
+  });
+</script>
+
+<style>
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .capa {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+  .instituicao {
+    margin-block: 1.5rem;
+  }
+  .pix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .pix code {
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+</style>

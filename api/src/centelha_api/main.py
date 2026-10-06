@@ -11,6 +11,7 @@ from .routers import (
     admin_editorial,
     admin_pronuncia,
     apoio,
+    campanhas,
     catalogo,
     glossario,
     health,
@@ -52,6 +53,8 @@ def create_app() -> FastAPI:
     app.include_router(posts.admin)
     app.include_router(apoio.publico)
     app.include_router(apoio.admin)
+    app.include_router(campanhas.publico)
+    app.include_router(campanhas.admin)
     return app
 
 
