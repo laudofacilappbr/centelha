@@ -64,5 +64,11 @@
   "campanhaCnpj": "CNPJ {cnpj}",
   "campanhaDireto": "Le don va directement à l’institution, par sa clé Pix. Centelha ne reçoit ni ne voit rien.",
   "campanhaDoarSite": "Donner sur le site de l’institution",
-  "campanhaSiteInstituicao": "Découvrir l’institution"
+  "campanhaSiteInstituicao": "Découvrir l’institution",
+  "compartilharTrecho": "Partager l’extrait",
+  "copiarTrecho": "Copier l’extrait",
+  "trechoCopiado": "Extrait copié.",
+  "segurarParaCompartilhar": "partager ou copier",
+  "citacaoQuestao": "{obra}, question {numero}",
+  "citacaoTradutor": "Traduction de {tradutor}."
 }

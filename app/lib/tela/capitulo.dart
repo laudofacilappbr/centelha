@@ -8,6 +8,7 @@ import '../player/controle_player.dart';
 import '../player/reprodutor.dart';
 import '../tema/centelha_tema.dart';
 import 'comum.dart';
+import 'compartilhar.dart';
 
 /// Texto do capítulo por segmento. Com [questao], rola até ela e a destaca.
 class TelaCapitulo extends StatelessWidget {
@@ -19,6 +20,7 @@ class TelaCapitulo extends StatelessWidget {
     required this.autor,
     this.questao,
     this.subquestao,
+    this.citacao,
   });
 
   final CatalogoApi api;
@@ -29,6 +31,10 @@ class TelaCapitulo extends StatelessWidget {
   final String autor;
   final int? questao;
   final String? subquestao;
+
+  /// Sem citação (edição juvenil ou infantil, ou origem desconhecida), não há
+  /// compartilhar.
+  final Citacao? citacao;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +50,14 @@ class TelaCapitulo extends StatelessWidget {
                 questao: questao,
                 subquestao: subquestao,
                 capitulo: capitulo,
+                compartilhar: citacao == null
+                    ? null
+                    : (contexto, trecho) => oferecerCompartilhar(
+                        contexto,
+                        citacao: citacao!,
+                        capitulo: resumo,
+                        trecho: trecho,
+                      ),
               ),
             ),
             if (capitulo.faixa != null)
@@ -71,12 +85,17 @@ class TextoCapitulo extends StatefulWidget {
     this.questao,
     this.subquestao,
     this.capitulo,
+    this.compartilhar,
   });
 
   final List<Segmento> segmentos;
   final int? questao;
   final String? subquestao;
   final Capitulo? capitulo;
+
+  /// Toque longo num trecho; null desliga.
+  final void Function(BuildContext contexto, List<Segmento> trecho)?
+  compartilhar;
 
   @override
   State<TextoCapitulo> createState() => _TextoCapituloState();
@@ -223,6 +242,14 @@ class _TextoCapituloState extends State<TextoCapitulo> {
                     destacado: _daBusca(s),
                     lendo: s.id == _lendo,
                     ouvirDaqui: _ouvirDaqui(s),
+                    compartilhar:
+                        widget.compartilhar == null ||
+                            s.tipo == TipoSegmento.titulo
+                        ? null
+                        : (contexto) => widget.compartilhar!(
+                            contexto,
+                            trechoDe(s, widget.segmentos),
+                          ),
                   ),
               ],
             ),
@@ -253,6 +280,7 @@ class _Segmento extends StatelessWidget {
     required this.destacado,
     this.lendo = false,
     this.ouvirDaqui,
+    this.compartilhar,
   });
 
   final Segmento segmento;
@@ -263,6 +291,7 @@ class _Segmento extends StatelessWidget {
   /// Trecho que a narração está lendo agora.
   final bool lendo;
   final VoidCallback? ouvirDaqui;
+  final void Function(BuildContext contexto)? compartilhar;
 
   @override
   Widget build(BuildContext context) {
@@ -338,9 +367,20 @@ class _Segmento extends StatelessWidget {
       selected: lendo,
       hint: lendo ? t.lendoAgora : null,
       onTapHint: ouvirDaqui == null ? null : t.ouvirDaqui,
-      child: ouvirDaqui == null
+      onLongPressHint: compartilhar == null ? null : t.segurarParaCompartilhar,
+      child: ouvirDaqui == null && compartilhar == null
           ? caixa
-          : InkWell(onTap: ouvirDaqui, borderRadius: raio, child: caixa),
+          : Builder(
+              // Contexto do próprio trecho: a folha do iPad sai dele.
+              builder: (contexto) => InkWell(
+                onTap: ouvirDaqui,
+                onLongPress: compartilhar == null
+                    ? null
+                    : () => compartilhar!(contexto),
+                borderRadius: raio,
+                child: caixa,
+              ),
+            ),
     );
   }
 }
