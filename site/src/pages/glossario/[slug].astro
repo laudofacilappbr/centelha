@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import { resumir } from '../../lib/catalogo';
+import { termosPublicados, urlTermo, type Termo } from '../../lib/glossario';
+import { paragrafos, urlItem } from '../../lib/temas';
+
+export async function getStaticPaths() {
+  return (await termosPublicados()).map((t) => ({ params: { slug: t.slug }, props: { t } }));
+}
+
+interface Props {
+  t: Termo;
+}
+const { t } = Astro.props;
+const url = new URL(urlTermo(t.slug), Astro.site).href;
+const conjunto = new URL('/glossario', Astro.site).href;
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: t.termo,
+    description: resumir(t.definicao),
+    url,
+    inLanguage: t.idioma,
+    inDefinedTermSet: { '@type': 'DefinedTermSet', '@id': conjunto, name: 'Glossário espírita' },
+    subjectOf: t.itens.map((i) => ({ '@type': 'CreativeWork', name: i.titulo, url: new URL(urlItem(i), Astro.site).href })),
+  },
+];
+---
+
+<BaseLayout title={`${t.termo}: o que é, segundo o espiritismo`} description={resumir(t.definicao)} jsonLd={ld}>
+  <PageHeader eyebrow="Glossário" title={t.termo} />
+  <div class="container section">
+    <nav aria-label="Trilha" class="muted trilha"><a href="/glossario">Glossário</a></nav>
+    <article class="prose">
+      {paragrafos(t.definicao).map((p) => <p>{p}</p>)}
+
+      <h2>Onde Kardec trata do termo</h2>
+      <ul>
+        {
+          t.itens.map((i) => (
+            <li>
+              <a href={urlItem(i)}>
+                {i.tipo === 'questao' ? (
+                  <>
+                    <strong>{i.referencia}</strong> — {i.titulo}
+                  </>
+                ) : (
+                  i.titulo
+                )}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+    <aside class="card cta">
+      <h2>Ouça as obras completas</h2>
+      <p>No app Centelha, grátis, com o texto acompanhando a narração.</p>
+      <StoreButtons />
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+</style>

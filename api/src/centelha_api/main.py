@@ -12,6 +12,7 @@ from .routers import (
     admin_pronuncia,
     apoio,
     catalogo,
+    glossario,
     health,
     posts,
     temas,
@@ -45,6 +46,8 @@ def create_app() -> FastAPI:
     app.include_router(transparencia.admin)
     app.include_router(temas.publico)
     app.include_router(temas.admin)
+    app.include_router(glossario.publico)
+    app.include_router(glossario.admin)
     app.include_router(posts.publico)
     app.include_router(posts.admin)
     app.include_router(apoio.publico)

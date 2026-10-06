@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { resumir } from '../../lib/catalogo';
+import { letra, termosPublicados, urlTermo } from '../../lib/glossario';
+
+const termos = await termosPublicados();
+// A API já devolve em ordem alfabética; aqui só agrupa pela letra.
+const grupos = new Map<string, typeof termos>();
+for (const t of termos) {
+  const l = letra(t.termo);
+  grupos.set(l, [...(grupos.get(l) ?? []), t]);
+}
+const url = new URL('/glossario', Astro.site).href;
+const ld = termos.length
+  ? [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'DefinedTermSet',
+        '@id': url,
+        name: 'Glossário espírita',
+        url,
+        inLanguage: 'pt-BR',
+        hasDefinedTerm: termos.map((t) => ({
+          '@type': 'DefinedTerm',
+          name: t.termo,
+          url: new URL(urlTermo(t.slug), Astro.site).href,
+        })),
+      },
+    ]
+  : [];
+---
+
+<BaseLayout
+  title="Glossário espírita: termos da doutrina"
+  description="O que é perispírito, fluido universal, reencarnação e outros termos da doutrina espírita, com as questões de Allan Kardec que tratam de cada um."
+  jsonLd={ld}
+>
+  <PageHeader
+    eyebrow="Glossário"
+    title="Termos da doutrina espírita"
+    lede="Uma definição curta para cada termo e, logo abaixo, onde Kardec trata dele nas obras."
+  />
+  <div class="container section">
+    {
+      termos.length ? (
+        <>
+          <nav aria-label="Letras" class="letras">
+            {[...grupos.keys()].map((l) => (
+              <a href={`#letra-${l}`}>{l}</a>
+            ))}
+          </nav>
+          {[...grupos].map(([l, ts]) => (
+            <section aria-labelledby={`letra-${l}`}>
+              <h2 id={`letra-${l}`}>{l}</h2>
+              <dl class="verbetes">
+                {ts.map((t) => (
+                  <>
+                    <dt>
+                      <a href={urlTermo(t.slug)}>{t.termo}</a>
+                    </dt>
+                    <dd class="muted">{resumir(t.definicao)}</dd>
+                  </>
+                ))}
+              </dl>
+            </section>
+          ))}
+        </>
+      ) : (
+        <p>Os primeiros termos serão publicados junto com as obras.</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .letras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin-bottom: var(--space-6);
+    font-weight: 600;
+  }
+  .verbetes dt {
+    font-weight: 600;
+    margin-top: var(--space-4);
+  }
+  .verbetes dd {
+    margin: 0.25rem 0 0;
+  }
+</style>
