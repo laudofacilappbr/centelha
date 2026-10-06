@@ -3,8 +3,15 @@
 # Uso: cp .env.example .env && docker compose -f docker-compose.prod.yml up -d
 name: centelha
 
+# Logs em JSON no stdout de cada container; o Docker guarda com rotação para não
+# encher o disco da VPS. Ler: docker compose logs -f api worker
+x-logs: &logs
+  driver: json-file
+  options: { max-size: "20m", max-file: "5" }
+
 services:
   caddy:
+    logging: *logs
     image: caddy:2-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443"]
@@ -19,26 +26,33 @@ services:
     networks: [borda]
 
   site:
+    logging: *logs
     image: ghcr.io/laudofacilappbr/centelha-site:${TAG:-latest}
     restart: unless-stopped
     networks: [borda]
 
   api:
+    logging: *logs
     image: ghcr.io/laudofacilappbr/centelha-api:${TAG:-latest}
     restart: unless-stopped
     environment:
       CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:${POSTGRES_PASSWORD}@postgres:5432/centelha
       CENTELHA_CORS_ORIGINS: '["https://${DOMINIO}","https://www.${DOMINIO}"]'
+      CENTELHA_AMBIENTE: producao
+      CENTELHA_SENTRY_DSN: ${CENTELHA_SENTRY_DSN:-}
     depends_on:
       postgres: { condition: service_healthy }
     networks: [borda, interna]
 
   worker:
+    logging: *logs
     image: ghcr.io/laudofacilappbr/centelha-worker:${TAG:-latest}
     restart: unless-stopped
     environment:
       CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:${POSTGRES_PASSWORD}@postgres:5432/centelha
       CENTELHA_AUDIO_URL_BASE: https://audio.${DOMINIO}
+      CENTELHA_AMBIENTE: producao
+      CENTELHA_SENTRY_DSN: ${CENTELHA_SENTRY_DSN:-}
       # Credenciais do motor de TTS escolhido (#1); vazias até a decisão.
       CENTELHA_AZURE_TTS_KEY: ${CENTELHA_AZURE_TTS_KEY:-}
       CENTELHA_AZURE_TTS_REGION: ${CENTELHA_AZURE_TTS_REGION:-}
@@ -51,6 +65,7 @@ services:
     networks: [interna, saida]
 
   postgres:
+    logging: *logs
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
@@ -65,6 +80,7 @@ services:
     networks: [interna]
 
   redis:
+    logging: *logs
     image: redis:7-alpine
     restart: unless-stopped
     networks: [interna]

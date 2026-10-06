@@ -11,6 +11,7 @@ import time
 
 from ..config import get_settings
 from ..db import SessionLocal
+from ..observabilidade import configurar_logs, contexto
 from .armazenamento import armazenamento_padrao
 from .jobs import executar, falhar, pegar
 
@@ -32,19 +33,21 @@ def processar_um(session_factory=SessionLocal, armazenamento=None, motor=None) -
         job = pegar(session)
         if job is None:
             return False
-        log.info("job %s: capítulo %s, tentativa %s", job.id, job.capitulo_id, job.tentativas)
-        try:
-            faixa = executar(session, job, armazenamento or armazenamento_padrao(), motor)
-        except Exception as e:  # noqa: BLE001 — qualquer erro vira falha registrada do job
-            log.exception("job %s falhou", job.id)
-            falhar(session, job, f"{type(e).__name__}: {e}")
-        else:
-            log.info("job %s: faixa %s v%s", job.id, faixa.id, faixa.versao)
+        # job_id e capitulo_id em toda linha: os mesmos ids que o admin mostra.
+        with contexto(job_id=job.id, capitulo_id=job.capitulo_id):
+            log.info("job iniciado, tentativa %s", job.tentativas)
+            try:
+                faixa = executar(session, job, armazenamento or armazenamento_padrao(), motor)
+            except Exception as e:  # noqa: BLE001 — qualquer erro vira falha registrada do job
+                log.exception("job falhou")
+                falhar(session, job, f"{type(e).__name__}: {e}")
+            else:
+                log.info("faixa %s v%s gravada", faixa.id, faixa.versao)
         return True
 
 
 def main() -> int:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    configurar_logs("worker")
     parada = _Parada()
     signal.signal(signal.SIGTERM, parada)
     signal.signal(signal.SIGINT, parada)

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
+from .observabilidade import MiddlewareRequisicao, configurar_logs
 from .routers import (
     admin,
     admin_audio,
@@ -15,13 +16,17 @@ from .routers import (
 
 
 def create_app() -> FastAPI:
+    configurar_logs("api")
     app = FastAPI(title="Centelha API", version="0.1.0")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=get_settings().cors_origins,
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
+        expose_headers=["X-Request-ID"],
     )
+    # Por último = mais externo: o request_id vale também para o CORS e os erros.
+    app.add_middleware(MiddlewareRequisicao)
     app.include_router(health.router)
     app.include_router(waitlist.router)
     app.include_router(catalogo.router)
