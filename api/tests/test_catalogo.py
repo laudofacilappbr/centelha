@@ -4,12 +4,14 @@ import pytest
 
 from centelha_api.models import (
     Capitulo,
+    Direitos,
     Edicao,
     EstadoCapitulo,
     FaixaAudio,
     Obra,
     PapelVoz,
     Segmento,
+    StatusDireitos,
     TipoSegmento,
     Voz,
 )
@@ -33,6 +35,7 @@ def catalogo(session):
         tradutor="Guillon Ribeiro",
         fonte="edição-fonte",
         publicada_em=datetime(2026, 10, 5, tzinfo=UTC),
+        direitos=Direitos(status=StatusDireitos.APROVADO),
     )
     rascunho = Edicao(obra=obra, idioma="fr", titulo="Le Livre des Esprits", fonte="original")
     c1 = Capitulo(
@@ -134,3 +137,25 @@ def test_questao_em_capitulo_nao_publicado_e_404(client, catalogo):
 
 def test_config_remota_mvp_tudo_desligado(client):
     assert client.get("/v1/config").json() == {"apoio": False, "caridade": False, "anuncios": False}
+
+
+@pytest.mark.parametrize("status", [StatusDireitos.PENDENTE, StatusDireitos.RECUSADO])
+def test_direitos_revogados_tiram_a_edicao_do_ar(client, session, catalogo, status):
+    """Nada é publicado sem direitos aprovados, nem depois de publicado: se os direitos
+    mudam, obra, edição, capítulo e questão somem do catálogo na mesma hora."""
+    edicao, c1 = catalogo["publicada"], catalogo["c1"]
+    assert client.get(f"/v1/capitulos/{c1.id}").status_code == 200
+    edicao.direitos.status = status
+    session.commit()
+    assert client.get("/v1/obras").json() == []
+    assert client.get(f"/v1/edicoes/{edicao.id}").status_code == 404
+    assert client.get(f"/v1/capitulos/{c1.id}").status_code == 404
+    assert client.get(f"/v1/edicoes/{edicao.id}/questoes/88").status_code == 404
+
+
+def test_publicada_sem_registro_de_direitos_nao_aparece(client, session, catalogo):
+    """publicada_em gravado por fora de publicar_edicao (script, SQL manual) não basta."""
+    edicao = catalogo["publicada"]
+    session.delete(edicao.direitos)
+    session.commit()
+    assert client.get(f"/v1/edicoes/{edicao.id}").status_code == 404
