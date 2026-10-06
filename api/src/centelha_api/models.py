@@ -487,3 +487,40 @@ class ConfigApoio(Timestamps, Base):
     chave_pix: Mapped[str | None] = mapped_column(String(77))
     link_externo: Mapped[str | None] = mapped_column(Text)
     atualizado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+
+
+class Termo(Timestamps, Base):
+    """Verbete do glossário do site (#42): "o que é perispírito".
+
+    Definição curta da equipe, sempre fundamentada em trechos publicados de Kardec:
+    o glossário não ensina doutrina por conta própria, aponta onde Kardec ensina.
+    """
+
+    __tablename__ = "termo"
+    __table_args__ = (UniqueConstraint("idioma", "termo"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # URL permanente: /glossario/<slug>. Não muda depois de publicado.
+    slug: Mapped[str] = mapped_column(String(80), unique=True)
+    termo: Mapped[str] = mapped_column(String(80))
+    definicao: Mapped[str] = mapped_column(Text)
+    idioma: Mapped[str] = mapped_column(String(35), default="pt-BR")
+    publicado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    referencias: Mapped[list["TermoReferencia"]] = relationship(
+        back_populates="termo", order_by="TermoReferencia.ordem", cascade="all, delete-orphan"
+    )
+
+
+class TermoReferencia(Base):
+    """Trecho que fundamenta a definição, como nos temas: referência canônica ("LE-88")."""
+
+    __tablename__ = "termo_referencia"
+    __table_args__ = (UniqueConstraint("termo_id", "referencia"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    termo_id: Mapped[int] = mapped_column(ForeignKey("termo.id", ondelete="CASCADE"), index=True)
+    referencia: Mapped[str] = mapped_column(String(40), index=True)
+    ordem: Mapped[int]
+
+    termo: Mapped[Termo] = relationship(back_populates="referencias")
