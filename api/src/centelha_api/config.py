@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     # considerado abandonado (worker que morreu) e voltar à fila.
     worker_intervalo_segundos: float = 5.0
     worker_lease_minutos: int = 30
+    # Logs: "json" em produção (uma linha por evento), "texto" para ler no terminal.
+    log_formato: str = "json"
+    log_nivel: str = "info"
+    ambiente: str = "desenvolvimento"
+    # Vazio = Sentry desligado. Ligar é decisão do dono (terceiro recebendo dados).
+    sentry_dsn: str = ""
 
 
 @lru_cache
