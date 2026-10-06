@@ -125,6 +125,15 @@ class CatalogoApi {
   Future<Apoio> apoio() async =>
       Apoio.deJson(await _get('/v1/apoio') as Map<String, dynamic>);
 
+  /// A campanha de caridade em andamento, pela data do servidor; null sem nenhuma.
+  Future<Campanha?> campanhaAtiva() async {
+    for (final j in await _get('/v1/campanhas') as List) {
+      final c = Campanha.deJson(j as Map<String, dynamic>);
+      if (c.ativa) return c;
+    }
+    return null;
+  }
+
   Future<Object?> _get(String caminho) async {
     final http.Response r;
     try {
@@ -381,10 +390,7 @@ class Apoio {
       for (final v in j['valores_centavos'] as List? ?? []) v as int,
     ],
     chavePix: j['chave_pix'] as String?,
-    // Só https: o app não abre outro esquema vindo da rede.
-    linkExterno: (j['link_externo'] as String?)?.startsWith('https://') == true
-        ? j['link_externo'] as String
-        : null,
+    linkExterno: _https(j['link_externo']),
   );
 
   final bool ligado;
@@ -393,4 +399,62 @@ class Apoio {
   final List<int> valoresCentavos;
   final String? chavePix;
   final String? linkExterno;
+}
+
+/// Só https: o app não abre outro esquema vindo da rede.
+String? _https(Object? link) =>
+    link is String && link.startsWith('https://') ? link : null;
+
+/// GET /v1/campanhas (#41). A doação vai pelo Pix da instituição; o projeto não
+/// recebe nada.
+class Campanha {
+  const Campanha({
+    required this.slug,
+    required this.titulo,
+    required this.texto,
+    required this.situacao,
+    required this.fim,
+    required this.instituicao,
+    required this.cnpj,
+    required this.descricaoInstituicao,
+    this.chavePix,
+    this.paginaDoacao,
+    this.siteInstituicao,
+    this.metaCentavos,
+  });
+
+  factory Campanha.deJson(Map<String, dynamic> j) {
+    final i = j['instituicao'] as Map<String, dynamic>;
+    return Campanha(
+      slug: j['slug'] as String,
+      titulo: j['titulo'] as String,
+      texto: j['texto'] as String,
+      situacao: j['situacao'] as String,
+      fim: DateTime.parse(j['fim'] as String),
+      instituicao: i['nome'] as String,
+      cnpj: i['cnpj'] as String,
+      descricaoInstituicao: i['descricao'] as String,
+      chavePix: i['chave_pix'] as String?,
+      paginaDoacao: _https(i['pagina_doacao']),
+      siteInstituicao: _https(i['site']),
+      metaCentavos: j['meta_centavos'] as int?,
+    );
+  }
+
+  final String slug;
+  final String titulo;
+  final String texto;
+
+  /// "futura", "ativa" ou "encerrada", pela data do servidor.
+  final String situacao;
+  final DateTime fim;
+  final String instituicao;
+  final String cnpj;
+  final String descricaoInstituicao;
+  final String? chavePix;
+  final String? paginaDoacao;
+  final String? siteInstituicao;
+  final int? metaCentavos;
+
+  bool get ativa => situacao == 'ativa';
 }

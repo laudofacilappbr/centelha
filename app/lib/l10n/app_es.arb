@@ -56,5 +56,13 @@
   "apoioCopiarPix": "Copiar clave Pix",
   "apoioPixCopiada": "Clave Pix copiada.",
   "apoioAbrirLink": "Apoyar en el sitio",
-  "apoioLinkFalhou": "No se pudo abrir el enlace."
+  "apoioLinkFalhou": "No se pudo abrir el enlace.",
+  "campanhaRotulo": "Campaña solidaria",
+  "campanhaPara": "Para {instituicao} · hasta el {data}",
+  "campanhaFechar": "Cerrar campaña",
+  "campanhaMeta": "Meta: {valor}",
+  "campanhaCnpj": "CNPJ {cnpj}",
+  "campanhaDireto": "La donación va directamente a la institución, por su clave Pix. Centelha no recibe ni ve nada.",
+  "campanhaDoarSite": "Donar en el sitio de la institución",
+  "campanhaSiteInstituicao": "Conocer la institución"
 }

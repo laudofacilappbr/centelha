@@ -119,5 +119,37 @@
   "apoioCopiarPix": "Copiar chave Pix",
   "apoioPixCopiada": "Chave Pix copiada.",
   "apoioAbrirLink": "Apoiar pelo site",
-  "apoioLinkFalhou": "Não foi possível abrir o link."
+  "apoioLinkFalhou": "Não foi possível abrir o link.",
+  "campanhaRotulo": "Campanha de caridade",
+  "campanhaPara": "Para {instituicao} · até {data}",
+  "@campanhaPara": {
+    "placeholders": {
+      "instituicao": {
+        "type": "String"
+      },
+      "data": {
+        "type": "String"
+      }
+    }
+  },
+  "campanhaFechar": "Fechar campanha",
+  "campanhaMeta": "Meta: {valor}",
+  "@campanhaMeta": {
+    "placeholders": {
+      "valor": {
+        "type": "String"
+      }
+    }
+  },
+  "campanhaCnpj": "CNPJ {cnpj}",
+  "@campanhaCnpj": {
+    "placeholders": {
+      "cnpj": {
+        "type": "String"
+      }
+    }
+  },
+  "campanhaDireto": "A doação vai direto para a instituição, pela chave Pix dela. O Centelha não recebe nem vê nada.",
+  "campanhaDoarSite": "Doar pelo site da instituição",
+  "campanhaSiteInstituicao": "Conhecer a instituição"
 }

@@ -56,5 +56,13 @@
   "apoioCopiarPix": "Copy Pix key",
   "apoioPixCopiada": "Pix key copied.",
   "apoioAbrirLink": "Support on the website",
-  "apoioLinkFalhou": "Couldn't open the link."
+  "apoioLinkFalhou": "Couldn't open the link.",
+  "campanhaRotulo": "Charity campaign",
+  "campanhaPara": "For {instituicao} · until {data}",
+  "campanhaFechar": "Close campaign",
+  "campanhaMeta": "Goal: {valor}",
+  "campanhaCnpj": "CNPJ {cnpj}",
+  "campanhaDireto": "Donations go straight to the institution, through its own Pix key. Centelha receives and sees nothing.",
+  "campanhaDoarSite": "Donate on the institution's website",
+  "campanhaSiteInstituicao": "About the institution"
 }

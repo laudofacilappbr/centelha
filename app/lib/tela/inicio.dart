@@ -6,6 +6,8 @@ import '../l10n/app_localizations.dart';
 import '../tema/centelha_tema.dart';
 import '../player/controle_player.dart';
 import '../player/progresso.dart';
+import 'apoio.dart';
+import 'campanha.dart';
 import 'capitulo.dart';
 import 'comum.dart';
 import 'configuracoes.dart';
@@ -13,10 +15,16 @@ import 'obra.dart';
 
 /// Início: as obras publicadas.
 class TelaInicio extends StatefulWidget {
-  const TelaInicio({super.key, required this.api, required this.idioma});
+  const TelaInicio({
+    super.key,
+    required this.api,
+    required this.idioma,
+    this.abrirLink = abrirNoNavegador,
+  });
 
   final CatalogoApi api;
   final PreferenciaIdioma idioma;
+  final AbrirLink abrirLink;
 
   @override
   State<TelaInicio> createState() => _TelaInicioState();
@@ -24,11 +32,20 @@ class TelaInicio extends StatefulWidget {
 
 class _TelaInicioState extends State<TelaInicio> {
   late Future<List<Obra>> _obras = widget.api.obras();
+  late Future<Campanha?> _campanha = campanhaParaMostrar(widget.api);
 
   void _recarregar() {
     setState(() {
       _obras = widget.api.obras();
+      _campanha = campanhaParaMostrar(widget.api);
     });
+  }
+
+  void _fecharCampanha(Campanha campanha) {
+    setState(() {
+      _campanha = Future.value();
+    });
+    fecharCampanha(campanha);
   }
 
   @override
@@ -81,6 +98,17 @@ class _TelaInicioState extends State<TelaInicio> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                FutureBuilder<Campanha?>(
+                  future: _campanha,
+                  builder: (context, snap) => switch (snap.data) {
+                    final c? => CartaoCampanha(
+                      campanha: c,
+                      aoFechar: () => _fecharCampanha(c),
+                      abrirLink: widget.abrirLink,
+                    ),
+                    null => const SizedBox.shrink(),
+                  },
+                ),
                 if (EscopoPlayer.of(context).armazem.ultimo() case final u?)
                   _ContinuarOuvindo(api: widget.api, ultimo: u),
                 for (final obra in obras)
