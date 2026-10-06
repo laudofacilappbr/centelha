@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
 from ..db import get_session
-from ..dominio import contas
+from ..dominio import contas, pix
 from ..dominio.permissoes import Permissao
 from ..models import ConfigApoio, Usuario
 from ..ratelimit import ip_do_cliente
@@ -23,28 +23,6 @@ from .catalogo import _cache
 publico = APIRouter(prefix="/v1", tags=["site"])
 admin = APIRouter(prefix="/v1/admin/apoio", tags=["admin"])
 pode_gerir = exigir(Permissao.GERIR_APOIO)
-
-# Formatos de chave Pix do Banco Central, já sem espaços.
-_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-_TELEFONE = re.compile(r"^\+55\d{10,11}$")
-_ALEATORIA = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
-_CNPJ = re.compile(r"^\d{14}$")
-
-
-def _chave_pix(valor: str) -> str:
-    chave = re.sub(r"\s", "", valor)
-    so_digitos = re.sub(r"[.\-/]", "", chave)
-    if re.fullmatch(r"\d{11}", so_digitos):
-        # CPF na página pública expõe o documento de quem recebe (hoje pessoa física,
-        # #4). Chave aleatória, e-mail ou telefone recebem o mesmo Pix sem isso.
-        raise ValueError("chave CPF não é aceita: use chave aleatória, e-mail ou telefone")
-    if _CNPJ.fullmatch(so_digitos):
-        return so_digitos
-    if _ALEATORIA.fullmatch(chave.lower()):
-        return chave.lower()
-    if _TELEFONE.fullmatch(chave) or (len(chave) <= 77 and _EMAIL.fullmatch(chave)):
-        return chave
-    raise ValueError("chave Pix inválida: use chave aleatória, e-mail, telefone (+55…) ou CNPJ")
 
 
 class Apoio(BaseModel):
@@ -67,7 +45,7 @@ class Apoio(BaseModel):
     @field_validator("chave_pix")
     @classmethod
     def _pix(cls, v: str | None) -> str | None:
-        return None if v is None or not v.strip() else _chave_pix(v)
+        return None if v is None or not v.strip() else pix.chave_pix(v)
 
     @field_validator("link_externo")
     @classmethod

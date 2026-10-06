@@ -27,6 +27,8 @@ class Permissao(enum.StrEnum):
     EDITAR_CONTEUDO = "editar_conteudo"
     # Liga o apoio e diz para onde vai o dinheiro (#40). Só administrador.
     GERIR_APOIO = "gerir_apoio"
+    # Instituições parceiras e campanhas de caridade (#41). Só administrador.
+    GERIR_CAMPANHAS = "gerir_campanhas"
 
 
 # Tabela "Papéis" da especificação. Lista explícita, sem herança entre papéis: um

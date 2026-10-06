@@ -9,11 +9,12 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_session
 from ..models import (
+    Campanha,
     Capitulo,
     ConfigApoio,
     Direitos,
@@ -228,9 +229,18 @@ class ConfigRemota(BaseModel):
 
 @router.get("/config", response_model=ConfigRemota)
 def config_remota(response: Response, session: Session = Depends(get_session)):
-    """Configuração lida pelo app ao abrir. Apoio segue o admin (#40); caridade e
-    anúncios continuam desligados. O perfil infantil ignora estas opções no próprio
-    app, sempre."""
+    """Configuração lida pelo app ao abrir. Apoio segue o admin (#40), caridade segue
+    as campanhas (#41) e anúncios continuam desligados. O perfil infantil ignora
+    estas opções no próprio app, sempre."""
     _cache(response)
     apoio = session.get(ConfigApoio, 1)
-    return ConfigRemota(apoio=bool(apoio and apoio.ligado), caridade=False, anuncios=False)
+    hoje = func.current_date()
+    # Cartão de caridade só durante uma campanha publicada (#41), pela data do banco.
+    caridade = session.scalar(
+        select(Campanha.id).where(
+            Campanha.publicado_em.is_not(None), Campanha.inicio <= hoje, Campanha.fim >= hoje
+        )
+    )
+    return ConfigRemota(
+        apoio=bool(apoio and apoio.ligado), caridade=caridade is not None, anuncios=False
+    )

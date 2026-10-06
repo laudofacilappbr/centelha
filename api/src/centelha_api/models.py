@@ -487,3 +487,53 @@ class ConfigApoio(Timestamps, Base):
     chave_pix: Mapped[str | None] = mapped_column(String(77))
     link_externo: Mapped[str | None] = mapped_column(Text)
     atualizado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+
+
+class Instituicao(Timestamps, Base):
+    """Instituição parceira das campanhas de caridade (#41).
+
+    O Pix é dela: o dinheiro cai na conta da instituição e o projeto não toca nele.
+    Por isso a página mostra nome e CNPJ, para quem doa conferir a quem está doando.
+    """
+
+    __tablename__ = "instituicao"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(200))
+    # Só dígitos, com dígito verificador conferido na entrada.
+    cnpj: Mapped[str] = mapped_column(String(14), unique=True)
+    descricao: Mapped[str] = mapped_column(Text)
+    chave_pix: Mapped[str | None] = mapped_column(String(77))
+    # Página de doação da própria instituição: no iOS o app abre esta página em vez de
+    # mostrar o Pix (regra da Apple para quem não é entidade aprovada por ela).
+    pagina_doacao: Mapped[str | None] = mapped_column(Text)
+    site: Mapped[str | None] = mapped_column(Text)
+
+
+class Campanha(Timestamps, Base):
+    """Campanha com início e fim, ligada a uma instituição (#41).
+
+    Uma ativa por vez: duas campanhas ao mesmo tempo dividem a atenção e viram pedido
+    permanente, que é o que o calendário existe para evitar.
+    """
+
+    __tablename__ = "campanha"
+    __table_args__ = (CheckConstraint("fim >= inicio", name="fim_depois_do_inicio"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # URL permanente: /campanhas/<slug>. Não muda depois de publicada.
+    slug: Mapped[str] = mapped_column(String(80), unique=True)
+    titulo: Mapped[str] = mapped_column(String(200))
+    texto: Mapped[str] = mapped_column(Text)
+    instituicao_id: Mapped[int] = mapped_column(ForeignKey("instituicao.id"))
+    inicio: Mapped[date] = mapped_column(Date)
+    fim: Mapped[date] = mapped_column(Date)
+    meta_centavos: Mapped[int | None] = mapped_column(BigInteger)
+    imagem_url: Mapped[str | None] = mapped_column(Text)
+    publicado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Resultado informado pela instituição depois do fim. O projeto não vê o Pix, então
+    # não há "progresso ao vivo": só o número que a instituição prestou contas.
+    arrecadado_centavos: Mapped[int | None] = mapped_column(BigInteger)
+    resultado: Mapped[str | None] = mapped_column(Text)
+
+    instituicao: Mapped[Instituicao] = relationship()
