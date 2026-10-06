@@ -249,6 +249,96 @@ void main() {
       },
     );
 
+    group('leitura acompanhada (#32)', () {
+      Color? fundo(WidgetTester tester, String texto) {
+        final caixa = tester.widget<AnimatedContainer>(
+          find
+              .ancestor(
+                of: find.text(texto),
+                matching: find.byType(AnimatedContainer),
+              )
+              .first,
+        );
+        return (caixa.decoration as BoxDecoration?)?.color;
+      }
+
+      bool naTela(WidgetTester tester, String texto) {
+        final r = tester.getRect(find.text(texto));
+        final tela = tester.view.physicalSize / tester.view.devicePixelRatio;
+        return r.top >= 0 && r.bottom <= tela.height;
+      }
+
+      testWidgets('destaca o trecho lido e rola até ele enquanto toca', (
+        tester,
+      ) async {
+        final motor = await abrirCapitulo(tester);
+        await tester.tap(find.byTooltip('Tocar'));
+        await tester.pump();
+        // A pergunta 60 começa em 60 × 20 s.
+        motor.avancarTempo(const Duration(seconds: 1205));
+        await tester.pumpAndSettle();
+
+        expect(naTela(tester, 'Pergunta de exemplo 60?'), isTrue);
+        expect(
+          fundo(tester, 'Pergunta de exemplo 60?'),
+          isNot(Colors.transparent),
+        );
+        expect(fundo(tester, '“Resposta de exemplo 60.”'), Colors.transparent);
+
+        // 10 s depois, a leitura passa para a resposta.
+        motor.avancarTempo(const Duration(seconds: 1211));
+        await tester.pumpAndSettle();
+        expect(fundo(tester, 'Pergunta de exemplo 60?'), Colors.transparent);
+        expect(
+          fundo(tester, '“Resposta de exemplo 60.”'),
+          isNot(Colors.transparent),
+        );
+      });
+
+      testWidgets(
+        'rolar com o dedo para de acompanhar; o botão volta à leitura',
+        (tester) async {
+          final motor = await abrirCapitulo(tester);
+          await tester.tap(find.byTooltip('Tocar'));
+          await tester.pump();
+          motor.avancarTempo(const Duration(seconds: 1205));
+          await tester.pumpAndSettle();
+          expect(find.text('Acompanhar a leitura'), findsNothing);
+
+          await tester.drag(
+            find.text('Pergunta de exemplo 60?'),
+            const Offset(0, 2000),
+          );
+          await tester.pumpAndSettle();
+          expect(naTela(tester, 'Pergunta de exemplo 60?'), isFalse);
+          expect(find.text('Acompanhar a leitura'), findsOneWidget);
+
+          // A leitura segue, mas a tela fica onde a pessoa deixou.
+          motor.avancarTempo(const Duration(seconds: 1225));
+          await tester.pumpAndSettle();
+          expect(naTela(tester, 'Pergunta de exemplo 61?'), isFalse);
+
+          await tester.tap(find.text('Acompanhar a leitura'));
+          await tester.pumpAndSettle();
+          expect(naTela(tester, 'Pergunta de exemplo 61?'), isTrue);
+          expect(find.text('Acompanhar a leitura'), findsNothing);
+        },
+      );
+
+      testWidgets('tocar num trecho leva o áudio até ele', (tester) async {
+        final motor = await abrirCapitulo(tester);
+        await tester.tap(find.text('Pergunta de exemplo 3?'));
+        await tester.pump();
+        expect(motor.chamadas.last, 'irPara 60s');
+
+        // Segmento sem marcação (o título) não reage ao toque.
+        final antes = motor.chamadas.length;
+        await tester.tap(find.text('De Deus').last);
+        await tester.pump();
+        expect(motor.chamadas.length, antes);
+      });
+    });
+
     testWidgets('"continuar ouvindo" aparece no início e reabre o capítulo', (
       tester,
     ) async {

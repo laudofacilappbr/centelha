@@ -42,5 +42,8 @@
   "continuarOuvindo": "Seguir escuchando",
   "ouvirEsteCapitulo": "Escuchar este capítulo",
   "audioIndisponivel": "El audio de este capítulo necesita una versión más nueva de la app.",
-  "posicao": "Posición"
+  "posicao": "Posición",
+  "acompanharLeitura": "Seguir la lectura",
+  "ouvirDaqui": "Escuchar desde aquí",
+  "lendoAgora": "Leyendo ahora"
 }
