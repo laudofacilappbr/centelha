@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     # Vazio = Sentry desligado. Ligar é decisão do dono (terceiro recebendo dados).
     sentry_dsn: str = ""
 
+    # Preço do motor de TTS por milhão de caracteres, para o custo estimado no admin.
+    # Ex.: CENTELHA_TTS_PRECO_POR_MILHAO='{"azure": 85.0, "google": 85.0}'. Vazio por
+    # padrão: preço muda por provedor e contrato, a fonte é a fatura.
+    tts_preco_por_milhao: dict[str, float] = {"falso": 0.0, "piper": 0.0}
+    tts_moeda: str = "BRL"
+
 
 @lru_cache
 def get_settings() -> Settings:

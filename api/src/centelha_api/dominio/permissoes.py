@@ -19,6 +19,8 @@ class Permissao(enum.StrEnum):
     PUBLICAR = "publicar"
     GERIR_USUARIOS = "gerir_usuarios"
     VER_AUDITORIA = "ver_auditoria"
+    # Custo de TTS é dado financeiro: só o administrador vê.
+    VER_CUSTOS = "ver_custos"
 
 
 # Tabela "Papéis" da especificação. Lista explícita, sem herança entre papéis: um
