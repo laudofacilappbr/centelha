@@ -45,5 +45,16 @@
   "posicao": "Position",
   "acompanharLeitura": "Follow along",
   "ouvirDaqui": "Listen from here",
-  "lendoAgora": "Now reading"
+  "lendoAgora": "Now reading",
+  "apoieTitulo": "Support Centelha",
+  "apoioIndisponivel": "Support isn't available right now.",
+  "apoioMensagemPadrao": "Centelha is free and ad-free. Support helps pay for narration, the server and the app stores.",
+  "apoioNaoLibera": "Supporting doesn't unlock any content: the app is the same for everyone.",
+  "apoioRecebedor": "Support goes to {recebedor}.",
+  "apoioValoresSugeridos": "Suggested amounts",
+  "apoioPix": "Pix key",
+  "apoioCopiarPix": "Copy Pix key",
+  "apoioPixCopiada": "Pix key copied.",
+  "apoioAbrirLink": "Support on the website",
+  "apoioLinkFalhou": "Couldn't open the link."
 }
