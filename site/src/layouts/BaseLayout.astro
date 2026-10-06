@@ -78,7 +78,11 @@ const ld = [organizationLd(Astro.site!), ...jsonLd];
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
 
-    {ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+    {
+      /* "<" escapado: um "</script>" dentro de um texto (resumo de tema, título) fecharia
+         a tag e o resto viraria HTML executável. Para o JSON, \u003c é o mesmo caractere. */
+      ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj).replace(/</g, '\\u003c')} />)
+    }
 
     {
       comAnalitica && (
