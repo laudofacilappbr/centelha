@@ -574,3 +574,45 @@ class Campanha(Timestamps, Base):
     resultado: Mapped[str | None] = mapped_column(Text)
 
     instituicao: Mapped[Instituicao] = relationship()
+
+
+class DesafioAtestacao(Base):
+    """Valor de uso único que o app inclui no atestado (ADR 0004). Impede reaproveitar
+    um atestado capturado: cada registro de aparelho consome um desafio novo."""
+
+    __tablename__ = "desafio_atestacao"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    valor: Mapped[str] = mapped_column(String(64), unique=True)
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    usado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Dispositivo(Base):
+    """Instalação do app que provou ser legítima. Não identifica a pessoa: guarda só a
+    plataforma e o identificador do atestado, e o token fica como hash."""
+
+    __tablename__ = "dispositivo"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    plataforma: Mapped[str] = mapped_column(String(10))
+    # SHA-256 do token entregue ao app; o token em si não é guardado.
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    # keyId do App Attest ou equivalente; serve para revogar e investigar abuso.
+    identificador: Mapped[str | None] = mapped_column(String(200))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ultimo_uso_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revogado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class EntregaChave(Base):
+    """Cada chave de faixa entregue a um aparelho: base do limite diário contra raspagem."""
+
+    __tablename__ = "entrega_chave"
+    __table_args__ = (Index("ix_entrega_chave_dispositivo_criado", "dispositivo_id", "criado_em"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    dispositivo_id: Mapped[int] = mapped_column(ForeignKey("dispositivo.id"))
+    faixa_id: Mapped[int] = mapped_column(ForeignKey("faixa_audio.id"))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

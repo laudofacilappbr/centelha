@@ -30,6 +30,18 @@ class Settings(BaseSettings):
     # exige a chave-mestra: 32 bytes em base64, só no .env da VPS e no backup.
     audio_cifrar: bool = False
     audio_chave_mestra: str = ""
+    # Entrega da chave ao app atestado (ADR 0004). A chave vale 90 dias (decisão 2B):
+    # depois disso o app precisa ficar online uma vez para renovar.
+    chave_validade_dias: int = 90
+    # Um capítulo por chave: 300 por dia cobre ouvir e baixar obras inteiras, e barra
+    # quem tenta raspar o acervo com um aparelho só.
+    chave_limite_por_dia: int = 300
+    desafio_validade_segundos: int = 300
+    desafio_limite_por_ip: int = 30
+    desafio_janela_segundos: int = 3600
+    # Só para desenvolvimento e testes: aceita o atestado "falso:<desafio>". Ignorado
+    # com ambiente = "producao".
+    atestacao_falsa: bool = False
     # Worker: intervalo de consulta da fila e prazo para um job "executando" ser
     # considerado abandonado (worker que morreu) e voltar à fila.
     worker_intervalo_segundos: float = 5.0

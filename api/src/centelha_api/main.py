@@ -13,6 +13,7 @@ from .routers import (
     apoio,
     campanhas,
     catalogo,
+    dispositivos,
     glossario,
     health,
     posts,
@@ -37,6 +38,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(waitlist.router)
     app.include_router(catalogo.router)
+    app.include_router(dispositivos.router)
     app.include_router(admin.router)
     app.include_router(admin_direitos.router)
     app.include_router(admin_editorial.router)
