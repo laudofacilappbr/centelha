@@ -217,6 +217,7 @@ def test_tabela_de_papeis_da_especificacao():
         for p in (
             Permissao.PUBLICAR,
             Permissao.APROVAR_DIREITOS,
+            Permissao.EDITAR_DIREITOS,
             Permissao.GERIR_USUARIOS,
             Permissao.VER_AUDITORIA,
         ):

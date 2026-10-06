@@ -11,6 +11,7 @@ class Permissao(enum.StrEnum):
     APONTAR_ERRO_AUDIO = "apontar_erro_audio"
     EDITAR_DICIONARIO = "editar_dicionario"
     APROVAR_AUDIO = "aprovar_audio"
+    EDITAR_DIREITOS = "editar_direitos"
     APROVAR_DIREITOS = "aprovar_direitos"
     PUBLICAR = "publicar"
     GERIR_USUARIOS = "gerir_usuarios"

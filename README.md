@@ -37,6 +37,8 @@ Os testes apagam e recriam as tabelas a cada caso. Com duas sessões rodando tes
 
 A API do admin fica em `/v1/admin` e exige `Authorization: Bearer <token>` (token de `POST /v1/admin/sessoes`, válido por 12 h). Os papéis seguem a [especificação](docs-iniciais/MDs/especificacao-plataforma.md): administrador, revisor de texto e revisor de áudio; as permissões de cada um estão em `api/src/centelha_api/dominio/permissoes.py`. Toda ação fica em `registro_auditoria` (`GET /v1/admin/auditoria`).
 
+Direitos de cada edição em `/v1/admin/edicoes/{id}/direitos`: só se aprova com base legal, link https do documento e, em tradução, a data de falecimento do tradutor. Mudar qualquer desses campos devolve o status a pendente. O catálogo público só mostra edição com direitos aprovados: recusar ou alterar os direitos tira a edição do ar na hora.
+
 Não há cadastro aberto. A primeira conta sai da linha de comando, no servidor:
 
 ```sh
