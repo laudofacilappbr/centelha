@@ -7,10 +7,10 @@ import '../api/catalogo_api.dart';
 import '../l10n/app_localizations.dart';
 import 'comum.dart';
 
-/// Abre o link de apoio fora do app (navegador ou app do banco).
+/// Abre um link fora do app (navegador ou app do banco).
 typedef AbrirLink = Future<bool> Function(Uri uri);
 
-Future<bool> _abrirNoNavegador(Uri uri) =>
+Future<bool> abrirNoNavegador(Uri uri) =>
     launchUrl(uri, mode: LaunchMode.externalApplication);
 
 /// "Apoie o Centelha" (#40). Apoiar não libera nada: o app é o mesmo para todos.
@@ -19,7 +19,7 @@ class TelaApoio extends StatelessWidget {
   const TelaApoio({
     super.key,
     required this.api,
-    this.abrirLink = _abrirNoNavegador,
+    this.abrirLink = abrirNoNavegador,
   });
 
   final CatalogoApi api;

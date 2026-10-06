@@ -10,11 +10,12 @@ ARG VOZES_REV=c10ece1aade47bb51c153c893d14e5bf8e5b7117
 
 RUN pip install --no-cache-dir "piper-tts[http]==${PIPER_VERSION}"
 
-# Datasets das três vozes: CC0. Treinadas a partir da voz lessac (en_US), cuja licença
-# de dados entra no parecer jurídico (#3). Ver docs/decisoes/0005.
+# As duas vozes escolhidas na escuta (#1): faber narra, cadu lê as perguntas. Datasets
+# CC0, mas treinadas a partir da voz lessac (en_US), de licença só para pesquisa: o
+# áudio delas não vai ao ar até o parecer (#3). Ver docs/decisoes/0005.
 COPY vozes.sha256 /vozes/vozes.sha256
 RUN set -eu; cd /vozes; base="https://huggingface.co/rhasspy/piper-voices/resolve/${VOZES_REV}/pt/pt_BR"; \
-    for v in faber cadu jeff; do \
+    for v in faber cadu; do \
       for ext in onnx onnx.json; do \
         python -c "import sys,urllib.request; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])" \
           "$base/$v/medium/pt_BR-$v-medium.$ext" "pt_BR-$v-medium.$ext"; \

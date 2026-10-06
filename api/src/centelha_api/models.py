@@ -50,6 +50,9 @@ class EstadoCapitulo(enum.StrEnum):
 
     IMPORTADO = "importado"
     TEXTO_REVISADO = "texto_revisado"
+    # Só edições juvenis e infantis (#49): adaptação passa por revisão doutrinária e de
+    # linguagem antes de virar áudio. Edição adulta pula este estado.
+    DOUTRINA_REVISADA = "doutrina_revisada"
     AUDIO_GERADO = "audio_gerado"
     AUDIO_REVISADO = "audio_revisado"
     PUBLICADO = "publicado"

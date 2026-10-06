@@ -7,6 +7,10 @@ class Permissao(enum.StrEnum):
     VER_ADMIN = "ver_admin"
     EDITAR_SEGMENTO = "editar_segmento"
     APROVAR_TEXTO = "aprovar_texto"
+    # Revisão doutrinária das adaptações juvenis e infantis (#49). Só administrador:
+    # a IA faz a primeira leitura (#98), mas quem aprova é uma pessoa, o dono enquanto
+    # não houver revisores doutrinários (#76).
+    APROVAR_DOUTRINA = "aprovar_doutrina"
     OUVIR_AUDIO = "ouvir_audio"
     APONTAR_ERRO_AUDIO = "apontar_erro_audio"
     EDITAR_DICIONARIO = "editar_dicionario"

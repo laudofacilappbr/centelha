@@ -13,6 +13,7 @@ from centelha_api.models import (
     Obra,
     PapelUsuario,
     PapelVoz,
+    Publico,
     RegistroAuditoria,
     Segmento,
     StatusDireitos,
@@ -24,6 +25,8 @@ from centelha_api.models import (
 E = EstadoCapitulo
 SENHA = "cavalo correto bateria grampo"
 ORDEM = [E.IMPORTADO, E.TEXTO_REVISADO, E.AUDIO_GERADO, E.AUDIO_REVISADO, E.PUBLICADO]
+# Adaptação juvenil ou infantil tem a revisão doutrinária antes do áudio (#49).
+ORDEM_ADAPTACAO = [*ORDEM[:2], E.DOUTRINA_REVISADA, *ORDEM[2:]]
 
 
 # --- Tabela de transições ---------------------------------------------------
@@ -32,18 +35,22 @@ ORDEM = [E.IMPORTADO, E.TEXTO_REVISADO, E.AUDIO_GERADO, E.AUDIO_REVISADO, E.PUBL
 def test_toda_reprovacao_volta_exatamente_um_passo():
     """Especificação: "qualquer reprovação volta o capítulo um passo". Uma transição
     que pulasse dois passos para trás descartaria trabalho aprovado sem ninguém pedir."""
-    for nome, t in editorial.TRANSICOES.items():
-        i_de, i_para = ORDEM.index(t.de), ORDEM.index(t.para)
-        if i_para < i_de:
-            assert i_de - i_para == 1, nome
-            assert t.exige_motivo, f"{nome} volta sem motivo"
-        else:
-            assert i_para - i_de == 1, nome
+    for publico in Publico:
+        ordem = ORDEM if publico == Publico.ADULTO else ORDEM_ADAPTACAO
+        for nome, t in editorial.TRANSICOES.items():
+            if publico not in t.publicos:
+                continue
+            i_de, i_para = ordem.index(t.de), ordem.index(t.destino(publico))
+            if i_para < i_de:
+                assert i_de - i_para == 1, (nome, publico)
+                assert t.exige_motivo, f"{nome} volta sem motivo"
+            else:
+                assert i_para - i_de == 1, (nome, publico)
 
 
 def test_ninguem_aprova_o_proprio_passo_de_outro_papel():
     texto, audio = PapelUsuario.REVISOR_TEXTO, PapelUsuario.REVISOR_AUDIO
-    cap = Capitulo(estado=E.IMPORTADO)
+    cap = Capitulo(estado=E.IMPORTADO, edicao=Edicao(publico=Publico.ADULTO))
     assert editorial.acoes_possiveis(cap, texto) == ["aprovar_texto"]
     assert editorial.acoes_possiveis(cap, audio) == []
     cap.estado = E.AUDIO_GERADO
