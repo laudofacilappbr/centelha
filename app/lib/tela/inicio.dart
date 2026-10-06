@@ -43,7 +43,8 @@ class _TelaInicioState extends State<TelaInicio> {
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => TelaConfiguracoes(idioma: widget.idioma),
+                builder: (_) =>
+                    TelaConfiguracoes(idioma: widget.idioma, api: widget.api),
               ),
             ),
           ),

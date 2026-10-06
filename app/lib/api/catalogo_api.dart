@@ -119,6 +119,12 @@ class CatalogoApi {
     }
   }
 
+  Future<ConfigRemota> config() async =>
+      ConfigRemota.deJson(await _get('/v1/config') as Map<String, dynamic>);
+
+  Future<Apoio> apoio() async =>
+      Apoio.deJson(await _get('/v1/apoio') as Map<String, dynamic>);
+
   Future<Object?> _get(String caminho) async {
     final http.Response r;
     try {
@@ -341,4 +347,50 @@ class Questao {
   final numero = int.parse(m.group(1)!);
   if (numero < 1) return null;
   return (numero: numero, sub: m.group(2));
+}
+
+/// GET /v1/config: o que o app mostra além do catálogo. Tudo desligado por padrão.
+class ConfigRemota {
+  const ConfigRemota({this.apoio = false, this.caridade = false});
+
+  factory ConfigRemota.deJson(Map<String, dynamic> j) => ConfigRemota(
+    apoio: j['apoio'] as bool? ?? false,
+    caridade: j['caridade'] as bool? ?? false,
+  );
+
+  final bool apoio;
+  final bool caridade;
+}
+
+/// GET /v1/apoio. Desligado, só `ligado: false`.
+class Apoio {
+  const Apoio({
+    required this.ligado,
+    this.recebedor,
+    this.mensagem,
+    this.valoresCentavos = const [],
+    this.chavePix,
+    this.linkExterno,
+  });
+
+  factory Apoio.deJson(Map<String, dynamic> j) => Apoio(
+    ligado: j['ligado'] as bool? ?? false,
+    recebedor: j['recebedor'] as String?,
+    mensagem: j['mensagem'] as String?,
+    valoresCentavos: [
+      for (final v in j['valores_centavos'] as List? ?? []) v as int,
+    ],
+    chavePix: j['chave_pix'] as String?,
+    // Só https: o app não abre outro esquema vindo da rede.
+    linkExterno: (j['link_externo'] as String?)?.startsWith('https://') == true
+        ? j['link_externo'] as String
+        : null,
+  );
+
+  final bool ligado;
+  final String? recebedor;
+  final String? mensagem;
+  final List<int> valoresCentavos;
+  final String? chavePix;
+  final String? linkExterno;
 }
