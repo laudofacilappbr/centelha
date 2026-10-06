@@ -48,6 +48,17 @@ Locale resolverLocale(List<Locale>? doAparelho, Iterable<Locale> suportados) {
   return const Locale('pt');
 }
 
+// Nome de cada idioma nele mesmo: quem não entende a interface atual ainda acha o seu.
+const _nomes = {
+  'pt': 'Português',
+  'es': 'Español',
+  'fr': 'Français',
+  'en': 'English',
+};
+
+/// "pt-BR" → "Português"; idioma sem nome conhecido fica com o próprio código.
+String nomeDoIdioma(String idioma) => _nomes[idioma.split('-').first] ?? idioma;
+
 /// Idioma das edições (BCP 47, como na API) que combina com o da interface.
 String idiomaDoConteudo(Locale interface) =>
     interface.languageCode == 'pt' ? 'pt-BR' : interface.languageCode;

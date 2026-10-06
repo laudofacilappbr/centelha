@@ -12,8 +12,11 @@ const urlApiPadrao = String.fromEnvironment(
 );
 
 class ErroCatalogo implements Exception {
-  ErroCatalogo(this.mensagem);
+  ErroCatalogo(this.mensagem, {this.status});
   final String mensagem;
+
+  /// Status HTTP, quando houve resposta (404 = não existe ou não publicado).
+  final int? status;
 
   @override
   String toString() => 'ErroCatalogo: $mensagem';
@@ -99,6 +102,23 @@ class CatalogoApi {
     return [for (final o in dados) Obra.deJson(o as Map<String, dynamic>)];
   }
 
+  Future<Edicao> edicao(int id) async =>
+      Edicao.deJson(await _get('/v1/edicoes/$id') as Map<String, dynamic>);
+
+  Future<Capitulo> capitulo(int id) async =>
+      Capitulo.deJson(await _get('/v1/capitulos/$id') as Map<String, dynamic>);
+
+  /// null quando a edição não tem essa questão publicada.
+  Future<Questao?> questao(int edicaoId, int numero) async {
+    try {
+      final j = await _get('/v1/edicoes/$edicaoId/questoes/$numero');
+      return Questao.deJson(j as Map<String, dynamic>);
+    } on ErroCatalogo catch (e) {
+      if (e.status == 404) return null;
+      rethrow;
+    }
+  }
+
   Future<Object?> _get(String caminho) async {
     final http.Response r;
     try {
@@ -109,9 +129,139 @@ class CatalogoApi {
       throw ErroCatalogo('$caminho: $e');
     }
     if (r.statusCode != 200) {
-      throw ErroCatalogo('$caminho: HTTP ${r.statusCode}');
+      throw ErroCatalogo(
+        '$caminho: HTTP ${r.statusCode}',
+        status: r.statusCode,
+      );
     }
     // A API responde em UTF-8; o http só assume isso se o charset vier no cabeçalho.
     return jsonDecode(utf8.decode(r.bodyBytes));
   }
+}
+
+class CapituloResumo {
+  CapituloResumo({
+    required this.id,
+    required this.ordem,
+    required this.titulo,
+    required this.referencia,
+  });
+
+  factory CapituloResumo.deJson(Map<String, dynamic> j) => CapituloResumo(
+    id: j['id'] as int,
+    ordem: j['ordem'] as int,
+    titulo: j['titulo'] as String,
+    referencia: j['referencia_canonica'] as String,
+  );
+
+  final int id;
+  final int ordem;
+  final String titulo;
+
+  /// Liga o mesmo capítulo entre idiomas, ex.: "LE-C001".
+  final String referencia;
+}
+
+class Edicao {
+  Edicao({
+    required this.id,
+    required this.idioma,
+    required this.titulo,
+    required this.tradutor,
+    required this.fonte,
+    required this.capitulos,
+  });
+
+  factory Edicao.deJson(Map<String, dynamic> j) => Edicao(
+    id: j['id'] as int,
+    idioma: j['idioma'] as String,
+    titulo: j['titulo'] as String,
+    tradutor: j['tradutor'] as String?,
+    fonte: j['fonte'] as String,
+    capitulos: [
+      for (final c in j['capitulos'] as List)
+        CapituloResumo.deJson(c as Map<String, dynamic>),
+    ],
+  );
+
+  final int id;
+  final String idioma;
+  final String titulo;
+  final String? tradutor;
+  final String fonte;
+  final List<CapituloResumo> capitulos;
+}
+
+enum TipoSegmento { titulo, pergunta, resposta, comentario, paragrafo, nota }
+
+class Segmento {
+  Segmento({
+    required this.id,
+    required this.ordem,
+    required this.tipo,
+    required this.texto,
+    required this.numeroQuestao,
+    required this.subquestao,
+  });
+
+  factory Segmento.deJson(Map<String, dynamic> j) => Segmento(
+    id: j['id'] as int,
+    ordem: j['ordem'] as int,
+    // Tipo novo na API, que este app ainda não conhece, é lido como parágrafo.
+    tipo: TipoSegmento.values.asNameMap()[j['tipo']] ?? TipoSegmento.paragrafo,
+    texto: j['texto'] as String,
+    numeroQuestao: j['numero_questao'] as int?,
+    subquestao: j['subquestao'] as String?,
+  );
+
+  final int id;
+  final int ordem;
+  final TipoSegmento tipo;
+  final String texto;
+  final int? numeroQuestao;
+  final String? subquestao;
+}
+
+class Capitulo {
+  Capitulo({
+    required this.resumo,
+    required this.edicaoId,
+    required this.segmentos,
+  });
+
+  factory Capitulo.deJson(Map<String, dynamic> j) => Capitulo(
+    resumo: CapituloResumo.deJson(j),
+    edicaoId: j['edicao_id'] as int,
+    segmentos: [
+      for (final s in j['segmentos'] as List)
+        Segmento.deJson(s as Map<String, dynamic>),
+    ],
+  );
+
+  final CapituloResumo resumo;
+  final int edicaoId;
+  final List<Segmento> segmentos;
+}
+
+/// Resultado de "questão 88": em que capítulo ela está.
+class Questao {
+  Questao({required this.numero, required this.capitulo});
+
+  factory Questao.deJson(Map<String, dynamic> j) => Questao(
+    numero: j['numero'] as int,
+    capitulo: CapituloResumo.deJson(j['capitulo'] as Map<String, dynamic>),
+  );
+
+  final int numero;
+  final CapituloResumo capitulo;
+}
+
+/// Lê "88", "questão 88", "q. 88" ou "88a". Devolve null se não houver número.
+({int numero, String? sub})? lerBuscaQuestao(String texto) {
+  final m = RegExp(r'(\d{1,4})\s*([a-z])?\b')
+      .firstMatch(texto.toLowerCase().trim());
+  if (m == null) return null;
+  final numero = int.parse(m.group(1)!);
+  if (numero < 1) return null;
+  return (numero: numero, sub: m.group(2));
 }

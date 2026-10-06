@@ -12,5 +12,17 @@
   "idiomaDoAparelho": "Langue de l’appareil",
   "sobre": "À propos",
   "avisoVozSintetica": "La narration est produite par une voix de synthèse, à partir d’éditions du domaine public ou autorisées. Chaque édition crédite l’auteur, le traducteur et la source.",
-  "licencas": "Licences"
+  "licencas": "Licences",
+  "capitulos": "Chapitres",
+  "traducao": "Traduction : {tradutor}",
+  "fonte": "Source : {fonte}",
+  "buscaQuestao": "Aller à la question",
+  "buscaQuestaoDica": "Numéro, ex. : 88",
+  "questaoNaoEncontrada": "La question {numero} n’est pas dans cette édition.",
+  "numeroInvalido": "Saisissez le numéro de la question.",
+  "erroCarregar": "Chargement impossible. Vérifiez la connexion.",
+  "questao": "Question {numero}",
+  "pergunta": "Question",
+  "resposta": "Réponse",
+  "outraEdicao": "Édition"
 }
