@@ -42,5 +42,8 @@
   "continuarOuvindo": "Continue listening",
   "ouvirEsteCapitulo": "Listen to this chapter",
   "audioIndisponivel": "This chapter's audio needs a newer version of the app.",
-  "posicao": "Position"
+  "posicao": "Position",
+  "acompanharLeitura": "Follow along",
+  "ouvirDaqui": "Listen from here",
+  "lendoAgora": "Now reading"
 }
