@@ -1,0 +1,63 @@
+# Validação local em containers — substitui o CI do GitHub.
+# Não chame direto: use ci/validar.sh, que dá nome de projeto por worktree e limpa no fim.
+#
+# O código entra por bind mount (o que está na worktree, commitado ou não). Dependências,
+# caches e saídas de build ficam em volumes, para não sujar a worktree nem misturar
+# binários do Windows com os do Linux.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: centelha
+      POSTGRES_PASSWORD: centelha
+      POSTGRES_DB: centelha_test
+    volumes:
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql:ro
+    # Em memória e sem porta exposta: cada validação começa limpa e não disputa a
+    # 55432 com o banco de teste do dia a dia.
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U centelha -d centelha_mig"]
+      interval: 2s
+      retries: 30
+
+  api:
+    build: { context: ., dockerfile: api.Dockerfile }
+    working_dir: /app
+    environment:
+      CENTELHA_TEST_DATABASE_URL: postgresql+psycopg://centelha:centelha@postgres:5432/centelha_test?connect_timeout=5
+      CENTELHA_MIG_DATABASE_URL: postgresql+psycopg://centelha:centelha@postgres:5432/centelha_mig
+      UV_PROJECT_ENVIRONMENT: /venv
+      UV_CACHE_DIR: /cache/uv
+      UV_LINK_MODE: copy
+      RUFF_NO_CACHE: "true"
+      PYTEST_ADDOPTS: "-p no:cacheprovider"
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ../api:/app
+      - venv:/venv
+      - cache:/cache
+    command: ["bash", "/ci/api.sh"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  site:
+    image: node:22-alpine
+    working_dir: /app
+    environment:
+      ASTRO_TELEMETRY_DISABLED: "1"
+      npm_config_cache: /cache/npm
+    volumes:
+      - ../site:/app
+      # Por cima do bind mount: node_modules, .astro e dist do Linux, fora da worktree.
+      - site_node_modules:/app/node_modules
+      - /app/.astro
+      - /app/dist
+      - cache:/cache
+    command: ["sh", "-c", "npm ci --no-audit --no-fund && npm run build && npx astro check"]
+
+volumes:
+  venv:
+  cache:
+  site_node_modules:

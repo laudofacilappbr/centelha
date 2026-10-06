@@ -16,16 +16,18 @@ Segue `RICARDO-DEFAULT/20-engenharia/fluxo-desenvolvimento/FLUXO-DE-TRABALHO.md`
 
 ## Loop de desenvolvimento
 
-`/centelha-loop` faz uma volta (próxima issue elegível → PR com CI verde); `/loop /centelha-loop` repete. Definição em [.claude/skills/centelha-loop/SKILL.md](.claude/skills/centelha-loop/SKILL.md).
+`/centelha-loop` faz uma volta (próxima issue elegível → PR validada em Docker); `/loop /centelha-loop` repete. Definição em [.claude/skills/centelha-loop/SKILL.md](.claude/skills/centelha-loop/SKILL.md).
 
 ## Verificação antes de abrir PR
 
+Local, em Docker; o CI do GitHub não valida PR (só publica as imagens quando algo entra na main).
+
 ```sh
-# API (precisa de PostgreSQL em localhost:55432, ver README)
-cd api && uv run ruff check . && uv run ruff format --check . && uv run pytest -q
-# Site
-cd site && npm run build && npx astro check
+bash ci/validar.sh            # api: lint, testes com PostgreSQL, migrações · site: build, astro check · infra: compose e Caddyfile
+bash ci/validar.sh api        # um alvo só (api, site, infra, imagens)
 ```
+
+Roda o que está na worktree, com projeto Docker próprio por worktree (sessões em paralelo não colidem) e PostgreSQL em memória. Saída diferente de zero = não abra a PR.
 
 ## Não negociável
 
