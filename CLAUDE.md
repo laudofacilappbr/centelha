@@ -1,6 +1,6 @@
 # Regras deste repositório
 
-Monorepo do Centelha: `api/` (FastAPI), `site/` (Astro), `infra/` (Docker Compose + Caddy). Plano em [docs/ROADMAP.md](docs/ROADMAP.md), especificação em [docs-iniciais/MDs/](docs-iniciais/MDs/).
+Monorepo do Centelha: `api/` (FastAPI), `site/` (Astro), `app/` (Flutter), `infra/` (Docker Compose + Caddy). Plano em [docs/ROADMAP.md](docs/ROADMAP.md), especificação em [docs-iniciais/MDs/](docs-iniciais/MDs/).
 
 ## Fluxo de trabalho
 
@@ -23,8 +23,8 @@ Segue `RICARDO-DEFAULT/20-engenharia/fluxo-desenvolvimento/FLUXO-DE-TRABALHO.md`
 Local, em Docker; o CI do GitHub não valida PR (só publica as imagens quando algo entra na main).
 
 ```sh
-bash ci/validar.sh            # api: lint, testes com PostgreSQL, migrações · site: build, astro check · infra: compose e Caddyfile
-bash ci/validar.sh api        # um alvo só (api, site, infra, imagens)
+bash ci/validar.sh            # api: lint, testes com PostgreSQL, migrações · site: build, astro check · infra: compose e Caddyfile · app: format, analyze, testes
+bash ci/validar.sh api        # um alvo só (api, site, infra, app, imagens)
 ```
 
 Roda o que está na worktree, com projeto Docker próprio por worktree (sessões em paralelo não colidem) e PostgreSQL em memória. Saída diferente de zero = não abra a PR.

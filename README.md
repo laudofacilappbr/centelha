@@ -12,6 +12,7 @@ App gratuito de audiolivros espíritas (iOS e Android) com as obras de Allan Kar
 | --- | --- |
 | `api/` | API FastAPI + PostgreSQL (modelo de dados, direitos, lista de espera) |
 | `site/` | Site www e landing page em Astro, servido por nginx |
+| `app/` | App Android e iOS em Flutter ([app/README.md](app/README.md)) |
 | `infra/` | Docker Compose de dev e produção (VPS + Cloudflare), Caddyfile |
 
 ## Rodar localmente
@@ -26,7 +27,7 @@ docker compose -f infra/docker-compose.yml up --build
 Validar antes de abrir PR (tudo em Docker, sem depender do CI do GitHub):
 
 ```sh
-bash ci/validar.sh            # api + site + infra
+bash ci/validar.sh            # api + site + infra + app
 bash ci/validar.sh imagens    # build das imagens
 ```
 

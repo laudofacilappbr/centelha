@@ -1,0 +1,16 @@
+{
+  "@@locale": "en",
+  "appTitulo": "Centelha",
+  "obras": "Works",
+  "configuracoes": "Settings",
+  "carregando": "Loading…",
+  "erroCatalogo": "Couldn't load the catalog. Check your connection.",
+  "tentarNovamente": "Try again",
+  "catalogoVazio": "No works published yet.",
+  "edicoes": "{quantidade, plural, =1{1 edition} other{{quantidade} editions}}",
+  "idioma": "Language",
+  "idiomaDoAparelho": "Device language",
+  "sobre": "About",
+  "avisoVozSintetica": "Narration is produced with a synthetic voice, from public-domain or licensed editions. Each edition credits the author, translator and source.",
+  "licencas": "Licenses"
+}

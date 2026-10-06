@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Validação completa em Docker, sem depender do CI do GitHub.
 #
-#   ci/validar.sh            # api + site + infra
+#   ci/validar.sh            # api + site + infra + app
 #   ci/validar.sh api        # só a API (lint, testes, migrações)
 #   ci/validar.sh site       # só o site (build, astro check)
 #   ci/validar.sh infra      # compose de dev e prod, Caddyfile
+#   ci/validar.sh app        # só o app Flutter (format, analyze, testes)
 #   ci/validar.sh imagens    # build das imagens api, worker e site
 #
 # Roda o que está na worktree (commitado ou não). Cada worktree usa um projeto Docker
@@ -23,7 +24,7 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 alvos=("$@")
-[ ${#alvos[@]} -eq 0 ] && alvos=(api site infra)
+[ ${#alvos[@]} -eq 0 ] && alvos=(api site infra app)
 
 resultado=()
 falhou=0
@@ -46,6 +47,11 @@ for alvo in "${alvos[@]}"; do
       compose run --rm site
       marcar site $?
       ;;
+    app)
+      echo "### app"
+      compose build -q app && compose run --rm app
+      marcar app $?
+      ;;
     infra)
       echo "### infra"
       ok=0
@@ -67,7 +73,7 @@ for alvo in "${alvos[@]}"; do
       marcar imagens $ok
       ;;
     *)
-      echo "alvo desconhecido: $alvo (use api, site, infra, imagens)" >&2
+      echo "alvo desconhecido: $alvo (use api, site, infra, app, imagens)" >&2
       exit 2
       ;;
   esac
