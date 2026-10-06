@@ -84,6 +84,59 @@ def test_limpeza_de_ligaduras_e_espacos():
     assert p.texto == "A filosofia do Espírito."
 
 
+def test_paragrafos_sem_linha_em_branco_separados_por_recuo_e_tamanho():
+    # Como o Tesseract devolve um livro com recuo: linhas seguidas, sem linha em branco.
+    pagina = "\n".join(
+        [
+            "CAPÍTULO I",
+            "DO PRIMEIRO TEMA",
+            "1. Que é o primeiro assunto deste livro, e como se chega",
+            "a ele?",
+            "“É a ideia sobre a qual tudo se apoia; ele explica as causas",
+            "e os efeitos, como se viu no ano de",
+            "1857. Depois disso, ninguém mais duvidou do que foi dito ali",
+            "pelos que estudaram.”",
+            "Comentário do autor sobre a questão, longo o bastante para",
+            "ocupar duas linhas inteiras da página.",
+            "2. Segunda pergunta?",
+        ]
+    )
+    textos = [p.texto for p in limpar_paginas(pagina)]
+    assert textos == [
+        "CAPÍTULO I",
+        "DO PRIMEIRO TEMA",
+        "1. Que é o primeiro assunto deste livro, e como se chega a ele?",
+        "“É a ideia sobre a qual tudo se apoia; ele explica as causas e os efeitos, como se"
+        " viu no ano de 1857. Depois disso, ninguém mais duvidou do que foi dito ali pelos"
+        " que estudaram.”",
+        "Comentário do autor sobre a questão, longo o bastante para ocupar duas linhas"
+        " inteiras da página.",
+        "2. Segunda pergunta?",
+    ]
+
+
+def test_revisao_aponta_trema_lido_como_ii():
+    rel = revisar([Paragrafo(9, "de modo fregiiente e tranqiiilo, no século XII.")])
+    achados = [(a.trecho, a.detalhe) for a in rel.achados if a.tipo == "trema lido como ii"]
+    assert ("fregiiente", "talvez freguente (confira g/q na imagem)") in achados
+    assert all("XII" not in t for t, _ in achados)
+
+
+def test_revisao_aponta_palavra_rara_parecida_com_frequente_mas_nao_flexao():
+    frase = "O homem estuda de modo frequente e os espíritos estudam o espírito. "
+    paragrafos = [Paragrafo(1, frase * 5), Paragrafo(6, "Um caso fregiente e estudar.")]
+    achados = [
+        (a.pagina, a.trecho, a.detalhe)
+        for a in revisar(paragrafos).achados
+        if a.tipo == "parecida com palavra frequente"
+    ]
+    assert achados == [(6, "fregiente", "talvez frequente")]
+
+
+def test_sometne_com_circunflexo_vai_para_conferir():
+    assert a_conferir("sômente o fenômeno") == ["sômente"]
+
+
 def test_revisao_aponta_suspeitas_com_pagina():
     paragrafos = [
         Paragrafo(3, "O homem c0m a alma; o homem e o homem e o homem."),

@@ -77,8 +77,60 @@ def suspeitas(paragrafos: list[Paragrafo]) -> list[Achado]:
                         achados.append(
                             Achado(p.pagina, "rn/m", m.group(0), f"mais comum no livro: {outra}")
                         )
+            # O trema de 1943 (freqüente, tranqüilo) costuma sair do OCR como "ii" e às
+            # vezes com q lido como g: "fregiiente". Em português, "ii" quase não existe.
+            if "ii" in w and not w.startswith("xii"):
+                achados.append(
+                    Achado(
+                        p.pagina,
+                        "trema lido como ii",
+                        m.group(0),
+                        f"talvez {w.replace('ii', 'u')} (confira g/q na imagem)",
+                    )
+                )
         if t[:1].islower():
             achados.append(Achado(p.pagina, "começa com minúscula", t[:60], "juntar ao anterior?"))
+    achados += _parecidas(paragrafos, vocabulario)
+    return achados
+
+
+def _so_no_fim(a: str, b: str) -> bool:
+    """Diferem só nas duas últimas letras (estudam/estudar, espírito/espíritos): é
+    flexão, não erro de OCR."""
+    i = next((k for k, (x, y) in enumerate(zip(a, b, strict=False)) if x != y), min(len(a), len(b)))
+    return i >= min(len(a), len(b)) - 2
+
+
+def _parecidas(paragrafos: list[Paragrafo], vocabulario: Counter[str]) -> list[Achado]:
+    """Palavra rara quase igual a uma frequente do próprio livro ("fregiente" e
+    "frequente"): o erro de OCR mais comum, que nenhuma regra fixa pega.
+
+    Compara só com palavras do mesmo tamanho (±1) e mesma inicial, para não varrer o
+    vocabulário inteiro a cada palavra."""
+    frequentes: dict[tuple[str, int], list[str]] = {}
+    for w, n in vocabulario.items():
+        if n >= 5 and len(w) >= 5:
+            frequentes.setdefault((w[0], len(w)), []).append(w)
+    achados: list[Achado] = []
+    vistas: set[str] = set()
+    for p in paragrafos:
+        for w in _PALAVRA.findall(p.texto):
+            baixa = w.lower()
+            if len(baixa) < 5 or vocabulario[baixa] > 2 or baixa in vistas:
+                continue
+            candidatas = [
+                c for d in (-1, 0, 1) for c in frequentes.get((baixa[0], len(baixa) + d), [])
+            ]
+            parecida = [
+                c
+                for c in difflib.get_close_matches(baixa, candidatas, n=3, cutoff=0.75)
+                if not _so_no_fim(baixa, c)
+            ][:1]
+            if parecida:
+                vistas.add(baixa)
+                achados.append(
+                    Achado(p.pagina, "parecida com palavra frequente", w, f"talvez {parecida[0]}")
+                )
     return achados
 
 

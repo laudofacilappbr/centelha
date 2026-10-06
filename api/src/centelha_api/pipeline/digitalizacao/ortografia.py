@@ -136,6 +136,11 @@ def a_conferir(texto: str) -> list[str]:
         if p in _CIRCUNFLEXO_ATUAL or p in _DIFERENCIAIS:
             continue
         # Proparoxítonas e terminações que levam circunflexo pela regra geral atual.
+        # Advérbio em -mente fica de fora dessa dispensa: "sômente" é o grave de
+        # "sòmente" lido como circunflexo pelo OCR.
+        if p.endswith("mente"):
+            vistas.setdefault(p, None)
+            continue
         if re.search(r"[êô]\w*[aeiou]\w*[aeiou]s?$", p) or re.search(r"ências?$", p):
             continue
         vistas.setdefault(p, None)

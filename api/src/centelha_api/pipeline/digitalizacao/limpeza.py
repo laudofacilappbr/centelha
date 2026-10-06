@@ -36,7 +36,7 @@ def _assinatura(linha: str) -> str:
 
 def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> set[str]:
     """Assinaturas que aparecem nas 2 primeiras ou 2 últimas linhas de muitas páginas."""
-    if len(paginas) < 4:
+    if len(paginas) < 3:
         return set()
     contagem: Counter[str] = Counter()
     for linhas in paginas:
@@ -55,6 +55,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
     paragrafos: list[Paragrafo] = []
     atual: list[str] = []
     pagina_atual = 1
+    tipico = 60  # caracteres por linha; recalculado a cada página
 
     def fechar() -> None:
         if atual:
@@ -81,25 +82,52 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
                     uteis.pop(borda)
                     while uteis and not uteis[borda]:
                         uteis.pop(borda)
+        tamanhos = sorted(len(linha) for linha in uteis if len(linha) > 20)
+        if tamanhos:
+            tipico = tamanhos[len(tamanhos) // 2]
         for linha in uteis:
             if not linha:
                 fechar()
                 continue
-            if not atual:
-                pagina_atual = numero
             if atual and _HIFEN_FINAL.search(atual[-1]) and linha[:1].islower():
                 atual[-1] = atual[-1][:-1] + linha.split(" ", 1)[0]
                 resto = linha.split(" ", 1)[1:] if " " in linha else []
                 if resto:
                     atual.append(resto[0])
                 continue
+            if atual and _inicia_paragrafo(atual[-1], linha, tipico):
+                fechar()
+            if not atual:
+                pagina_atual = numero
             atual.append(linha)
-        # Parágrafo que continua na página seguinte: só fecha se a última linha termina
-        # frase; senão a próxima página o completa.
-        if atual and re.search(r"[.!?:»”\"]$", atual[-1]):
-            fechar()
+        # Parágrafo que chega ao fim da página não fecha aqui: a primeira linha da
+        # próxima decide (minúscula continua, questão ou linha curta antes abre outro).
     fechar()
     return paragrafos
+
+
+_ABRE_PARAGRAFO = re.compile(
+    r"^(\d{1,4}\s*[.)–-]\s|[a-z]\)\s|[“«\"—–]|(cap[íi]tulo|livro|parte|chapitre|livre|partie)\b)",
+    re.IGNORECASE,
+)
+_FIM_DE_FRASE = re.compile(r"[.!?:»”\"]$")
+
+
+def _inicia_paragrafo(anterior: str, linha: str, tipico: int) -> bool:
+    """O OCR nem sempre separa parágrafos com linha em branco: o livro usa recuo.
+
+    Abre parágrafo novo quando a linha é questão numerada, subquestão, abre aspas ou
+    travessão, é título (caixa alta ou "Capítulo"), ou quando a anterior termina frase
+    e é bem mais curta que a linha típica da página (última linha de parágrafo)."""
+    if linha[:1].islower():
+        return False
+    if _ABRE_PARAGRAFO.match(linha) and _FIM_DE_FRASE.search(anterior):
+        return True
+    # "…no ano de / 1857. Depois…" não abre parágrafo: a questão numerada só conta
+    # depois de frase terminada, como acima.
+    if linha.isupper() or anterior.isupper():
+        return True
+    return bool(_FIM_DE_FRASE.search(anterior)) and len(anterior) < 0.8 * tipico
 
 
 def como_texto(paragrafos: list[Paragrafo]) -> str:
