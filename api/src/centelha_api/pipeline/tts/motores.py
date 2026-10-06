@@ -11,7 +11,7 @@ pedido. Hoje: Google (v1beta1, timepoints) e o falso. O Azure por REST devolve s
 Credenciais vêm de variáveis de ambiente, nunca do código:
   CENTELHA_AZURE_TTS_KEY, CENTELHA_AZURE_TTS_REGION
   CENTELHA_GOOGLE_TTS_KEY
-  CENTELHA_PIPER_BIN, CENTELHA_PIPER_MODELOS (pasta com os .onnx)
+  CENTELHA_PIPER_URL (serviço piper da rede interna, ex.: http://piper:5000)
 """
 
 import base64
@@ -20,12 +20,10 @@ import math
 import os
 import re
 import struct
-import subprocess
 import urllib.request
 import wave
 from dataclasses import dataclass, field
 from io import BytesIO
-from pathlib import Path
 from typing import Protocol
 from xml.sax.saxutils import quoteattr
 
@@ -211,25 +209,30 @@ class MotorGoogle:
 
 @dataclass
 class MotorPiper:
-    """Piper local (open source). Sem SSML: recebe o texto com as substituições aplicadas."""
+    """Piper local (open source), no container `piper` (infra/piper, ADR 0005).
+
+    Fala com o servidor HTTP oficial do Piper, que carrega cada voz uma vez; pela linha
+    de comando o modelo seria carregado de novo a cada segmento. Sem SSML: recebe o
+    texto com as substituições do dicionário aplicadas. A voz é o nome do modelo, ex.:
+    pt_BR-faber-medium.
+    """
 
     nome: str = "piper"
     aceita_ssml: bool = False
 
     def sintetizar(self, pedido: Pedido) -> bytes:
-        binario = os.environ.get("CENTELHA_PIPER_BIN", "piper")
-        modelo = Path(_exigir("CENTELHA_PIPER_MODELOS")) / f"{pedido.voz_id}.onnx"
-        if not modelo.exists():
-            raise ErroTTS(f"piper: modelo não encontrado: {modelo}")
-        r = subprocess.run(
-            [binario, "--model", str(modelo), "--output_file", "-"],
-            input=pedido.texto.encode("utf-8"),
-            capture_output=True,
+        base = _exigir("CENTELHA_PIPER_URL").rstrip("/")
+        wav = _post(
+            f"{base}/synthesize",
+            json.dumps({"text": pedido.texto, "voice": pedido.voz_id}).encode("utf-8"),
+            {"Content-Type": "application/json"},
             timeout=300,
         )
-        if r.returncode != 0:
-            raise ErroTTS(f"piper falhou: {r.stderr[-300:].decode('utf-8', 'replace')}")
-        return r.stdout
+        # Voz inexistente devolve página de erro do Flask com 500, que o _post já
+        # transforma em ErroTTS; aqui fica só a resposta que não é WAV.
+        if not wav.startswith(b"RIFF"):
+            raise ErroTTS(f"piper: resposta não é WAV (voz {pedido.voz_id})")
+        return wav
 
 
 MOTORES: dict[str, type] = {
