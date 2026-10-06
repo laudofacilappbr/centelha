@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import { renderizar } from '../../lib/markdown';
+import { postsPublicados, urlPost, dataPost, NOMES_LINHA, type Post } from '../../lib/posts';
+import { urlItem } from '../../lib/temas';
+
+export async function getStaticPaths() {
+  return (await postsPublicados()).map((p) => ({ params: { slug: p.slug }, props: { p } }));
+}
+
+interface Props {
+  p: Post;
+}
+const { p } = Astro.props;
+const url = new URL(urlPost(p.slug), Astro.site).href;
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: p.titulo,
+    description: p.resumo,
+    url,
+    inLanguage: p.idioma,
+    datePublished: p.publicado_em,
+    dateModified: p.atualizado_em,
+    ...(p.capa_url ? { image: p.capa_url } : {}),
+    publisher: { '@type': 'Organization', name: 'Centelha' },
+    citation: p.fontes.map((f) => ({ '@type': 'CreativeWork', name: f.titulo, url: new URL(urlItem(f), Astro.site).href })),
+  },
+];
+---
+
+<BaseLayout title={p.titulo} description={p.resumo} jsonLd={ld}>
+  <PageHeader eyebrow={NOMES_LINHA[p.linha] ?? 'Blog'} title={p.titulo} />
+  <div class="container section">
+    <nav aria-label="Trilha" class="muted trilha">
+      <a href="/blog">Blog</a> · <time datetime={p.publicado_em}>{dataPost(p.publicado_em)}</time>
+    </nav>
+    {p.capa_url && <img class="capa" src={p.capa_url} alt="" loading="lazy" decoding="async" />}
+    <article class="prose" set:html={renderizar(p.texto)} />
+
+    <section class="fontes" aria-labelledby="fontes">
+      <h2 id="fontes">Fontes</h2>
+      <ul>
+        {
+          p.fontes.map((f) => (
+            <li>
+              <a href={urlItem(f)}>
+                <strong>{f.referencia}</strong> — {f.titulo}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <aside class="card cta">
+      <h2>Ouça o trecho no app</h2>
+      <p>No Centelha, grátis, com o texto acompanhando a narração.</p>
+      <StoreButtons />
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .capa {
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-6);
+  }
+  .fontes {
+    margin-top: var(--space-10);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+</style>
