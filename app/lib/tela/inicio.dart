@@ -4,9 +4,11 @@ import '../api/catalogo_api.dart';
 import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
 import '../tema/centelha_tema.dart';
+import 'comum.dart';
 import 'configuracoes.dart';
+import 'obra.dart';
 
-/// Início: as obras publicadas. Capítulos e busca por questão vêm na #29.
+/// Início: as obras publicadas.
 class TelaInicio extends StatefulWidget {
   const TelaInicio({super.key, required this.api, required this.idioma});
 
@@ -56,7 +58,7 @@ class _TelaInicioState extends State<TelaInicio> {
             );
           }
           if (snap.hasError) {
-            return _Aviso(
+            return Aviso(
               texto: t.erroCatalogo,
               acao: FilledButton(
                 onPressed: _recarregar,
@@ -65,7 +67,7 @@ class _TelaInicioState extends State<TelaInicio> {
             );
           }
           final obras = snap.data!;
-          if (obras.isEmpty) return _Aviso(texto: t.catalogoVazio);
+          if (obras.isEmpty) return Aviso(texto: t.catalogoVazio);
           final idioma = idiomaDoConteudo(Localizations.localeOf(context));
           return RefreshIndicator(
             onRefresh: () async {
@@ -77,7 +79,7 @@ class _TelaInicioState extends State<TelaInicio> {
               itemCount: obras.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, i) =>
-                  _CartaoObra(obra: obras[i], idioma: idioma),
+                  _CartaoObra(api: widget.api, obra: obras[i], idioma: idioma),
             ),
           );
         },
@@ -87,8 +89,13 @@ class _TelaInicioState extends State<TelaInicio> {
 }
 
 class _CartaoObra extends StatelessWidget {
-  const _CartaoObra({required this.obra, required this.idioma});
+  const _CartaoObra({
+    required this.api,
+    required this.obra,
+    required this.idioma,
+  });
 
+  final CatalogoApi api;
   final Obra obra;
   final String idioma;
 
@@ -103,58 +110,44 @@ class _CartaoObra extends StatelessWidget {
     ].join(' · ');
     return Card(
       margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: tema.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(Raios.sm),
-              ),
-              child: Text(obra.sigla, style: tema.textTheme.titleSmall),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(edicao.titulo, style: tema.textTheme.titleMedium),
-                  Text(linhaAutor, style: tema.textTheme.bodySmall),
-                  Text(
-                    t.edicoes(obra.edicoes.length),
-                    style: tema.textTheme.labelSmall,
-                  ),
-                ],
-              ),
-            ),
-          ],
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                TelaObra(api: api, obra: obra, edicaoInicial: edicao),
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class _Aviso extends StatelessWidget {
-  const _Aviso({required this.texto, this.acao});
-
-  final String texto;
-  final Widget? acao;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(texto, textAlign: TextAlign.center),
-            if (acao != null) ...[const SizedBox(height: 16), acao!],
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: tema.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(Raios.sm),
+                ),
+                child: Text(obra.sigla, style: tema.textTheme.titleSmall),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(edicao.titulo, style: tema.textTheme.titleMedium),
+                    Text(linhaAutor, style: tema.textTheme.bodySmall),
+                    Text(
+                      t.edicoes(obra.edicoes.length),
+                      style: tema.textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

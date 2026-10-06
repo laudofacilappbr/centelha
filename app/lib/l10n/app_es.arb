@@ -12,5 +12,17 @@
   "idiomaDoAparelho": "Idioma del dispositivo",
   "sobre": "Acerca de",
   "avisoVozSintetica": "La narración se genera con voz sintética, a partir de ediciones de dominio público o con autorización. Cada edición acredita autor, traductor y fuente.",
-  "licencas": "Licencias"
+  "licencas": "Licencias",
+  "capitulos": "Capítulos",
+  "traducao": "Traducción: {tradutor}",
+  "fonte": "Fuente: {fonte}",
+  "buscaQuestao": "Ir a la pregunta",
+  "buscaQuestaoDica": "Número, p. ej.: 88",
+  "questaoNaoEncontrada": "La pregunta {numero} no está en esta edición.",
+  "numeroInvalido": "Escribe el número de la pregunta.",
+  "erroCarregar": "No se pudo cargar. Revisa la conexión.",
+  "questao": "Pregunta {numero}",
+  "pergunta": "Pregunta",
+  "resposta": "Respuesta",
+  "outraEdicao": "Edición"
 }

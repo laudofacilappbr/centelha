@@ -9,11 +9,55 @@
   "catalogoVazio": "Nenhuma obra publicada ainda.",
   "edicoes": "{quantidade, plural, =1{1 edição} other{{quantidade} edições}}",
   "@edicoes": {
-    "placeholders": { "quantidade": { "type": "int" } }
+    "placeholders": {
+      "quantidade": {
+        "type": "int"
+      }
+    }
   },
   "idioma": "Idioma",
   "idiomaDoAparelho": "Idioma do aparelho",
   "sobre": "Sobre",
   "avisoVozSintetica": "A narração é gerada por voz sintética, a partir de edições em domínio público ou com autorização. Cada edição credita autor, tradutor e fonte.",
-  "licencas": "Licenças"
+  "licencas": "Licenças",
+  "capitulos": "Capítulos",
+  "traducao": "Tradução: {tradutor}",
+  "@traducao": {
+    "placeholders": {
+      "tradutor": {
+        "type": "String"
+      }
+    }
+  },
+  "fonte": "Fonte: {fonte}",
+  "@fonte": {
+    "placeholders": {
+      "fonte": {
+        "type": "String"
+      }
+    }
+  },
+  "buscaQuestao": "Ir para a questão",
+  "buscaQuestaoDica": "Número, ex.: 88",
+  "questaoNaoEncontrada": "A questão {numero} não está nesta edição.",
+  "@questaoNaoEncontrada": {
+    "placeholders": {
+      "numero": {
+        "type": "int"
+      }
+    }
+  },
+  "numeroInvalido": "Digite o número da questão.",
+  "erroCarregar": "Não foi possível carregar. Confira a conexão.",
+  "questao": "Questão {numero}",
+  "@questao": {
+    "placeholders": {
+      "numero": {
+        "type": "int"
+      }
+    }
+  },
+  "pergunta": "Pergunta",
+  "resposta": "Resposta",
+  "outraEdicao": "Edição"
 }

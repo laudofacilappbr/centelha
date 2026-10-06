@@ -12,5 +12,17 @@
   "idiomaDoAparelho": "Device language",
   "sobre": "About",
   "avisoVozSintetica": "Narration is produced with a synthetic voice, from public-domain or licensed editions. Each edition credits the author, translator and source.",
-  "licencas": "Licenses"
+  "licencas": "Licenses",
+  "capitulos": "Chapters",
+  "traducao": "Translation: {tradutor}",
+  "fonte": "Source: {fonte}",
+  "buscaQuestao": "Go to question",
+  "buscaQuestaoDica": "Number, e.g. 88",
+  "questaoNaoEncontrada": "Question {numero} isn't in this edition.",
+  "numeroInvalido": "Type the question number.",
+  "erroCarregar": "Couldn't load. Check your connection.",
+  "questao": "Question {numero}",
+  "pergunta": "Question",
+  "resposta": "Answer",
+  "outraEdicao": "Edition"
 }

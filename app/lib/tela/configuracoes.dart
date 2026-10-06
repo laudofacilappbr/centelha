@@ -3,14 +3,6 @@ import 'package:flutter/material.dart';
 import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
 
-// Nome de cada idioma nele mesmo: quem não entende a interface atual ainda acha o seu.
-const _nomes = {
-  'pt': 'Português',
-  'es': 'Español',
-  'fr': 'Français',
-  'en': 'English',
-};
-
 class TelaConfiguracoes extends StatelessWidget {
   const TelaConfiguracoes({super.key, required this.idioma});
 
@@ -40,9 +32,7 @@ class TelaConfiguracoes extends StatelessWidget {
                   for (final locale in AppLocalizations.supportedLocales)
                     RadioListTile<String>(
                       value: locale.languageCode,
-                      title: Text(
-                        _nomes[locale.languageCode] ?? locale.languageCode,
-                      ),
+                      title: Text(nomeDoIdioma(locale.languageCode)),
                     ),
                 ],
               ),
