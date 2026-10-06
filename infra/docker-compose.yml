@@ -22,6 +22,8 @@ services:
       CENTELHA_CORS_ORIGINS: '["http://localhost:4321","http://localhost:8080"]'
       CENTELHA_CONFIAR_CF_CONNECTING_IP: "false"
       CENTELHA_LOG_FORMATO: texto
+      CENTELHA_AUDIO_URL_BASE: http://localhost:8081
+    volumes: ["audio:/data/audio:ro"]
     ports: ["8000:8000"]
     depends_on:
       postgres: { condition: service_healthy }

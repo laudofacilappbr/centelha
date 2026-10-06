@@ -10,33 +10,20 @@ este comando só monta o que alguém escolheu.
 import argparse
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 
 from sqlalchemy import select
 
-from ..config import get_settings
 from ..db import SessionLocal
 from ..models import Capitulo, EstadoCapitulo, FaixaAudio, Publico, Segmento
+from . import cifra
 from .audio import ErroPosProducao
+from .faixa import audio_aberto
 from .video import ErroVideo, TrechoLegenda, montar_video
 
 # Só trecho cujo áudio passou pela revisão humana vai para a rede.
 ESTADOS_PERMITIDOS = {EstadoCapitulo.AUDIO_REVISADO, EstadoCapitulo.PUBLICADO}
 CHAMADA = "Ouça o capítulo completo no app Centelha"
-
-
-def _arquivo_local(url: str, tmp: Path) -> Path:
-    """Arquivo da faixa: direto do disco quando é o armazenamento local, senão baixa."""
-    cfg = get_settings()
-    base = cfg.audio_url_base.rstrip("/") + "/"
-    if url.startswith(base):
-        caminho = Path(cfg.audio_dir) / url[len(base) :]
-        if caminho.exists():
-            return caminho
-    destino = tmp / Path(url).name
-    urllib.request.urlretrieve(url, destino)  # noqa: S310 (URL vem do próprio banco)
-    return destino
 
 
 def _segmentos(session, capitulo: Capitulo, questao: int | None, faixa: str | None):
@@ -99,8 +86,15 @@ def main(argv: list[str] | None = None) -> int:
         infantil = edicao.publico == Publico.INFANTIL
         chamada = None if (a.sem_chamada or infantil) else CHAMADA
 
+        try:
+            claro = audio_aberto(faixa)
+        except (ValueError, cifra.ErroCifra) as e:
+            print(f"não consegui abrir o áudio da faixa: {e}", file=sys.stderr)
+            return 1
         with tempfile.TemporaryDirectory() as tmp:
-            audio = _arquivo_local(faixa.url, Path(tmp))
+            # Faixa .cent decifrada só nesta pasta temporária, que some no fim.
+            audio = Path(tmp) / "capitulo.m4a"
+            audio.write_bytes(claro)
             try:
                 video = montar_video(audio, trechos, referencia, chamada, a.saida, a.fundo)
             except (ErroVideo, ErroPosProducao) as e:

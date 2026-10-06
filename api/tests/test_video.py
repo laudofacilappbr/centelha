@@ -1,7 +1,10 @@
+import base64
+import os
 import subprocess
 from pathlib import Path
 
 import pytest
+from sqlalchemy import select
 
 from centelha_api.config import get_settings
 from centelha_api.models import (
@@ -16,7 +19,7 @@ from centelha_api.models import (
     TipoSegmento,
     Voz,
 )
-from centelha_api.pipeline import video, video_cli
+from centelha_api.pipeline import cifra, video, video_cli
 from centelha_api.pipeline.audio import duracao_ms, ffmpeg_exe
 from centelha_api.pipeline.video import TrechoLegenda, documento_ass, legendas
 
@@ -162,7 +165,10 @@ def _capturar(monkeypatch):
     chamadas = {}
 
     def falso(audio, trechos, referencia, chamada, destino, fundo=None):
-        chamadas.update(audio=audio, trechos=trechos, referencia=referencia, chamada=chamada)
+        # A pasta temporária some quando o comando termina: guarda o conteúdo.
+        chamadas.update(
+            audio=Path(audio).read_bytes(), trechos=trechos, referencia=referencia, chamada=chamada
+        )
         return Path(destino).with_suffix(".mp4")
 
     monkeypatch.setattr(video_cli, "montar_video", falso)
@@ -181,7 +187,7 @@ def test_cli_monta_so_a_questao_pedida(capitulo_revisado, monkeypatch, tmp_path)
     assert [t.texto for t in c["trechos"]] == ["Têm forma?", "Para vós, não."]
     assert c["referencia"] == "O Livro dos Espíritos, questão 88"
     assert c["chamada"] == video_cli.CHAMADA
-    assert c["audio"].name == "c1.m4a"  # do disco, sem baixar
+    assert c["audio"] == (tmp_path / "audio" / "le" / "c1.m4a").read_bytes()  # do disco
 
 
 def test_cli_infantil_nunca_tem_chamada_para_o_app(capitulo_revisado, monkeypatch, tmp_path):
@@ -207,4 +213,46 @@ def test_cli_recusa_audio_nao_revisado(capitulo_revisado, monkeypatch, tmp_path,
         == 1
     )
     assert "revisado" in capsys.readouterr().err
+    assert c == {}
+
+
+def test_cli_decifra_faixa_cent_antes_do_ffmpeg(capitulo_revisado, session, monkeypatch, tmp_path):
+    """Com a cifragem ligada (ADR 0004) a faixa publicada é .cent, que o ffmpeg recusa:
+    o vídeo recebe o .m4a decifrado, e nenhuma cópia aberta fica no volume do áudio."""
+    mestra = os.urandom(32)
+    monkeypatch.setenv("CENTELHA_AUDIO_CHAVE_MESTRA", base64.b64encode(mestra).decode())
+    get_settings.cache_clear()
+    cap = capitulo_revisado()
+    aberto = tmp_path / "audio" / "le" / "c1.m4a"
+    claro = aberto.read_bytes()
+    chave = cifra.nova_chave()
+    (tmp_path / "audio" / "le" / "c1.cent").write_bytes(cifra.cifrar(claro, chave))
+    aberto.unlink()
+    faixa = session.scalar(select(FaixaAudio).where(FaixaAudio.capitulo_id == cap.id))
+    faixa.url = "https://audio.exemplo/le/c1.cent"
+    faixa.formato = cifra.FORMATO
+    faixa.chave_cifrada = cifra.embrulhar(chave, mestra)
+    session.commit()
+
+    c = _capturar(monkeypatch)
+    argv = ["--capitulo", str(cap.id), "--questao", "88", "--saida", str(tmp_path / "v")]
+    assert video_cli.main(argv) == 0
+    assert c["audio"] == claro
+    assert sorted(p.name for p in (tmp_path / "audio" / "le").iterdir()) == ["c1.cent"]
+
+
+def test_cli_chave_mestra_errada_nao_monta(
+    capitulo_revisado, session, monkeypatch, tmp_path, capsys
+):
+    monkeypatch.setenv("CENTELHA_AUDIO_CHAVE_MESTRA", base64.b64encode(os.urandom(32)).decode())
+    get_settings.cache_clear()
+    cap = capitulo_revisado()
+    faixa = session.scalar(select(FaixaAudio).where(FaixaAudio.capitulo_id == cap.id))
+    faixa.formato = cifra.FORMATO
+    faixa.chave_cifrada = cifra.embrulhar(cifra.nova_chave(), os.urandom(32))
+    session.commit()
+    c = _capturar(monkeypatch)
+    argv = ["--capitulo", str(cap.id), "--questao", "88", "--saida", str(tmp_path / "v")]
+    assert video_cli.main(argv) == 1
+    assert "abrir o áudio" in capsys.readouterr().err
     assert c == {}

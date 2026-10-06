@@ -51,6 +51,10 @@ services:
       CENTELHA_SENTRY_DSN: ${CENTELHA_SENTRY_DSN:-}
       # A api entrega ao app a chave de cada faixa cifrada (#73); a mesma do worker.
       CENTELHA_AUDIO_CHAVE_MESTRA: ${CENTELHA_AUDIO_CHAVE_MESTRA:-}
+      # Escuta do revisor no admin: lê a faixa do volume (só leitura), e não pela
+      # Cloudflare. Mesma base do worker, para reconhecer a URL guardada no banco.
+      CENTELHA_AUDIO_URL_BASE: https://audio.${DOMINIO}
+    volumes: ["audio:/data/audio:ro"]
     depends_on:
       postgres: { condition: service_healthy }
     networks: [borda, interna]
