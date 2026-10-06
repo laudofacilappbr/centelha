@@ -76,4 +76,4 @@ O resultado (`PUT /v1/admin/campanhas/{id}/resultado`) só entra depois do fim, 
 
 ## Deploy
 
-VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`.
+VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`. Passo a passo da primeira vez, deploy automático e volta de versão em [docs/deploy.md](docs/deploy.md).

@@ -7,6 +7,8 @@
 #   ci/validar.sh infra      # compose de dev e prod, Caddyfile
 #   ci/validar.sh app        # só o app Flutter (format, analyze, testes)
 #   ci/validar.sh backup     # backup → apaga → restaura, com PostgreSQL e S3 locais
+#   ci/validar.sh vps        # preparar.sh num Ubuntu 24.04 e o firewall da Cloudflare com
+#                            # pacote de verdade; actionlint dos workflows
 #   ci/validar.sh imagens    # build das imagens api, worker, site, piper, digitalizacao e backup
 #
 # Roda o que está na worktree (commitado ou não). Cada worktree usa um projeto Docker
@@ -58,6 +60,13 @@ for alvo in "${alvos[@]}"; do
       bash infra/backup/teste/testar.sh
       marcar backup $?
       ;;
+    vps)
+      echo "### vps"
+      ok=0
+      bash infra/vps/teste/testar.sh || ok=1
+      MSYS_NO_PATHCONV=1 docker run --rm -v "$raiz:/repo" -w /repo rhysd/actionlint:1.7.7         -no-color || ok=1
+      marcar vps $ok
+      ;;
     infra)
       echo "### infra"
       ok=0
@@ -83,7 +92,7 @@ for alvo in "${alvos[@]}"; do
       marcar imagens $ok
       ;;
     *)
-      echo "alvo desconhecido: $alvo (use api, site, infra, app, backup, imagens)" >&2
+      echo "alvo desconhecido: $alvo (use api, site, infra, app, backup, vps, imagens)" >&2
       exit 2
       ;;
   esac

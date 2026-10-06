@@ -22,13 +22,22 @@ services:
       - audio:/srv/audio:ro
     environment:
       DOMINIO: ${DOMINIO}
-    depends_on: [site, api]
+    # Admin do Caddy só em localhost dentro do container: responde se o Caddy está de pé.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    depends_on:
+      site: { condition: service_healthy }
+      api: { condition: service_healthy }
     networks: [borda]
 
   site:
     logging: *logs
     image: ghcr.io/laudofacilappbr/centelha-site:${TAG:-latest}
     restart: unless-stopped
+    # Healthcheck vem da imagem (site/Dockerfile), como o da api.
     networks: [borda]
 
   api:
@@ -40,6 +49,8 @@ services:
       CENTELHA_CORS_ORIGINS: '["https://${DOMINIO}","https://www.${DOMINIO}"]'
       CENTELHA_AMBIENTE: producao
       CENTELHA_SENTRY_DSN: ${CENTELHA_SENTRY_DSN:-}
+      # A api entrega ao app a chave de cada faixa cifrada (#73); a mesma do worker.
+      CENTELHA_AUDIO_CHAVE_MESTRA: ${CENTELHA_AUDIO_CHAVE_MESTRA:-}
     depends_on:
       postgres: { condition: service_healthy }
     networks: [borda, interna]
@@ -67,9 +78,15 @@ services:
     volumes: [audio:/data/audio]
     depends_on:
       postgres: { condition: service_healthy }
-      piper: { condition: service_started }
+      piper: { condition: service_healthy }
     # Só fala com o banco e com o provedor de TTS; não precisa da rede de borda,
     # mas precisa de saída para a internet, que a rede interna não tem.
+    # Sem porta HTTP: saudável se consegue falar com o banco, que é de onde vem o trabalho.
+    healthcheck:
+      test: ["CMD", "python", "-c", "from sqlalchemy import text; from centelha_api.db import engine; engine.connect().execute(text('select 1'))"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
     networks: [interna, saida]
 
   # TTS local: vozes dentro da imagem, então não precisa de internet. Só na rede
@@ -78,6 +95,11 @@ services:
     logging: *logs
     image: ghcr.io/laudofacilappbr/centelha-piper:${TAG:-latest}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/voices', timeout=5)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
     networks: [interna]
 
   # Backup diário do banco e do áudio, cifrado, para um bucket S3 (R2 ou B2). Restaurar:
@@ -117,12 +139,6 @@ services:
       test: ["CMD-SHELL", "pg_isready -U centelha -d centelha"]
       interval: 10s
       retries: 10
-    networks: [interna]
-
-  redis:
-    logging: *logs
-    image: redis:7-alpine
-    restart: unless-stopped
     networks: [interna]
 
 volumes:

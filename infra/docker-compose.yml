@@ -15,10 +15,6 @@ services:
       interval: 5s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-
   api:
     build: ../api
     environment:
