@@ -25,3 +25,12 @@ api.{$DOMINIO} {
 	import cloudflare
 	reverse_proxy api:8000
 }
+
+audio.{$DOMINIO} {
+	import cloudflare
+	root * /srv/audio
+	# Nome do arquivo tem a versão (…-v2.m4a): conteúdo nunca muda, cache eterno.
+	header Cache-Control "public, max-age=31536000, immutable"
+	header Access-Control-Allow-Origin *
+	file_server
+}
