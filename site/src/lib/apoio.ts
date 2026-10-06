@@ -28,33 +28,26 @@ const DESLIGADO: Apoio = {
 };
 
 const env = import.meta.env;
-const BASE = String(env.CATALOGO_API_URL || env.PUBLIC_API_URL || "").replace(
-  /\/+$/,
-  "",
-);
-const OBRIGATORIO = env.CATALOGO_OBRIGATORIO === "1";
+const BASE = String(env.CATALOGO_API_URL || env.PUBLIC_API_URL || '').replace(/\/+$/, '');
+const OBRIGATORIO = env.CATALOGO_OBRIGATORIO === '1';
 
 async function buscar(): Promise<Apoio> {
   if (!BASE) {
-    if (OBRIGATORIO)
-      throw new Error("apoio: CATALOGO_OBRIGATORIO=1 sem URL da API");
+    if (OBRIGATORIO) throw new Error('apoio: CATALOGO_OBRIGATORIO=1 sem URL da API');
     return DESLIGADO;
   }
   try {
     const r = await fetch(`${BASE}/v1/apoio`, {
-      headers: { Accept: "application/json" },
+      headers: { Accept: 'application/json' },
     });
     if (!r.ok) throw new Error(`apoio: ${r.status}`);
     const a = (await r.json()) as Apoio;
     // Só https sai do site; a API já recusa outro esquema, isto é a segunda trava.
-    if (a.link_externo && !a.link_externo.startsWith("https://"))
-      a.link_externo = null;
+    if (a.link_externo && !a.link_externo.startsWith('https://')) a.link_externo = null;
     return a;
   } catch (e) {
     if (OBRIGATORIO) throw e;
-    console.warn(
-      `[apoio] API indisponível (${(e as Error).message}); apoio aparece fechado.`,
-    );
+    console.warn(`[apoio] API indisponível (${(e as Error).message}); apoio aparece fechado.`);
     return DESLIGADO;
   }
 }

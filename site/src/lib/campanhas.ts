@@ -15,7 +15,7 @@ export interface Instituicao {
   site: string | null;
 }
 
-export type Situacao = "futura" | "ativa" | "encerrada";
+export type Situacao = 'futura' | 'ativa' | 'encerrada';
 
 export interface Campanha {
   slug: string;
@@ -34,42 +34,35 @@ export interface Campanha {
 }
 
 const env = import.meta.env;
-const BASE = String(env.CATALOGO_API_URL || env.PUBLIC_API_URL || "").replace(
-  /\/+$/,
-  "",
-);
-const OBRIGATORIO = env.CATALOGO_OBRIGATORIO === "1";
+const BASE = String(env.CATALOGO_API_URL || env.PUBLIC_API_URL || '').replace(/\/+$/, '');
+const OBRIGATORIO = env.CATALOGO_OBRIGATORIO === '1';
 
 let carregado: Promise<Campanha[]> | undefined;
 
 export function campanhasPublicadas(): Promise<Campanha[]> {
   carregado ??= (async () => {
     if (!BASE) {
-      if (OBRIGATORIO)
-        throw new Error("campanhas: CATALOGO_OBRIGATORIO=1 sem URL da API");
+      if (OBRIGATORIO) throw new Error('campanhas: CATALOGO_OBRIGATORIO=1 sem URL da API');
       return [];
     }
     try {
       const r = await fetch(`${BASE}/v1/campanhas`, {
-        headers: { Accept: "application/json" },
+        headers: { Accept: 'application/json' },
       });
       if (!r.ok) throw new Error(`campanhas: ${r.status}`);
       const lista = (await r.json()) as Campanha[];
       // Só https sai do site; a API já recusa outro esquema, isto é a segunda trava.
       for (const c of lista) {
-        for (const k of ["pagina_doacao", "site"] as const) {
+        for (const k of ['pagina_doacao', 'site'] as const) {
           const v = c.instituicao[k];
-          if (v && !v.startsWith("https://")) c.instituicao[k] = null;
+          if (v && !v.startsWith('https://')) c.instituicao[k] = null;
         }
-        if (c.imagem_url && !c.imagem_url.startsWith("https://"))
-          c.imagem_url = null;
+        if (c.imagem_url && !c.imagem_url.startsWith('https://')) c.imagem_url = null;
       }
       return lista;
     } catch (e) {
       if (OBRIGATORIO) throw e;
-      console.warn(
-        `[campanhas] API indisponível (${(e as Error).message}); páginas de campanha não geradas.`,
-      );
+      console.warn(`[campanhas] API indisponível (${(e as Error).message}); páginas de campanha não geradas.`);
       return [];
     }
   })();
@@ -83,17 +76,17 @@ export function urlCampanha(slug: string): string {
 
 /** "2026-07-01" → "1º de julho de 2026". */
 export function dataCampanha(iso: string): string {
-  const [a, m, d] = iso.split("-").map(Number);
-  const texto = new Date(Date.UTC(a, m - 1, d)).toLocaleDateString("pt-BR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
+  const [a, m, d] = iso.split('-').map(Number);
+  const texto = new Date(Date.UTC(a, m - 1, d)).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
   });
-  return d === 1 ? texto.replace(/^1 /, "1º ") : texto;
+  return d === 1 ? texto.replace(/^1 /, '1º ') : texto;
 }
 
 /** "11222333000181" → "11.222.333/0001-81". */
 export function formatarCnpj(c: string): string {
-  return c.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+  return c.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
 }

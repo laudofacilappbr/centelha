@@ -72,8 +72,8 @@ const ld = [
 ---
 
 <BaseLayout
-  title={`${nomeCapitulo(cap.titulo)} — ${ed.titulo}`}
-  description={resumir(`${ed.titulo}, ${cap.titulo.toLowerCase()}: ${primeiroTexto}`)}
+  title={cap.seo_titulo || `${nomeCapitulo(cap.titulo)} — ${ed.titulo}`}
+  description={cap.seo_descricao || resumir(`${ed.titulo}, ${cap.titulo.toLowerCase()}: ${primeiroTexto}`)}
   jsonLd={ld}
 >
   <PageHeader eyebrow={ed.titulo} title={cap.titulo} />

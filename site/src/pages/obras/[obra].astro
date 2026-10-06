@@ -48,8 +48,8 @@ const ld = [
 ---
 
 <BaseLayout
-  title={`${ed.titulo} — audiolivro completo`}
-  description={`Ouça ${ed.titulo}, de ${obra.autor}, completo e grátis, em português. ${resumo}`}
+  title={ed.seo_titulo || `${ed.titulo} — audiolivro completo`}
+  description={ed.seo_descricao || `Ouça ${ed.titulo}, de ${obra.autor}, completo e grátis, em português. ${resumo}`}
   jsonLd={ld}
 >
   <PageHeader eyebrow={obra.autor} title={ed.titulo} lede={resumo} />

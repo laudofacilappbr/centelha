@@ -163,3 +163,17 @@ def test_publicado_nao_se_edita_e_despublicar_exige_nova_revisao(client, h, acer
 )
 def test_entrada_invalida(client, h, acervo, campo):
     assert client.post(URL, json=_corpo(**campo), headers=h["autor"]).status_code == 422
+
+
+def test_seo_do_post_passa_pela_revisao(client, h, acervo):
+    """SEO do post aparece na busca como o texto: entra pela mesma revisão."""
+    corpo = _corpo(seo_titulo="Sonhos segundo Kardec", seo_descricao="A questão 402.")
+    pid = client.post(URL, json=corpo, headers=h["autor"]).json()["id"]
+    client.post(f"{URL}/{pid}/revisar", headers=h["revisor"])
+    client.post(f"{URL}/{pid}/publicar", headers=h["autor"])
+    pub = client.get("/v1/posts/kardec-e-os-sonhos").json()
+    assert (pub["seo_titulo"], pub["seo_descricao"]) == ("Sonhos segundo Kardec", "A questão 402.")
+    # Mudar só o SEO também devolve o post a rascunho, como qualquer edição.
+    client.post(f"{URL}/{pid}/despublicar", headers=h["autor"])
+    r = client.put(f"{URL}/{pid}", json={**corpo, "seo_titulo": "Outro"}, headers=h["autor"])
+    assert r.json()["estado"] == "rascunho"

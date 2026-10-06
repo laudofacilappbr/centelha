@@ -100,6 +100,10 @@ class Edicao(Timestamps, Base):
     idioma: Mapped[str] = mapped_column(String(35))  # BCP 47, ex.: pt-BR
     publico: Mapped[Publico] = mapped_column(_enum(Publico), default=Publico.ADULTO)
     titulo: Mapped[str] = mapped_column(String(300))
+    # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
+    # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
+    seo_titulo: Mapped[str | None] = mapped_column(String(60))
+    seo_descricao: Mapped[str | None] = mapped_column(String(160))
     tradutor: Mapped[str | None] = mapped_column(String(200))
     fonte: Mapped[str] = mapped_column(Text)
     # Notas de rodapé: "fim_paragrafo" ou "omitir" (normalização do pipeline).
@@ -138,6 +142,10 @@ class Capitulo(Timestamps, Base):
     edicao_id: Mapped[int] = mapped_column(ForeignKey("edicao.id"))
     ordem: Mapped[int]
     titulo: Mapped[str] = mapped_column(String(300))
+    # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
+    # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
+    seo_titulo: Mapped[str | None] = mapped_column(String(60))
+    seo_descricao: Mapped[str | None] = mapped_column(String(160))
     # Liga o mesmo capítulo entre idiomas, ex.: "ESE-05".
     referencia_canonica: Mapped[str] = mapped_column(String(40))
     estado: Mapped[EstadoCapitulo] = mapped_column(
@@ -433,6 +441,10 @@ class Post(Timestamps, Base):
     titulo: Mapped[str] = mapped_column(String(200))
     # Uma ou duas frases: lista do blog e <meta description>.
     resumo: Mapped[str] = mapped_column(String(300))
+    # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
+    # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
+    seo_titulo: Mapped[str | None] = mapped_column(String(60))
+    seo_descricao: Mapped[str | None] = mapped_column(String(160))
     # Markdown restrito (parágrafos, subtítulos, listas, ênfase e links); o site
     # escapa o HTML antes de interpretar.
     texto: Mapped[str] = mapped_column(Text)
