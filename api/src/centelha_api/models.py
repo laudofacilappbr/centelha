@@ -8,6 +8,7 @@ import enum
 from datetime import date, datetime
 
 from sqlalchemy import (
+    ARRAY,
     JSON,
     BigInteger,
     CheckConstraint,
@@ -456,3 +457,28 @@ class PostReferencia(Base):
     ordem: Mapped[int]
 
     post: Mapped[Post] = relationship(back_populates="referencias")
+
+
+class ConfigApoio(Timestamps, Base):
+    """Apoio ao projeto (#40): uma linha só, editada pelo administrador.
+
+    Nasce desligado. Ligar depende de quem recebe o dinheiro estar resolvido (#4),
+    e a página pública diz o nome de quem recebe: dinheiro que fica com o projeto
+    não pode parecer caridade (especificação, Monetização).
+    """
+
+    __tablename__ = "config_apoio"
+    # Uma linha: duas configurações "ativas" seriam duas verdades sobre o mesmo botão.
+    __table_args__ = (CheckConstraint("id = 1", name="linha_unica"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    ligado: Mapped[bool] = mapped_column(default=False)
+    recebedor: Mapped[str | None] = mapped_column(String(200))
+    mensagem: Mapped[str | None] = mapped_column(String(500))
+    valores_centavos: Mapped[list[int]] = mapped_column(ARRAY(Integer), default=list)
+    # Meios. Compra no app é o padrão nas lojas; Pix e link externo valem no site e,
+    # onde a loja permitir, no app (decisão C em #40).
+    compra_no_app: Mapped[bool] = mapped_column(default=False)
+    chave_pix: Mapped[str | None] = mapped_column(String(77))
+    link_externo: Mapped[str | None] = mapped_column(Text)
+    atualizado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))

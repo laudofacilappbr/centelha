@@ -25,6 +25,8 @@ class Permissao(enum.StrEnum):
     EDITAR_TRANSPARENCIA = "editar_transparencia"
     # Temas, glossário e posts do site (#42). Só administrador.
     EDITAR_CONTEUDO = "editar_conteudo"
+    # Liga o apoio e diz para onde vai o dinheiro (#40). Só administrador.
+    GERIR_APOIO = "gerir_apoio"
 
 
 # Tabela "Papéis" da especificação. Lista explícita, sem herança entre papéis: um

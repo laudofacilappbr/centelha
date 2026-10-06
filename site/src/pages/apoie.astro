@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import StoreButtons from '../components/StoreButtons.astro';
+import { apoio } from '../lib/apoio';
+import { reais } from '../lib/transparencia';
+
+const a = await apoio();
+---
+
+<BaseLayout
+  title="Apoie o Centelha"
+  description="O Centelha é gratuito e sem anúncios. O apoio voluntário cobre a narração por IA, o servidor e as contas nas lojas."
+  noindex={!a.ligado}
+>
+  <PageHeader
+    eyebrow="Apoie"
+    title="Ajude a manter o Centelha no ar"
+    lede="O app é gratuito e continua gratuito. Apoiar não libera conteúdo: cobre a narração por IA, o servidor e as contas nas lojas."
+  />
+  <div class="container">
+    <article class="prose">
+      {
+        a.ligado ? (
+          <>
+            {a.mensagem && <p>{a.mensagem}</p>}
+            <p class="card recebedor">
+              O apoio vai para <strong>{a.recebedor}</strong>, que mantém o projeto. Não é doação para caridade. Cada real
+              que entra aparece na <a href="/transparencia">prestação de contas</a>, junto com os custos do mês.
+            </p>
+
+            {a.valores_centavos.length > 0 && (
+              <>
+                <h2>Valores sugeridos</h2>
+                <ul class="valores" aria-label="Valores sugeridos">
+                  {a.valores_centavos.map((v) => (
+                    <li>{reais(v)}</li>
+                  ))}
+                </ul>
+                <p class="muted">Qualquer valor ajuda, uma vez ou todo mês.</p>
+              </>
+            )}
+
+            {a.chave_pix && (
+              <>
+                <h2>Pix</h2>
+                <p>Copie a chave e escolha o valor no app do seu banco.</p>
+                <p class="pix">
+                  <code id="chave-pix">{a.chave_pix}</code>
+                  <button type="button" class="btn btn-ghost" id="copiar-pix" data-chave={a.chave_pix}>
+                    Copiar chave
+                  </button>
+                  <span id="pix-copiado" class="muted" role="status" />
+                </p>
+              </>
+            )}
+
+            {a.link_externo && (
+              <>
+                <h2>Cartão e outros meios</h2>
+                <p>
+                  <a class="btn btn-primary" href={a.link_externo} rel="noopener noreferrer">
+                    Apoiar pela página de pagamento
+                  </a>
+                </p>
+              </>
+            )}
+
+            {a.compra_no_app && (
+              <>
+                <h2>Pelo app</h2>
+                <p>No app Centelha, abra Ajustes e toque em “Apoie o Centelha”. O pagamento passa pela loja.</p>
+                <StoreButtons />
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <p>
+              O apoio ainda não está aberto. Enquanto isso, os custos do projeto estão na página de{' '}
+              <a href="/transparencia">transparência</a>.
+            </p>
+            <p>A melhor ajuda agora é ouvir e indicar o Centelha para quem gostaria de conhecer as obras.</p>
+          </>
+        )
+      }
+    </article>
+  </div>
+</BaseLayout>
+
+<script>
+  const botao = document.getElementById('copiar-pix');
+  const aviso = document.getElementById('pix-copiado');
+  botao?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(botao.dataset.chave ?? '');
+      if (aviso) aviso.textContent = 'Chave copiada.';
+    } catch {
+      if (aviso) aviso.textContent = 'Não deu para copiar; selecione a chave acima.';
+    }
+  });
+</script>
+
+<style>
+  .recebedor {
+    margin-block: 1.5rem;
+  }
+  .valores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  .valores li {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border, currentColor);
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .pix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .pix code {
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+</style>

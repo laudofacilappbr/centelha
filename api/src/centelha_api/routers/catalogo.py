@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session, selectinload
 from ..db import get_session
 from ..models import (
     Capitulo,
+    ConfigApoio,
     Direitos,
     Edicao,
     EstadoCapitulo,
@@ -224,8 +225,10 @@ class ConfigRemota(BaseModel):
 
 
 @router.get("/config", response_model=ConfigRemota)
-def config_remota(response: Response):
-    """Configuração lida pelo app ao abrir. MVP: toda monetização desligada (especificação).
-    O perfil infantil ignora estas opções no próprio app, sempre."""
+def config_remota(response: Response, session: Session = Depends(get_session)):
+    """Configuração lida pelo app ao abrir. Apoio segue o admin (#40); caridade e
+    anúncios continuam desligados. O perfil infantil ignora estas opções no próprio
+    app, sempre."""
     _cache(response)
-    return ConfigRemota(apoio=False, caridade=False, anuncios=False)
+    apoio = session.get(ConfigApoio, 1)
+    return ConfigRemota(apoio=bool(apoio and apoio.ligado), caridade=False, anuncios=False)

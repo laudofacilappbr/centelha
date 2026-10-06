@@ -60,6 +60,8 @@ Para gerar o áudio, `POST /v1/admin/capitulos/{id}/gerar-audio` com as vozes (`
 
 Dicionário de pronúncia em `/v1/admin/pronuncias` (revisor de áudio ou administrador). Criar, alterar ou apagar uma entrada devolve `capitulos_afetados`: os capítulos com áudio cuja síntese usaria a entrada, pela mesma regra da pipeline (termo mais longo primeiro, palavra inteira). `POST /v1/admin/pronuncias/{id}/regenerar` enfileira esses capítulos de novo, com as vozes da última geração. Capítulos publicados ficam de fora até alguém despublicar.
 
+Apoio ao projeto em `PUT /v1/admin/apoio` (só administrador): liga e desliga, quem recebe, valores sugeridos e os meios (compra no app, chave Pix, link https). Nasce desligado. Para ligar, é preciso informar quem recebe, ao menos um meio e um valor. Chave Pix CPF é recusada porque publicaria o documento de quem recebe. O app lê `apoio` em `GET /v1/config` e o site monta `/apoie` com `GET /v1/apoio`, que devolve só `ligado: false` enquanto o apoio estiver desligado. O site só mostra a mudança no próximo build.
+
 ## Deploy
 
 VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`.
