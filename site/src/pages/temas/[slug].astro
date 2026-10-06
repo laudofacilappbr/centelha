@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import { resumir } from '../../lib/catalogo';
+import { temasPublicados, urlItem, urlTema, paragrafos, type Tema } from '../../lib/temas';
+
+export async function getStaticPaths() {
+  return (await temasPublicados()).map((t) => ({ params: { slug: t.slug }, props: { t } }));
+}
+
+interface Props {
+  t: Tema;
+}
+const { t } = Astro.props;
+const url = new URL(urlTema(t.slug), Astro.site).href;
+const questoes = t.itens.filter((i) => i.tipo === 'questao');
+const capitulos = t.itens.filter((i) => i.tipo === 'capitulo');
+
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: t.titulo,
+    url,
+    inLanguage: t.idioma,
+    description: resumir(t.resumo),
+    datePublished: t.publicado_em,
+    dateModified: t.atualizado_em,
+    hasPart: t.itens.map((i) => ({ '@type': 'CreativeWork', name: i.titulo, url: new URL(urlItem(i), Astro.site).href })),
+  },
+];
+---
+
+<BaseLayout title={`${t.titulo} — temas espíritas`} description={resumir(t.resumo)} jsonLd={ld}>
+  <PageHeader eyebrow="Tema" title={t.titulo} />
+  <div class="container section">
+    <nav aria-label="Trilha" class="muted trilha"><a href="/temas">Temas</a></nav>
+    <article class="prose">
+      {paragrafos(t.resumo).map((p) => <p>{p}</p>)}
+
+      {
+        questoes.length > 0 && (
+          <>
+            <h2>Questões</h2>
+            <ul>
+              {questoes.map((i) => (
+                <li>
+                  <a href={urlItem(i)}>
+                    <strong>{i.referencia}</strong> — {i.titulo}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+      {
+        capitulos.length > 0 && (
+          <>
+            <h2>Capítulos</h2>
+            <ul>
+              {capitulos.map((i) => (
+                <li>
+                  <a href={urlItem(i)}>{i.titulo}</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </article>
+    <aside class="card cta">
+      <h2>Ouça as obras completas</h2>
+      <p>No app Centelha, grátis, com o texto acompanhando a narração.</p>
+      <StoreButtons />
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+</style>

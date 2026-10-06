@@ -361,3 +361,39 @@ class LancamentoTransparencia(Timestamps, Base):
     nota: Mapped[str | None] = mapped_column(String(300))
 
     mes_ref: Mapped[MesTransparencia] = relationship(back_populates="lancamentos")
+
+
+class Tema(Timestamps, Base):
+    """Página de tema do site (#42): texto curto da equipe ligando questões e capítulos.
+
+    "O que o espiritismo diz sobre reencarnação" responde a uma busca real; o texto de
+    Kardec está em centenas de sites, a curadoria que liga os trechos não.
+    """
+
+    __tablename__ = "tema"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # URL permanente: /temas/<slug>. Não muda depois de publicado.
+    slug: Mapped[str] = mapped_column(String(80), unique=True)
+    titulo: Mapped[str] = mapped_column(String(200))
+    resumo: Mapped[str] = mapped_column(Text)
+    idioma: Mapped[str] = mapped_column(String(35), default="pt-BR")
+    publicado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    referencias: Mapped[list["TemaReferencia"]] = relationship(
+        back_populates="tema", order_by="TemaReferencia.ordem", cascade="all, delete-orphan"
+    )
+
+
+class TemaReferencia(Base):
+    __tablename__ = "tema_referencia"
+    __table_args__ = (UniqueConstraint("tema_id", "referencia"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tema_id: Mapped[int] = mapped_column(ForeignKey("tema.id", ondelete="CASCADE"), index=True)
+    # Referência canônica, não id: "LE-88" (questão) ou "LE-C001" (capítulo). Ids de
+    # capítulo mudam quando a edição é reimportada; a referência não.
+    referencia: Mapped[str] = mapped_column(String(40), index=True)
+    ordem: Mapped[int]
+
+    tema: Mapped[Tema] = relationship(back_populates="referencias")

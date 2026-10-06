@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { temasPublicados, urlTema, paragrafos } from '../../lib/temas';
+
+const temas = await temasPublicados();
+---
+
+<BaseLayout
+  title="Temas: o que a doutrina espírita diz"
+  description="Temas da doutrina espírita com as questões e os capítulos de Allan Kardec que tratam de cada um, para ler e ouvir."
+>
+  <PageHeader
+    eyebrow="Temas"
+    title="O que Kardec diz sobre…"
+    lede="Cada tema reúne as questões e os capítulos das obras que tratam do assunto."
+  />
+  <div class="container section">
+    {
+      temas.length ? (
+        <ul class="grid lista-temas" role="list">
+          {temas.map((t) => (
+            <li class="card">
+              <h2>
+                <a href={urlTema(t.slug)}>{t.titulo}</a>
+              </h2>
+              <p class="muted">{paragrafos(t.resumo)[0]}</p>
+              <p class="muted contagem">
+                {t.itens.length} {t.itens.length === 1 ? 'trecho' : 'trechos'}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Os primeiros temas serão publicados junto com as obras.</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .lista-temas h2 {
+    font-size: 1.25rem;
+    margin-top: 0;
+  }
+  .contagem {
+    font-size: 0.9rem;
+  }
+</style>

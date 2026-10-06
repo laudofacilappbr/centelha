@@ -5,6 +5,7 @@ import Segmentos from '../../../components/Segmentos.astro';
 import StoreButtons from '../../../components/StoreButtons.astro';
 import { slugCapitulo, nomeCapitulo, resumir, type Obra, type Edicao } from '../../../lib/catalogo';
 import { questoesDoLivroDosEspiritos, urlQuestao, type Questao } from '../../../lib/questoes';
+import { temasDaQuestao, urlTema } from '../../../lib/temas';
 
 export async function getStaticPaths() {
   const dados = await questoesDoLivroDosEspiritos();
@@ -28,6 +29,7 @@ const pergunta = q.segmentos.find((s) => s.tipo === 'pergunta' && !s.subquestao)
 const resposta = q.segmentos.find((s) => s.tipo === 'resposta' && !s.subquestao);
 const capUrl = `/obras/${obra.slug}/${slugCapitulo(q.capitulo)}`;
 const url = new URL(urlQuestao(q.numero), Astro.site).href;
+const relacionados = await temasDaQuestao(q.numero);
 
 const ld = [
   {
@@ -62,6 +64,20 @@ const ld = [
       <a href={`${capUrl}#q${q.numero}`}>{nomeCapitulo(q.capitulo.titulo)}</a>
     </nav>
     <Segmentos segmentos={q.segmentos} />
+    {
+      relacionados.length > 0 && (
+        <aside class="relacionados" aria-labelledby="temas-relacionados">
+          <h2 id="temas-relacionados">Temas relacionados</h2>
+          <ul>
+            {relacionados.map((t) => (
+              <li>
+                <a href={urlTema(t.slug)}>{t.titulo}</a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
     <nav class="paginacao" aria-label="Questões">
       {anterior ? <a href={urlQuestao(anterior)} rel="prev">← Questão {anterior}</a> : <span />}
       {proxima && <a href={urlQuestao(proxima)} rel="next">Questão {proxima} →</a>}
@@ -89,5 +105,11 @@ const ld = [
   }
   .cta {
     margin-top: var(--space-10);
+  }
+  .relacionados {
+    margin-top: var(--space-8);
+  }
+  .relacionados h2 {
+    font-size: 1.15rem;
   }
 </style>

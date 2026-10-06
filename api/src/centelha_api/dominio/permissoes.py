@@ -23,6 +23,8 @@ class Permissao(enum.StrEnum):
     VER_CUSTOS = "ver_custos"
     # Lança e publica a prestação de contas pública (#36). Só administrador.
     EDITAR_TRANSPARENCIA = "editar_transparencia"
+    # Temas, glossário e posts do site (#42). Só administrador.
+    EDITAR_CONTEUDO = "editar_conteudo"
 
 
 # Tabela "Papéis" da especificação. Lista explícita, sem herança entre papéis: um
