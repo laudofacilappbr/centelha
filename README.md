@@ -56,6 +56,8 @@ cd api && uv run centelha-admin criar --email voce@exemplo.org --nome "Seu nome"
 
 Fluxo editorial do capítulo: `importado → texto_revisado → audio_gerado → audio_revisado → publicado`. Para mudar de estado, `POST /v1/admin/capitulos/{id}/transicoes` com a ação; `GET /v1/admin/capitulos/{id}` lista as ações que o usuário logado pode tomar. A tabela de transições está em `api/src/centelha_api/dominio/editorial.py`. O texto só se edita com o capítulo em `importado`; depois disso, é preciso reabrir o texto.
 
+Edição juvenil ou infantil tem um passo a mais antes do áudio: `texto_revisado → doutrina_revisada`, com as ações `aprovar_doutrina` e `reprovar_doutrina` (permissão `APROVAR_DOUTRINA`, só administrador). A IA pode fazer a primeira leitura (#98), mas quem aprova é uma pessoa. Sem esse passo, a geração de áudio é recusada. A geração também recusa voz de outro público: história infantil com voz infantil, obra adulta com voz adulta.
+
 Para gerar o áudio, `POST /v1/admin/capitulos/{id}/gerar-audio` com as vozes (`GET /v1/admin/vozes`), por um administrador ou revisor de áudio. A rota só enfileira; o worker sintetiza e leva o capítulo a `audio_gerado`. O motor de TTS sai da voz escolhida, e a resposta traz `caracteres_estimados`, que é a base de cobrança dos motores em nuvem.
 
 Dicionário de pronúncia em `/v1/admin/pronuncias` (revisor de áudio ou administrador). Criar, alterar ou apagar uma entrada devolve `capitulos_afetados`: os capítulos com áudio cuja síntese usaria a entrada, pela mesma regra da pipeline (termo mais longo primeiro, palavra inteira). `POST /v1/admin/pronuncias/{id}/regenerar` enfileira esses capítulos de novo, com as vozes da última geração. Capítulos publicados ficam de fora até alguém despublicar.

@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..config import get_settings
+from ..dominio import editorial
 from ..dominio.contas import registrar
 from ..models import (
     Capitulo,
@@ -32,14 +33,6 @@ from .pronuncia import EntradaPronuncia
 from .tts.gerar import SegmentoParaVoz, Vozes, gerar_capitulo
 from .tts.motores import Motor
 from .tts.motores import motor as motor_por_nome
-
-# Texto precisa estar revisado antes de virar áudio (fluxo do admin). Regenerar áudio
-# já gerado ou revisado é permitido e devolve o capítulo para "áudio gerado".
-ESTADOS_QUE_GERAM = {
-    EstadoCapitulo.TEXTO_REVISADO,
-    EstadoCapitulo.AUDIO_GERADO,
-    EstadoCapitulo.AUDIO_REVISADO,
-}
 
 
 class JobRecusado(Exception):
@@ -61,15 +54,25 @@ def enfileirar(
     resposta: Voz | None = None,
     usuario: Usuario | None = None,
 ) -> JobAudio:
-    if capitulo.estado not in ESTADOS_QUE_GERAM:
+    # Regra no fluxo editorial: texto revisado, e na adaptação também a doutrina.
+    if not editorial.pode_gerar_audio(capitulo):
         raise JobRecusado(
             f"capítulo {capitulo.id} em '{capitulo.estado.value}': "
-            "áudio só sai de texto revisado (publicado exige despublicar antes)"
+            "áudio só sai de texto revisado, e na adaptação juvenil ou infantil de doutrina "
+            "revisada (publicado exige despublicar antes)"
         )
-    idioma = capitulo.edicao.idioma
+    edicao = capitulo.edicao
     for voz in (narrador, pergunta, resposta):
-        if voz is not None and voz.idioma != idioma:
-            raise JobRecusado(f"voz {voz.id} é {voz.idioma}, capítulo é {idioma}")
+        if voz is None:
+            continue
+        if voz.idioma != edicao.idioma:
+            raise JobRecusado(f"voz {voz.id} é {voz.idioma}, capítulo é {edicao.idioma}")
+        # Cada público tem a sua narração (especificação: infantil com voz calorosa e
+        # ritmo lento, juvenil mais dinâmica); voz adulta numa história infantil passaria.
+        if voz.publico != edicao.publico:
+            raise JobRecusado(
+                f"voz {voz.id} é do público {voz.publico.value}, a edição é {edicao.publico.value}"
+            )
     motor_por_nome(motor)  # valida o nome cedo, não no worker
     job = JobAudio(
         capitulo_id=capitulo.id,

@@ -16,8 +16,9 @@ import sys
 from sqlalchemy import func, select
 
 from ..db import SessionLocal
+from ..dominio import editorial
 from ..models import Capitulo, EstadoJob, JobAudio, PapelVoz, Pronuncia, Voz
-from .jobs import ESTADOS_QUE_GERAM, JobRecusado, enfileirar
+from .jobs import JobRecusado, enfileirar
 from .pronuncia import seed
 
 
@@ -50,7 +51,7 @@ def _enfileirar(s, a):
         return 1
     ok = pulados = 0
     for cap in capitulos:
-        if cap.estado not in ESTADOS_QUE_GERAM:
+        if not editorial.pode_gerar_audio(cap):
             pulados += 1
             continue
         try:
