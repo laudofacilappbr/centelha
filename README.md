@@ -44,6 +44,8 @@ cd api && uv run centelha-admin criar --email voce@exemplo.org --nome "Seu nome"
 # senha pedida no terminal, ou em CENTELHA_ADMIN_SENHA (mínimo 12 caracteres)
 ```
 
+Fluxo editorial do capítulo: `importado → texto_revisado → audio_gerado → audio_revisado → publicado`. Para mudar de estado, `POST /v1/admin/capitulos/{id}/transicoes` com a ação; `GET /v1/admin/capitulos/{id}` lista as ações que o usuário logado pode tomar. A tabela de transições está em `api/src/centelha_api/dominio/editorial.py`. O texto só se edita com o capítulo em `importado`; depois disso, é preciso reabrir o texto.
+
 ## Deploy
 
 VPS própria, um container por serviço, Cloudflare no DNS. Ver [ADR 0001](docs/decisoes/0001-deploy-vps-docker-cloudflare.md) e `infra/docker-compose.prod.yml`.
