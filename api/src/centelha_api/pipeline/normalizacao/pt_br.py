@@ -54,7 +54,7 @@ _RE_ABREVIACOES = [(re.compile(p), s) for p, s in _ABREVIACOES]
 
 _RE_ORDINAL = re.compile(r"\b(?P<n>\d{1,3})\s?(?P<g>[ºª°])")
 # Números com ponto de milhar ("1.019") ou simples.
-_RE_NUMERO = re.compile(r"(?<![\d.,])(?P<n>\d{1,3}(?:\.\d{3})+|\d+)(?![\d,]|\.\d)")
+_RE_NUMERO = re.compile(r"(?<![\d.,])(?P<n>\d{1,3}(?:\.\d{3})+|\d+)(?!\d|,\d|\.\d)")
 _RE_ESPACOS = re.compile(r"[ \t]+")
 
 

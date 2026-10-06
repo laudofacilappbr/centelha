@@ -1,5 +1,7 @@
 """Transforma parágrafos em capítulos e segmentos.
 
+Reconhece os títulos em português e em francês.
+
 Perfis:
 - "generico": parágrafos narrados em sequência (O Evangelho, A Gênese...).
 - "perguntas": O Livro dos Espíritos e O Livro dos Médiuns — pergunta numerada,
@@ -29,21 +31,30 @@ class CapituloBruto:
     segmentos: list[SegmentoBruto] = field(default_factory=list)
 
 
-_ROMANO_OU_ORDINAL = (
-    r"(?:[IVXLCDM]+|primeir[oa]|segund[oa]|terceir[oa]|quart[oa]|quint[oa]|sext[oa]|sétim[oa]"
-    r"|oitav[oa]|non[oa]|décim[oa]|único|única|\d+)"
+# Português e francês (originais de Kardec: "LIVRE PREMIER", "CHAPITRE PREMIER",
+# "PREMIÈRE PARTIE").
+_ORDINAIS = (
+    r"primeir[oa]|segund[oa]|terceir[oa]|quart[oa]|quint[oa]|sext[oa]|sétim[oa]|oitav[oa]"
+    r"|non[oa]|décim[oa]|únic[oa]"
+    r"|premier|première|second|seconde|deuxième|troisième|quatrième|cinquième|sixième"
+    r"|septième|huitième|neuvième|dixième|unique"
 )
+_ROMANO_OU_ORDINAL = rf"(?:[IVXLCDM]+|{_ORDINAIS}|\d+)"
+_FIM_ROTULO = r"\b\.?\s*(?:[—–:.-]\s*)?(?P<resto>.*)$"
 _RE_CAPITULO = re.compile(
-    rf"^(?P<rotulo>cap[íi]tulo\s+{_ROMANO_OU_ORDINAL})\b\.?\s*(?:[—–:.-]\s*)?(?P<resto>.*)$",
+    rf"^(?P<rotulo>(?:cap[íi]tulo|chapitre)\s+{_ROMANO_OU_ORDINAL}){_FIM_ROTULO}",
     re.IGNORECASE,
 )
 _RE_DIVISAO = re.compile(
-    rf"^(?P<rotulo>(?:livro|parte)\s+{_ROMANO_OU_ORDINAL})\b\.?\s*(?:[—–:.-]\s*)?(?P<resto>.*)$",
+    rf"^(?P<rotulo>(?:livro|parte|livre|partie)\s+{_ROMANO_OU_ORDINAL}"
+    rf"|(?:{_ORDINAIS})\s+(?:parte|partie)){_FIM_ROTULO}",
     re.IGNORECASE,
 )
 _SECOES_AVULSAS = {
     "introdução", "prolegômenos", "conclusão", "prefácio", "preâmbulo", "nota", "advertência",
     "introdução ao estudo da doutrina espírita",
+    "introduction", "prolégomènes", "conclusion", "préface", "préambule", "avant-propos",
+    "avertissement", "introduction à l'étude de la doctrine spirite",
 }  # fmt: skip
 
 _RE_PERGUNTA = re.compile(r"^(?P<n>\d{1,4})\s*[.)–-]\s*(?P<texto>.+)$")
@@ -103,7 +114,7 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
             atual = novo_capitulo(titulo)
             i += 2 if consumiu else 1
             continue
-        if p.lower().rstrip(".") in _SECOES_AVULSAS:
+        if p.lower().rstrip(".").replace("’", "'") in _SECOES_AVULSAS:
             divisao = None
             atual = novo_capitulo(p)
             i += 1

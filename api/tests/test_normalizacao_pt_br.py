@@ -75,6 +75,7 @@ def test_romanos_ida_e_volta():
         ("o Sr. Allan Kardec", "o senhor Allan Kardec"),
         ("em 18 de abril de 1857", "em dezoito de abril de mil oitocentos e cinquenta e sete"),
         ("as 1.019 questões", "as mil e dezenove questões"),
+        ("em 1857, depois", "em mil oitocentos e cinquenta e sete, depois"),
         ("1º de janeiro", "primeiro de janeiro"),
         ("a 2ª edição", "a segunda edição"),
         ("Deus, Espíritos, etc.", "Deus, Espíritos, etcétera"),

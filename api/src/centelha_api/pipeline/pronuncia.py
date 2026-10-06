@@ -35,6 +35,22 @@ SEED_PT_BR: list[EntradaPronuncia] = [
     EntradaPronuncia("Erasto", "Érasto"),
 ]
 
+# Seed francês: o motor em francês já lê os nomes franceses; aqui só os estrangeiros
+# que ele costuma ler à francesa. Também a validar na escuta.
+SEED_FR: list[EntradaPronuncia] = [
+    EntradaPronuncia("Hahnemann", "Ânemane"),
+    EntradaPronuncia("Swedenborg", "Svédenborg"),
+    EntradaPronuncia("Pestalozzi", "Pestalotsi"),
+    EntradaPronuncia("Channing", "Tchanigne"),
+]
+
+SEEDS: dict[str, list[EntradaPronuncia]] = {"pt-BR": SEED_PT_BR, "fr": SEED_FR}
+
+
+def seed(idioma: str) -> list[EntradaPronuncia]:
+    """Seed do idioma exato ou, sem ele, do idioma base ("fr-FR" usa o de "fr")."""
+    return SEEDS.get(idioma) or SEEDS.get(idioma.split("-")[0], [])
+
 
 def _padrao(entradas: list[EntradaPronuncia]) -> re.Pattern[str] | None:
     termos = sorted({e.termo for e in entradas}, key=len, reverse=True)

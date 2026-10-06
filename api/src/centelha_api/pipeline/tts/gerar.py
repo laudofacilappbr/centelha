@@ -7,12 +7,13 @@ vem depois) lê do banco, chama isto e grava a FaixaAudio.
 
 import tempfile
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 from ...models import TipoSegmento
 from ..audio import FaixaMontada, TrechoAudio, montar_capitulo
-from ..normalizacao.pt_br import normalizar
+from ..normalizacao import fr, pt_br
 from ..pronuncia import EntradaPronuncia, aplicar, aplicar_texto
 from .motores import Motor, Pedido
 
@@ -27,7 +28,16 @@ PAUSAS_MS: dict[TipoSegmento, int] = {
     TipoSegmento.NOTA: 700,
 }
 
-NORMALIZADORES = {"pt-BR": normalizar}
+# Por idioma BCP 47; sem o exato, vale o idioma base ("fr-CA" usa o de "fr").
+# Não há chave "pt": pt-PT lê números e abreviações de outro jeito e fica sem normalização.
+NORMALIZADORES = {"pt-BR": pt_br.normalizar, "fr": fr.normalizar}
+
+
+def normalizador(idioma: str) -> Callable[[str], str]:
+    funcao = NORMALIZADORES.get(idioma) or NORMALIZADORES.get(idioma.split("-")[0])
+    if funcao is None:
+        raise ValueError(f"sem normalização para {idioma}")
+    return funcao
 
 
 @dataclass(frozen=True)
@@ -68,10 +78,7 @@ def pedido_para(
     dicionario: list[EntradaPronuncia],
     idioma: str = "pt-BR",
 ) -> Pedido:
-    normalizar_idioma = NORMALIZADORES.get(idioma)
-    if normalizar_idioma is None:
-        raise ValueError(f"sem normalização para {idioma}")
-    texto = normalizar_idioma(segmento.texto)
+    texto = normalizador(idioma)(segmento.texto)
     return Pedido(
         ssml=aplicar(texto, dicionario),
         texto=aplicar_texto(texto, dicionario),

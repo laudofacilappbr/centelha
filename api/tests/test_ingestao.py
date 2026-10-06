@@ -212,3 +212,54 @@ def test_cli_resumo_e_json(tmp_path, capsys):
     assert json.loads(Path(saida).read_text(encoding="utf-8"))[1]["segmentos"][1]["tipo"] == (
         "pergunta"
     )
+
+
+# Texto sintético no formato do original francês (não é citação da obra).
+LE_EXEMPLO_FR = """\
+INTRODUCTION À L’ÉTUDE DE LA DOCTRINE SPIRITE
+
+Texte d’ouverture de l’introduction.
+
+LIVRE PREMIER
+
+CHAPITRE PREMIER
+
+DU PREMIER SUJET
+
+1. Première question d’exemple ?
+
+« Première réponse d’exemple. »
+
+Commentaire de l’auteur.
+
+CHAPITRE II. — DU SECOND SUJET
+
+2. Deuxième question ?
+
+« Deuxième réponse. »
+
+PREMIÈRE PARTIE — DOCTRINE
+
+CHAPITRE III
+
+Un paragraphe narré.
+"""
+
+
+def test_estrutura_reconhece_titulos_em_frances(tmp_path):
+    arquivo = tmp_path / "le-fr.txt"
+    arquivo.write_text(LE_EXEMPLO_FR, encoding="utf-8")
+    caps = estruturar(leitores.ler(arquivo), "perguntas")
+    assert [c.titulo for c in caps] == [
+        "INTRODUCTION À L’ÉTUDE DE LA DOCTRINE SPIRITE",
+        "LIVRE PREMIER — CHAPITRE PREMIER — DU PREMIER SUJET",
+        "LIVRE PREMIER — CHAPITRE II — DU SECOND SUJET",
+        "PREMIÈRE PARTIE — DOCTRINE — CHAPITRE III",
+    ]
+    tipos = [(s.tipo.value, s.numero_questao) for s in caps[1].segmentos]
+    assert tipos == [
+        ("titulo", None),
+        ("pergunta", 1),
+        ("resposta", 1),
+        ("comentario", 1),
+    ]
