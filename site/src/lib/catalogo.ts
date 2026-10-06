@@ -55,6 +55,14 @@ export interface Faixa {
   versao: number;
   duracao_ms: number;
   marcacoes: { segmento_id: number; inicio_ms: number; fim_ms: number }[];
+  // "m4a" toca no navegador; "cent1" é cifrado e só o app decifra (ADR 0004).
+  // Ausente nos dados gerados antes do campo existir: vale "m4a".
+  formato?: string;
+}
+
+/** Faixa que o navegador consegue tocar. Faixa cifrada nunca vira player nem link. */
+export function audioAberto(faixa: Faixa | null | undefined): faixa is Faixa {
+  return !!faixa && (faixa.formato ?? 'm4a') === 'm4a';
 }
 
 export interface Capitulo extends CapituloResumo {

@@ -11,6 +11,7 @@ import {
   slugCapitulo,
   nomeCapitulo,
   resumir,
+  audioAberto,
   type Obra,
   type Edicao,
   type CapituloResumo,
@@ -44,6 +45,8 @@ const base = `/obras/${obra.slug}`;
 const url = new URL(`${base}/${slugCapitulo(cap)}`, Astro.site).href;
 const primeiroTexto = cap.segmentos.find((s) => s.tipo !== 'titulo')?.texto ?? cap.titulo;
 const linkQuestao = obra.slug === OBRA_COM_QUESTOES ? urlQuestao : undefined;
+// Faixa cifrada (ADR 0004) só toca no app: nada de player, link ou contentUrl aqui.
+const faixa = audioAberto(cap.faixa) ? cap.faixa : null;
 
 const ld = [
   {
@@ -54,7 +57,7 @@ const ld = [
     url,
     inLanguage: ed.idioma,
     isPartOf: { '@type': 'Book', name: ed.titulo, url: new URL(base, Astro.site).href },
-    ...(cap.faixa ? { audio: { '@type': 'AudioObject', contentUrl: cap.faixa.url, encodingFormat: 'audio/mp4' } } : {}),
+    ...(faixa ? { audio: { '@type': 'AudioObject', contentUrl: faixa.url, encodingFormat: 'audio/mp4' } } : {}),
   },
   {
     '@context': 'https://schema.org',
@@ -79,11 +82,11 @@ const ld = [
       <a href="/obras">Obras</a>{' › '}<a href={base}>{ed.titulo}</a>
     </nav>
     {
-      cap.faixa && (
+      faixa && (
         <figure class="card audio">
           <figcaption>Ouça este capítulo</figcaption>
-          <audio controls preload="none" src={cap.faixa.url}>
-            <a href={cap.faixa.url}>Baixar o áudio</a>
+          <audio controls preload="none" src={faixa.url}>
+            <a href={faixa.url}>Baixar o áudio</a>
           </audio>
         </figure>
       )

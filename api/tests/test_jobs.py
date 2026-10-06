@@ -1,3 +1,4 @@
+import base64
 from datetime import timedelta
 
 import pytest
@@ -20,7 +21,7 @@ from centelha_api.models import (
     TipoSegmento,
     Voz,
 )
-from centelha_api.pipeline import jobs, worker
+from centelha_api.pipeline import cifra, jobs, worker
 from centelha_api.pipeline.armazenamento import ArmazenamentoLocal
 from centelha_api.pipeline.tts.motores import MotorFalso
 
@@ -126,6 +127,52 @@ def test_modo_bloco_vem_da_configuracao(session, base, armazenamento, monkeypatc
     # Os dois segmentos do narrador num pedido; a resposta, em outra voz, noutro.
     assert [p.voz_id for p in motor.pedidos] == ["n", "r"]
     assert [m["segmento_id"] for m in faixa.marcacoes] == [s.id for s in base["cap"].segmentos]
+
+
+def test_sem_cifragem_grava_m4a_aberto(session, base, armazenamento):
+    job = _enfileirar(session, base)
+    worker.processar_um(SessionLocal, armazenamento, MotorFalso())
+    session.expire_all()
+    faixa = session.get(FaixaAudio, session.get(JobAudio, job.id).faixa_id)
+    assert (faixa.formato, faixa.chave_cifrada) == ("m4a", None)
+    assert faixa.url.endswith(".m4a")
+
+
+def test_cifragem_grava_cent_e_guarda_a_chave_embrulhada(session, base, armazenamento, monkeypatch):
+    mestra = cifra.nova_chave()
+    monkeypatch.setattr(get_settings(), "audio_cifrar", True)
+    monkeypatch.setattr(get_settings(), "audio_chave_mestra", base64.b64encode(mestra).decode())
+    job = _enfileirar(session, base)
+    assert worker.processar_um(SessionLocal, armazenamento, MotorFalso()) is True
+
+    session.expire_all()
+    faixa = session.get(FaixaAudio, session.get(JobAudio, job.id).faixa_id)
+    assert faixa.formato == "cent1"
+    assert faixa.url.endswith("-v1.cent")
+    gravado = (armazenamento.raiz / faixa.url.split("audio.exemplo/")[1]).read_bytes()
+    # O arquivo publicado não é um MP4: sem a chave, nenhum player abre.
+    assert gravado[:4] == b"CENT" and b"ftyp" not in gravado
+    claro = cifra.decifrar(gravado, cifra.desembrulhar(faixa.chave_cifrada, mestra))
+    assert claro[4:8] == b"ftyp"
+
+
+def test_cifragem_sem_chave_mestra_falha_antes_do_tts(session, base, armazenamento, monkeypatch):
+    monkeypatch.setattr(get_settings(), "audio_cifrar", True)
+    monkeypatch.setattr(get_settings(), "audio_chave_mestra", "")
+    job = _enfileirar(session, base)
+    motor = MotorFalso()
+    worker.processar_um(SessionLocal, armazenamento, motor)
+    session.expire_all()
+    job = session.get(JobAudio, job.id)
+    assert "CHAVE_MESTRA" in job.erro
+    assert motor.pedidos == []
+    assert session.scalar(select(func.count(FaixaAudio.id))) == 0
+
+
+def test_worker_nao_sobe_com_cifragem_e_sem_chave(monkeypatch):
+    monkeypatch.setattr(get_settings(), "audio_cifrar", True)
+    monkeypatch.setattr(get_settings(), "audio_chave_mestra", "curta")
+    assert worker.main() == 2
 
 
 def test_fila_vazia(session):

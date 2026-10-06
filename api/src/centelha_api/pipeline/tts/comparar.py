@@ -8,6 +8,8 @@
         [--idioma fr-FR]   # trecho em francês, com vozes fr-FR-*
         [--modo ambos]     # por segmento e em bloco, para comparar a entonação
 
+O Piper precisa do serviço no ar: CENTELHA_PIPER_URL=http://localhost:5000 (infra/piper).
+
 Cada motor vira um .m4a na pasta de saída, e resumo.json traz caracteres, duração e
 tempo de síntese, para comparar custo junto com a escuta. Motor sem credencial é
 pulado com o motivo, sem derrubar os outros. Com --modo ambos, cada motor gera

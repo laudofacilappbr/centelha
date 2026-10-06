@@ -30,15 +30,21 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
 
-  # Worker da fila de áudio. Sem credenciais de TTS, use o motor "falso" para testar.
+  # Worker da fila de áudio. Motor "piper" usa o serviço abaixo; "falso" não precisa de nada.
   worker:
     build: { context: ../api, target: worker }
     environment:
       CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:centelha@postgres:5432/centelha
       CENTELHA_AUDIO_URL_BASE: http://localhost:8081
+      CENTELHA_PIPER_URL: http://piper:5000
       CENTELHA_LOG_FORMATO: texto
     volumes: [audio:/data/audio]
-    depends_on: [api]
+    depends_on: [api, piper]
+
+  # TTS local (ADR 0005). Página de teste das vozes em http://localhost:5000.
+  piper:
+    build: ./piper
+    ports: ["5000:5000"]
 
   # Serve o áudio gerado, como o Caddy faz em produção.
   audio:

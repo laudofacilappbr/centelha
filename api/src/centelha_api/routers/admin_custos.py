@@ -28,6 +28,7 @@ class VersaoAudio(BaseModel):
     faixa_id: int
     versao: int
     url: str
+    formato: str
     duracao_ms: int
     criado_em: datetime
     atual: bool
@@ -57,6 +58,7 @@ def versoes_audio(
             faixa_id=f.id,
             versao=f.versao,
             url=f.url,
+            formato=f.formato,
             duracao_ms=f.duracao_ms,
             criado_em=f.criado_em,
             # A API pública entrega a de maior versão; é essa a "atual".
