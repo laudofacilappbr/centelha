@@ -7,7 +7,7 @@
  * src/data/q88.json, para o build e o CI funcionarem sem o catálogo.
  */
 import q88 from '../data/q88.json';
-import type { Segmento } from './catalogo';
+import { audioAberto, type Segmento } from './catalogo';
 import { questoesDoLivroDosEspiritos } from './questoes';
 
 export const QUESTAO_DEMO = 88;
@@ -55,7 +55,8 @@ export async function demoQ88(): Promise<Demo> {
   const tempos = new Map(faixa?.marcacoes.map((m) => [m.segmento_id, m]) ?? []);
   // Áudio só se cada segmento da questão tiver marcação: com buraco, o destaque do
   // texto sairia do compasso da voz, e é isso que a demonstração quer mostrar.
-  const comAudio = !!faixa && q.segmentos.every((s) => tempos.has(s.id));
+  // Faixa cifrada (ADR 0004) não toca no navegador: fica só o texto.
+  const comAudio = audioAberto(faixa) && q.segmentos.every((s) => tempos.has(s.id));
   const inicioMs = comAudio ? Math.min(...q.segmentos.map((s) => tempos.get(s.id)!.inicio_ms)) : 0;
   const fimMs = comAudio ? Math.max(...q.segmentos.map((s) => tempos.get(s.id)!.fim_ms)) : 0;
   const rel = (ms: number) => (ms - inicioMs) / 1000;

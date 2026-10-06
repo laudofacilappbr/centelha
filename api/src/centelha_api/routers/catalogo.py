@@ -85,6 +85,8 @@ class FaixaOut(_Base):
     versao: int
     duracao_ms: int
     marcacoes: list[dict]
+    # "m4a" toca direto; "cent1" é cifrado e só o app atestado decifra (ADR 0004).
+    formato: str
 
 
 class CapituloOut(CapituloResumo):

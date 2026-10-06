@@ -59,6 +59,9 @@ services:
       CENTELHA_GOOGLE_TTS_KEY: ${CENTELHA_GOOGLE_TTS_KEY:-}
       # "segmento" ou "bloco" (#77); o padrão sai da escuta, junto com o motor.
       CENTELHA_TTS_MODO: ${CENTELHA_TTS_MODO:-segmento}
+      # Áudio cifrado (ADR 0004): desligado até o app decifrar.
+      CENTELHA_AUDIO_CIFRAR: ${CENTELHA_AUDIO_CIFRAR:-false}
+      CENTELHA_AUDIO_CHAVE_MESTRA: ${CENTELHA_AUDIO_CHAVE_MESTRA:-}
     volumes: [audio:/data/audio]
     depends_on:
       postgres: { condition: service_healthy }

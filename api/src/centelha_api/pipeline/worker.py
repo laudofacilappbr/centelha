@@ -51,8 +51,15 @@ def main() -> int:
     parada = _Parada()
     signal.signal(signal.SIGTERM, parada)
     signal.signal(signal.SIGINT, parada)
-    intervalo = get_settings().worker_intervalo_segundos
-    log.info("worker iniciado")
+    settings = get_settings()
+    if settings.audio_cifrar:
+        try:
+            settings.chave_mestra()
+        except ValueError as e:
+            log.error("cifragem ligada sem chave-mestra válida: %s", e)
+            return 2
+    intervalo = settings.worker_intervalo_segundos
+    log.info("worker iniciado (áudio %s)", "cifrado" if settings.audio_cifrar else "aberto")
     while not parada.pedida:
         try:
             processou = processar_um()
