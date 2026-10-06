@@ -23,7 +23,14 @@ docker compose -f infra/docker-compose.yml up --build
 # site: http://localhost:8080  ·  api: http://localhost:8000/docs
 ```
 
-Só a API, com testes:
+Validar antes de abrir PR (tudo em Docker, sem depender do CI do GitHub):
+
+```sh
+bash ci/validar.sh            # api + site + infra
+bash ci/validar.sh imagens    # build das imagens
+```
+
+Rodar os testes da API fora do Docker, durante o desenvolvimento:
 
 ```sh
 docker run -d --name centelha-pg-test -e POSTGRES_USER=centelha -e POSTGRES_PASSWORD=centelha \
