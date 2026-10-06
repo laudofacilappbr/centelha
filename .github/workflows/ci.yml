@@ -66,7 +66,10 @@ jobs:
       packages: write
     strategy:
       matrix:
-        servico: [api, site]
+        include:
+          - { servico: api, contexto: api, alvo: api }
+          - { servico: worker, contexto: api, alvo: worker }
+          - { servico: site, contexto: site, alvo: "" }
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -77,7 +80,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.servico }}
+          context: ${{ matrix.contexto }}
+          target: ${{ matrix.alvo }}
           push: true
           build-args: |
             PUBLIC_API_URL=${{ vars.PUBLIC_API_URL || 'https://api.centelha.com.br' }}

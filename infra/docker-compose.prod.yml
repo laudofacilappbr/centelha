@@ -12,6 +12,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./certs:/certs:ro # origin.pem e origin.key gerados no painel da Cloudflare
       - caddy_data:/data
+      - audio:/srv/audio:ro
     environment:
       DOMINIO: ${DOMINIO}
     depends_on: [site, api]
@@ -31,6 +32,23 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
     networks: [borda, interna]
+
+  worker:
+    image: ghcr.io/laudofacilappbr/centelha-worker:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:${POSTGRES_PASSWORD}@postgres:5432/centelha
+      CENTELHA_AUDIO_URL_BASE: https://audio.${DOMINIO}
+      # Credenciais do motor de TTS escolhido (#1); vazias até a decisão.
+      CENTELHA_AZURE_TTS_KEY: ${CENTELHA_AZURE_TTS_KEY:-}
+      CENTELHA_AZURE_TTS_REGION: ${CENTELHA_AZURE_TTS_REGION:-}
+      CENTELHA_GOOGLE_TTS_KEY: ${CENTELHA_GOOGLE_TTS_KEY:-}
+    volumes: [audio:/data/audio]
+    depends_on:
+      postgres: { condition: service_healthy }
+    # Só fala com o banco e com o provedor de TTS; não precisa da rede de borda,
+    # mas precisa de saída para a internet, que a rede interna não tem.
+    networks: [interna, saida]
 
   postgres:
     image: postgres:17-alpine
@@ -54,8 +72,11 @@ services:
 volumes:
   pgdata:
   caddy_data:
+  # Faixas geradas pelo worker; entra no backup junto com o banco (#26).
+  audio:
 
 networks:
   borda:
   interna:
     internal: true
+  saida:

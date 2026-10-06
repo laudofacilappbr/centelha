@@ -29,6 +29,27 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
 
+  # Worker da fila de áudio. Sem credenciais de TTS, use o motor "falso" para testar.
+  worker:
+    build: { context: ../api, target: worker }
+    environment:
+      CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:centelha@postgres:5432/centelha
+      CENTELHA_AUDIO_URL_BASE: http://localhost:8081
+    volumes: [audio:/data/audio]
+    depends_on: [api]
+
+  # Serve o áudio gerado, como o Caddy faz em produção.
+  audio:
+    image: nginx:alpine
+    volumes:
+      # nocopy: o index.html do nginx não vai parar no volume do áudio.
+      - type: volume
+        source: audio
+        target: /usr/share/nginx/html
+        read_only: true
+        volume: { nocopy: true }
+    ports: ["8081:80"]
+
   site:
     build:
       context: ../site
@@ -38,3 +59,4 @@ services:
 
 volumes:
   pgdata:
+  audio:
