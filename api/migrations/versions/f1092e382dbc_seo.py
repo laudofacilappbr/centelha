@@ -1,7 +1,7 @@
 """seo
 
 Revision ID: f1092e382dbc
-Revises: 3566d40a6ae7
+Revises: 8944d279cf5b
 Create Date: 2026-10-06 18:39:49.682892
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'f1092e382dbc'
-down_revision: Union[str, Sequence[str], None] = '3566d40a6ae7'
+down_revision: Union[str, Sequence[str], None] = '8944d279cf5b'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
