@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from centelha_api.db import Base, SessionLocal, engine  # noqa: E402
 from centelha_api.main import create_app  # noqa: E402
+from centelha_api.routers import admin  # noqa: E402
 from centelha_api.routers.waitlist import limitador  # noqa: E402
 
 
@@ -22,6 +23,7 @@ def banco_limpo():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     limitador.limpar()
+    admin.limitador_login.limpar()
     yield
 
 

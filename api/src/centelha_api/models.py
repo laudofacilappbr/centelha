@@ -202,6 +202,64 @@ class Pronuncia(Timestamps, Base):
     ipa: Mapped[str | None] = mapped_column(String(200))
 
 
+class PapelUsuario(enum.StrEnum):
+    """Papéis do admin (especificação, seção Admin). As permissões de cada um
+    ficam em dominio/permissoes.py, não no banco: mudar quem pode o quê é
+    mudança de código revisada, não um clique no painel."""
+
+    ADMINISTRADOR = "administrador"
+    REVISOR_TEXTO = "revisor_texto"
+    REVISOR_AUDIO = "revisor_audio"
+
+
+class Usuario(Timestamps, Base):
+    __tablename__ = "usuario"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # Sempre minúsculo; a unicidade depende disso.
+    email: Mapped[str] = mapped_column(String(320), unique=True)
+    nome: Mapped[str] = mapped_column(String(200))
+    senha_hash: Mapped[str] = mapped_column(String(200))
+    papel: Mapped[PapelUsuario] = mapped_column(_enum(PapelUsuario))
+    # Desativar em vez de apagar: o log de auditoria continua apontando para alguém.
+    ativo: Mapped[bool] = mapped_column(default=True, server_default="true")
+
+
+class SessaoAdmin(Base):
+    __tablename__ = "sessao_admin"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuario.id"), index=True)
+    # SHA-256 do token. O token em si só existe na resposta do login: um vazamento
+    # do banco não entrega sessões válidas.
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    revogada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    usuario: Mapped[Usuario] = relationship()
+
+
+class RegistroAuditoria(Base):
+    """Quem fez o quê, append-only. Nenhum código atualiza ou apaga linhas daqui."""
+
+    __tablename__ = "registro_auditoria"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # Nulo só quando não há usuário identificado (ex.: login com e-mail desconhecido).
+    usuario_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"), index=True)
+    acao: Mapped[str] = mapped_column(String(60), index=True)
+    alvo_tipo: Mapped[str | None] = mapped_column(String(40))
+    alvo_id: Mapped[int | None]
+    detalhes: Mapped[dict] = mapped_column(JSON, default=dict)
+    ip: Mapped[str | None] = mapped_column(String(64))
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
+
+    usuario: Mapped[Usuario | None] = relationship()
+
+
 class InscricaoListaEspera(Base):
     __tablename__ = "inscricao_lista_espera"
 

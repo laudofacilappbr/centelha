@@ -15,11 +15,13 @@ dependencies = [
     "pymupdf>=1.28.2",
     "python-docx>=1.2.0",
     "beautifulsoup4>=4.15.0",
+    "argon2-cffi>=25.1.0",
 ]
 
 [project.scripts]
 centelha-ingestao = "centelha_api.pipeline.ingestao.cli:main"
 centelha-lgpd = "centelha_api.lgpd:main"
+centelha-admin = "centelha_api.admin_cli:main"
 
 [dependency-groups]
 dev = [

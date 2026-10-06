@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
-from .routers import catalogo, health, waitlist
+from .routers import admin, catalogo, health, waitlist
 
 
 def create_app() -> FastAPI:
@@ -16,6 +16,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(waitlist.router)
     app.include_router(catalogo.router)
+    app.include_router(admin.router)
     return app
 
 
