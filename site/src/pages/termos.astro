@@ -10,45 +10,93 @@ import { SITE } from '../config';
   <div class="container">
     <article class="prose">
       <DraftNotice />
-      <!-- TODO: revisão jurídica completa. -->
+      <!--
+        Rascunho para a revisão jurídica (#17). Itens entre colchetes são definidos pelo dono ou pelo revisor.
+        Fontes: dossiê da #3 (domínio público, fonograma, art. 107), #73 e ADR 0004 (proteção do áudio,
+        renovação de 90 dias, exportação por acessibilidade), #40 (apoio), #41 (caridade).
+      -->
 
       <h2>1. O serviço</h2>
       <p>
-        O Centelha oferece, gratuitamente, audiolivros e textos de obras espíritas em domínio público, com narração gerada
-        por inteligência artificial e revisada por pessoas.
+        O Centelha oferece, gratuitamente, audiolivros e textos de obras espíritas em domínio público, narrados por voz
+        sintética e revisados por pessoas, com o texto acompanhando a narração. Não há anúncios nem conteúdo pago.
       </p>
 
-      <h2>2. Conteúdo</h2>
+      <h2>2. O que é de todos e o que é do Centelha</h2>
       <p>
-        Os textos de Allan Kardec e as traduções utilizadas estão em domínio público. As gravações, a organização do acervo,
-        a marca Centelha, o símbolo e a mascote Clara pertencem ao projeto. <em>[Licença das gravações a definir.]</em>
+        Os textos de Allan Kardec e a tradução de Guillon Ribeiro estão em domínio público: você pode lê-los, copiá-los e
+        usá-los livremente, de qualquer fonte. As gravações do Centelha (o áudio narrado, as marcações de tempo e a
+        leitura acompanhada), a organização do acervo, a marca Centelha, o símbolo e a mascote Clara pertencem ao projeto.
+        As gravações são protegidas como fonogramas (Lei 9.610/1998, arts. 93 e 96).{' '}
+        <em>[Revisor: confirmar o enquadramento de áudio gerado por máquina como fonograma; ver o dossiê da #3.]</em>
       </p>
 
-      <h2>3. Uso adequado</h2>
+      <h2>3. Proteção do áudio</h2>
       <ul>
-        <li>Não use o serviço para fins ilegais ou para sobrecarregar os servidores.</li>
+        <li>
+          O áudio é entregue cifrado e só toca no app Centelha. Os downloads para ouvir offline continuam funcionando
+          enquanto o app se conectar à internet ao menos uma vez a cada 90 dias.
+        </li>
+        <li>
+          Não é permitido contornar essa proteção, extrair o áudio do app nem redistribuí-lo (Lei 9.610/1998, art. 107).
+        </li>
+        <li>
+          <strong>Acessibilidade:</strong> se você precisa ouvir em outro player por deficiência visual ou outra
+          necessidade de acessibilidade, peça a exportação pelo <a href="/suporte">suporte</a>.{' '}
+          <em>[Definir como o pedido é conferido e em que formato o áudio é entregue.]</em>
+        </li>
+      </ul>
+
+      <h2>4. Uso adequado</h2>
+      <ul>
+        <li>Não use o serviço para fins ilegais nem para sobrecarregar os servidores (por exemplo, com downloads automatizados).</li>
         <li>Não apresente as gravações do Centelha como se fossem de outra origem.</li>
       </ul>
 
-      <h2>4. Narração por IA</h2>
+      <h2>5. Narração por voz sintética</h2>
       <p>
-        Apesar da revisão humana, a narração pode conter imprecisões. Em caso de dúvida, vale o texto da edição-fonte.
-        Erros podem ser comunicados pelo <a href="/suporte">suporte</a>.
+        A narração é gerada por voz sintética e revisada por pessoas, mas ainda pode conter imprecisões de leitura ou de
+        pronúncia. Em caso de dúvida, vale o texto da edição-fonte, indicada em cada obra. Erros podem ser comunicados pelo{' '}
+        <a href="/suporte">suporte</a>.
       </p>
 
-      <h2>5. Doações</h2>
+      <h2>6. Apoio ao projeto</h2>
+      <ul>
+        <li>
+          O apoio é voluntário, não libera conteúdo e não é doação para caridade: cobre a narração, o servidor e as contas
+          nas lojas. Cada valor recebido aparece na <a href="/transparencia">prestação de contas</a>.
+        </li>
+        <li>
+          <strong>Pelo app:</strong> o pagamento e eventuais reembolsos seguem as regras da App Store ou do Google Play.
+        </li>
+        <li>
+          <strong>Por Pix:</strong> <em>[Revisor: condições de devolução de valores enviados por engano.]</em>
+        </li>
+        <li>
+          O apoio nunca aparece no Centelha Kids.
+        </li>
+      </ul>
+
+      <h2>7. Campanhas de caridade</h2>
       <p>
-        O apoio financeiro é voluntário, feito fora do app, e não dá acesso a conteúdo exclusivo. <em>[Condições a definir.]</em>
+        Nas campanhas, a doação vai direto para a instituição parceira, pelo Pix dela. O Centelha divulga a campanha e
+        publica o resultado informado pela instituição, mas não recebe nem administra esse dinheiro.
       </p>
 
-      <h2>6. Garantias e responsabilidade</h2>
-      <p>O serviço é oferecido como está, sem garantia de disponibilidade contínua. <em>[Redação a definir.]</em></p>
+      <h2>8. Garantias e responsabilidade</h2>
+      <p>
+        O serviço é gratuito e oferecido como está, sem garantia de disponibilidade contínua.{' '}
+        <em>[Revisor: redação dos limites de responsabilidade.]</em>
+      </p>
 
-      <h2>7. Contato e foro</h2>
+      <h2>9. Contato e foro</h2>
       <p>
         Dúvidas: <a href={`mailto:${SITE.emailSuporte}`}>{SITE.emailSuporte}</a>. Estes termos seguem a legislação
-        brasileira. <em>[Foro a definir.]</em>
+        brasileira. <em>[Revisor: foro.]</em>
       </p>
+
+      <h2>10. Alterações</h2>
+      <p>Avisaremos aqui qualquer mudança nestes termos. Última atualização: <em>[data a definir]</em>.</p>
     </article>
   </div>
 </BaseLayout>

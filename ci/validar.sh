@@ -7,7 +7,7 @@
 #   ci/validar.sh infra      # compose de dev e prod, Caddyfile
 #   ci/validar.sh app        # só o app Flutter (format, analyze, testes)
 #   ci/validar.sh backup     # backup → apaga → restaura, com PostgreSQL e S3 locais
-#   ci/validar.sh imagens    # build das imagens api, worker, site, piper e backup
+#   ci/validar.sh imagens    # build das imagens api, worker, site, piper, digitalizacao e backup
 #
 # Roda o que está na worktree (commitado ou não). Cada worktree usa um projeto Docker
 # próprio, então duas sessões validam ao mesmo tempo sem colidir. Sai com código
@@ -76,8 +76,10 @@ for alvo in "${alvos[@]}"; do
       docker build -q --target worker -t "$projeto-worker" api >/dev/null || ok=1
       docker build -q -t "$projeto-site" site >/dev/null || ok=1
       docker build -q -t "$projeto-piper" infra/piper >/dev/null || ok=1
+      docker build -q --target digitalizacao -t "$projeto-digitalizacao" api >/dev/null || ok=1
       docker build -q -t "$projeto-backup" infra/backup >/dev/null || ok=1
-      docker rmi "$projeto-api" "$projeto-worker" "$projeto-site" "$projeto-piper" "$projeto-backup" >/dev/null 2>&1
+      docker rmi "$projeto-api" "$projeto-worker" "$projeto-site" "$projeto-piper" \
+        "$projeto-digitalizacao" "$projeto-backup" >/dev/null 2>&1
       marcar imagens $ok
       ;;
     *)

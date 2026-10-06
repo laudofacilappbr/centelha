@@ -9,3 +9,5 @@ __pycache__/
 dist/
 .astro/
 infra/certs/
+# Exemplares escaneados e saídas da digitalização (#86): ficam fora do repositório.
+acervo/
