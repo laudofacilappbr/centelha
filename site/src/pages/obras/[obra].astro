@@ -4,6 +4,7 @@ import PageHeader from '../../components/PageHeader.astro';
 import StoreButtons from '../../components/StoreButtons.astro';
 import obrasPlanejadas from '../../data/obras.json';
 import { obrasPublicadas, edicaoDoSite, edicao, slugCapitulo, type Obra } from '../../lib/catalogo';
+import { alternativas } from '../../lib/alternativas';
 
 export async function getStaticPaths() {
   const obras = (await obrasPublicadas()).filter((o) => edicaoDoSite(o));
@@ -16,6 +17,7 @@ const resumo =
   obrasPlanejadas.find((o) => o.slug === obra.slug)?.resumo ??
   `${ed.titulo}, de ${obra.autor}, narrado em português.`;
 const url = new URL(`/obras/${obra.slug}`, Astro.site).href;
+const alt = await alternativas(obra.slug, { tipo: 'obra' }, Astro.site!);
 
 const ld = [
   {
@@ -51,6 +53,7 @@ const ld = [
   title={ed.seo_titulo || `${ed.titulo} — audiolivro completo`}
   description={ed.seo_descricao || `Ouça ${ed.titulo}, de ${obra.autor}, completo e grátis, em português. ${resumo}`}
   jsonLd={ld}
+  alternativas={alt}
 >
   <PageHeader eyebrow={obra.autor} title={ed.titulo} lede={resumo} />
   <div class="container section">

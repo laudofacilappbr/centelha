@@ -19,6 +19,8 @@ export interface CamposSeo {
 export interface EdicaoResumo extends CamposSeo {
   id: number;
   idioma: string;
+  /** URL da edição em /fr, /es e /en (#48); o português usa o slug da obra. */
+  slug?: string | null;
   publico: 'adulto' | 'juvenil' | 'infantil';
   titulo: string;
   tradutor: string | null;
@@ -111,6 +113,20 @@ export async function obrasPublicadas(): Promise<Obra[]> {
       console.warn(`[catalogo] API indisponível (${(e as Error).message}); páginas do acervo não geradas.`);
       avisado = true;
     }
+    return [];
+  }
+}
+
+/** Obras com edição adulta publicada em qualquer idioma (#48). Mesma regra de falha. */
+export async function obrasEmTodosOsIdiomas(): Promise<Obra[]> {
+  if (!BASE) {
+    if (OBRIGATORIO) throw new Error('catálogo: CATALOGO_OBRIGATORIO=1 sem CATALOGO_API_URL/PUBLIC_API_URL');
+    return [];
+  }
+  try {
+    return await memo<Obra[]>('/v1/obras?publico=adulto');
+  } catch (e) {
+    if (OBRIGATORIO) throw e;
     return [];
   }
 }

@@ -5,6 +5,7 @@ from sqlalchemy.orm import object_session
 
 from ..config import get_settings
 from ..models import Edicao, EstadoCapitulo, FaixaAudio, StatusDireitos, Voz
+from .slug import slugificar
 
 
 class PublicacaoBloqueada(Exception):
@@ -46,6 +47,29 @@ def _motores_sem_licenca(edicao: Edicao) -> list[int]:
     return ordens
 
 
+def _slug_livre(edicao: Edicao) -> str:
+    """Slug do título; com outra edição do mesmo idioma e público no mesmo slug (duas
+    traduções com o mesmo título), ganha "-2", "-3"..."""
+    base = slugificar(edicao.titulo) or f"edicao-{edicao.id}"
+    session = object_session(edicao)
+    if session is None:
+        return base
+    usados = set(
+        session.scalars(
+            select(Edicao.slug).where(
+                Edicao.id != edicao.id,
+                Edicao.idioma == edicao.idioma,
+                Edicao.publico == edicao.publico,
+                Edicao.slug.like(f"{base}%"),
+            )
+        )
+    )
+    slug, n = base, 2
+    while slug in usados:
+        slug, n = f"{base}-{n}", n + 1
+    return slug
+
+
 def publicar_edicao(edicao: Edicao, agora: datetime | None = None) -> None:
     """Só publica edição com direitos aprovados, todos os capítulos com áudio revisado e
     nenhum áudio de motor sem licença liberada."""
@@ -66,4 +90,6 @@ def publicar_edicao(edicao: Edicao, agora: datetime | None = None) -> None:
         )
     for c in edicao.capitulos:
         c.estado = EstadoCapitulo.PUBLICADO
+    # A URL nos outros idiomas do site (#48) fica fixa a partir daqui.
+    edicao.slug = edicao.slug or _slug_livre(edicao)
     edicao.publicada_em = agora or datetime.now(UTC)
