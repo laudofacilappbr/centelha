@@ -7,6 +7,7 @@ import pytest
 
 from centelha_api.pipeline.audio import (
     ErroPosProducao,
+    MarcaSegmento,
     TrechoAudio,
     duracao_ms,
     ffmpeg_exe,
@@ -46,6 +47,26 @@ def test_marcacoes_exatas_com_pausas(tmp_path):
     ]
     # Sem pausa depois do último trecho.
     assert duracao == 3350
+
+
+def test_trecho_em_bloco_usa_as_marcas_de_cada_segmento(tmp_path):
+    trechos = [
+        TrechoAudio(1, _tom(tmp_path / "a.wav", 0.5), pausa_depois_ms=1000),
+        TrechoAudio(
+            2,
+            _tom(tmp_path / "b.wav", 2.0),
+            marcas=(MarcaSegmento(2, 100, 900), MarcaSegmento(3, 1200, 2500)),
+        ),
+    ]
+    duracao, marcacoes = juntar_wav(trechos, tmp_path / "x.wav")
+    assert marcacoes == [
+        {"segmento_id": 1, "inicio_ms": 0, "fim_ms": 500},
+        # O bloco começa em 1500 ms; as marcas são relativas a ele.
+        {"segmento_id": 2, "inicio_ms": 1600, "fim_ms": 2400},
+        # Marca além do fim do áudio do bloco fica presa ao fim dele.
+        {"segmento_id": 3, "inicio_ms": 2700, "fim_ms": 3500},
+    ]
+    assert duracao == 3500
 
 
 def test_formatos_diferentes_sao_recusados(tmp_path):

@@ -1,4 +1,4 @@
-"""Gera o mesmo trecho em vários motores para o teste de escuta (#1).
+"""Gera o mesmo trecho em vários motores para o teste de escuta (#1, #77).
 
     python -m centelha_api.pipeline.tts.comparar trecho.txt --saida amostras \\
         --motor azure:pt-BR-AntonioNeural \\
@@ -6,10 +6,12 @@
         --motor piper:pt_BR-faber-medium \\
         [--perfil perguntas --voz-pergunta azure:pt-BR-FranciscaNeural]
         [--idioma fr-FR]   # trecho em francês, com vozes fr-FR-*
+        [--modo ambos]     # por segmento e em bloco, para comparar a entonação
 
 Cada motor vira um .m4a na pasta de saída, e resumo.json traz caracteres, duração e
 tempo de síntese, para comparar custo junto com a escuta. Motor sem credencial é
-pulado com o motivo, sem derrubar os outros.
+pulado com o motivo, sem derrubar os outros. Com --modo ambos, cada motor gera
+"-segmento.m4a" e "-bloco.m4a"; motor sem marcadores não gera o de bloco.
 """
 
 import argparse
@@ -20,8 +22,8 @@ from pathlib import Path
 from ..ingestao.estrutura import estruturar
 from ..ingestao.leitores import ler
 from ..pronuncia import seed
-from .gerar import SegmentoParaVoz, Vozes, gerar_capitulo
-from .motores import ErroTTS, motor
+from .gerar import MODOS, SegmentoParaVoz, Vozes, gerar_capitulo
+from .motores import ErroTTS, aceita_marcas, motor
 
 
 def _par(valor: str) -> tuple[str, str]:
@@ -40,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--voz-resposta", type=_par, action="append", default=[])
     parser.add_argument("--perfil", choices=["generico", "perguntas"], default="generico")
     parser.add_argument("--idioma", default="pt-BR")
+    parser.add_argument("--modo", choices=[*MODOS, "ambos"], default="segmento")
     args = parser.parse_args(argv)
 
     segmentos = [
@@ -50,25 +53,35 @@ def main(argv: list[str] | None = None) -> int:
     ]
     extras_p = dict(args.voz_pergunta)
     extras_r = dict(args.voz_resposta)
+    modos = list(MODOS) if args.modo == "ambos" else [args.modo]
     args.saida.mkdir(parents=True, exist_ok=True)
     resumo = {}
     for nome, voz in args.motor:
         vozes = Vozes(voz, extras_p.get(nome), extras_r.get(nome))
-        destino = args.saida / f"{nome}-{voz}.m4a"
-        try:
-            r = gerar_capitulo(
-                segmentos, motor(nome), vozes, seed(args.idioma), destino, args.idioma
-            )
-        except ErroTTS as e:
-            resumo[f"{nome}:{voz}"] = {"erro": str(e)}
-            print(f"{nome}: {e}", file=sys.stderr)
-            continue
-        resumo[f"{nome}:{voz}"] = {
-            "arquivo": destino.name,
-            "caracteres": r.caracteres,
-            "duracao_s": round(r.faixa.duracao_ms / 1000, 1),
-            "segundos_sintese": round(r.segundos_sintese, 1),
-        }
+        for modo in modos:
+            chave = f"{nome}:{voz}" if len(modos) == 1 else f"{nome}:{voz}:{modo}"
+            try:
+                m = motor(nome)
+                if modo == "bloco" and not aceita_marcas(m):
+                    raise ErroTTS(f"{nome} não devolve marcadores; sem modo bloco")
+                destino = args.saida / (
+                    f"{nome}-{voz}.m4a" if len(modos) == 1 else f"{nome}-{voz}-{modo}.m4a"
+                )
+                r = gerar_capitulo(
+                    segmentos, m, vozes, seed(args.idioma), destino, args.idioma, modo=modo
+                )
+            except ErroTTS as e:
+                resumo[chave] = {"erro": str(e)}
+                print(f"{chave}: {e}", file=sys.stderr)
+                continue
+            resumo[chave] = {
+                "arquivo": destino.name,
+                "modo": r.modo,
+                "pedidos": r.pedidos,
+                "caracteres": r.caracteres,
+                "duracao_s": round(r.faixa.duracao_ms / 1000, 1),
+                "segundos_sintese": round(r.segundos_sintese, 1),
+            }
     (args.saida / "resumo.json").write_text(
         json.dumps(resumo, ensure_ascii=False, indent=2), encoding="utf-8"
     )

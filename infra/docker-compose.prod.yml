@@ -57,6 +57,8 @@ services:
       CENTELHA_AZURE_TTS_KEY: ${CENTELHA_AZURE_TTS_KEY:-}
       CENTELHA_AZURE_TTS_REGION: ${CENTELHA_AZURE_TTS_REGION:-}
       CENTELHA_GOOGLE_TTS_KEY: ${CENTELHA_GOOGLE_TTS_KEY:-}
+      # "segmento" ou "bloco" (#77); o padrão sai da escuta, junto com o motor.
+      CENTELHA_TTS_MODO: ${CENTELHA_TTS_MODO:-segmento}
     volumes: [audio:/data/audio]
     depends_on:
       postgres: { condition: service_healthy }

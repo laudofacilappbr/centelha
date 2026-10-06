@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -39,6 +40,10 @@ class Settings(BaseSettings):
     # padrão: preço muda por provedor e contrato, a fonte é a fatura.
     tts_preco_por_milhao: dict[str, float] = {"falso": 0.0, "piper": 0.0}
     tts_moeda: str = "BRL"
+    # Pedido ao motor: "segmento" (um por segmento) ou "bloco" (segmentos da mesma voz
+    # juntos, entonação contínua; só em motor com marcadores). O padrão sai da escuta (#77).
+    tts_modo: Literal["segmento", "bloco"] = "segmento"
+    tts_limite_bloco_bytes: int = 4500
 
 
 @lru_cache

@@ -16,12 +16,20 @@ from centelha_api.pipeline.tts.motores import (
     MotorGoogle,
     MotorPiper,
     Pedido,
+    SinteseMarcada,
 )
 
 SEGMENTOS = [
     SegmentoParaVoz(1, TipoSegmento.TITULO, "Capítulo XVII"),
     SegmentoParaVoz(2, TipoSegmento.PERGUNTA, "Que diz Kardec na q. 150?"),
     SegmentoParaVoz(3, TipoSegmento.RESPOSTA, "Resposta curta & direta."),
+]
+
+# Prosa corrida (O Evangelho): tudo na voz do narrador, sem termos do dicionário.
+PROSA = [
+    SegmentoParaVoz(1, TipoSegmento.TITULO, "Sede perfeitos"),
+    SegmentoParaVoz(2, TipoSegmento.PARAGRAFO, "Amai os vossos inimigos."),
+    SegmentoParaVoz(3, TipoSegmento.PARAGRAFO, "Fazei o bem aos que vos odeiam."),
 ]
 
 
@@ -55,6 +63,78 @@ def test_gerar_capitulo_ponta_a_ponta(tmp_path):
     assert m[2]["inicio_ms"] - m[1]["fim_ms"] == 500
     assert [p.voz_id for p in motor.pedidos] == ["n", "p", "r"]
     assert r.caracteres == sum(len(p.ssml) for p in motor.pedidos)
+    assert r.modo == "segmento"
+
+
+def test_bloco_junta_a_prosa_num_pedido_com_os_mesmos_tempos(tmp_path):
+    por_segmento = gerar_capitulo(PROSA, MotorFalso(), Vozes("n"), SEED_PT_BR, tmp_path / "s.m4a")
+    motor = MotorFalso()
+    em_bloco = gerar_capitulo(
+        PROSA, motor, Vozes("n"), SEED_PT_BR, tmp_path / "b.m4a", modo="bloco"
+    )
+    assert em_bloco.modo == "bloco"
+    assert em_bloco.pedidos == 1
+    [pedido] = motor.pedidos
+    assert pedido.ssml.startswith('<mark name="i1"/>Sede perfeitos<mark name="f1"/>')
+    # A pausa de cada tipo vai dentro do bloco: 1200 ms após o título, 700 após parágrafo.
+    assert '<mark name="f1"/><break time="1200ms"/><mark name="i2"/>' in pedido.ssml
+    assert '<mark name="f2"/><break time="700ms"/><mark name="i3"/>' in pedido.ssml
+    assert pedido.ssml.endswith('<mark name="f3"/>')
+    # O motor falso fala o mesmo tempo nos dois modos: as marcações têm de coincidir.
+    assert em_bloco.faixa.marcacoes == por_segmento.faixa.marcacoes
+    assert em_bloco.faixa.duracao_ms == por_segmento.faixa.duracao_ms
+
+
+def test_bloco_separa_vozes_e_respeita_o_limite(tmp_path):
+    motor = MotorFalso()
+    r = gerar_capitulo(
+        SEGMENTOS, motor, Vozes("n", "p", "r"), SEED_PT_BR, tmp_path / "a.m4a", modo="bloco"
+    )
+    assert [p.voz_id for p in motor.pedidos] == ["n", "p", "r"]
+    assert [m["segmento_id"] for m in r.faixa.marcacoes] == [1, 2, 3]
+
+    motor = MotorFalso()
+    r = gerar_capitulo(
+        PROSA, motor, Vozes("n"), SEED_PT_BR, tmp_path / "b.m4a", "pt-BR", "bloco", 80
+    )
+    assert len(motor.pedidos) == 3
+    assert all(len(p.ssml.encode()) <= 80 for p in motor.pedidos)
+
+
+class _SoSegmento:
+    """Motor sem marcadores, como o Piper e o Azure por REST."""
+
+    nome = "so-segmento"
+    aceita_ssml = True
+
+    def __init__(self):
+        self.interno = MotorFalso()
+
+    def sintetizar(self, pedido):
+        return self.interno.sintetizar(pedido)
+
+
+def test_bloco_em_motor_sem_marcadores_cai_para_segmento(tmp_path):
+    motor = _SoSegmento()
+    r = gerar_capitulo(PROSA, motor, Vozes("n"), SEED_PT_BR, tmp_path / "a.m4a", modo="bloco")
+    assert r.modo == "segmento"
+    assert len(motor.interno.pedidos) == 3
+
+
+class _PerdeMarca(MotorFalso):
+    def sintetizar_com_marcas(self, pedido):
+        s = super().sintetizar_com_marcas(pedido)
+        return SinteseMarcada(s.wav, {k: v for k, v in s.marcas_ms.items() if k != "f2"})
+
+
+def test_marca_ausente_falha_em_vez_de_gravar_tempo_errado(tmp_path):
+    with pytest.raises(ErroTTS, match="f2"):
+        gerar_capitulo(PROSA, _PerdeMarca(), Vozes("n"), SEED_PT_BR, tmp_path / "a", modo="bloco")
+
+
+def test_modo_desconhecido(tmp_path):
+    with pytest.raises(ValueError, match="modo"):
+        gerar_capitulo(PROSA, MotorFalso(), Vozes("n"), SEED_PT_BR, tmp_path / "a", modo="x")
 
 
 class _Resposta:
@@ -120,6 +200,23 @@ def test_google_decodifica_audio(monkeypatch, requisicoes):
     assert corpo["input"]["ssml"].startswith("<speak>")
     # Chave vai no cabeçalho, nunca na URL (não cai em log de proxy).
     assert "g" not in requisicoes[0].full_url.split("/")[-1]
+    assert "/v1/" in requisicoes[0].full_url
+
+
+def test_google_devolve_o_tempo_das_marcas(monkeypatch, requisicoes):
+    _Resposta.padrao = json.dumps(
+        {
+            "audioContent": base64.b64encode(_wav()).decode(),
+            # Marca no início vem sem timeSeconds (proto3 omite o zero).
+            "timepoints": [{"markName": "i1"}, {"markName": "f1", "timeSeconds": 1.2345}],
+        }
+    ).encode()
+    monkeypatch.setenv("CENTELHA_GOOGLE_TTS_KEY", "g")
+    s = MotorGoogle().sintetizar_com_marcas(PEDIDO)
+    assert s == SinteseMarcada(_wav(), {"i1": 0, "f1": 1234})
+    [req] = requisicoes
+    assert "/v1beta1/text:synthesize" in req.full_url
+    assert json.loads(req.data)["enableTimePointing"] == ["SSML_MARK"]
 
 
 def test_sem_credencial_explica(monkeypatch):
@@ -162,3 +259,18 @@ def test_comparar_gera_amostras_e_pula_motor_sem_credencial(tmp_path, monkeypatc
     resumo = json.loads((saida / "resumo.json").read_text(encoding="utf-8"))
     assert (saida / resumo["falso:a"]["arquivo"]).exists()
     assert "CENTELHA_GOOGLE_TTS_KEY" in resumo["google:pt-BR-Neural2-B"]["erro"]
+
+
+def test_comparar_ambos_gera_segmento_e_bloco(tmp_path):
+    fonte = tmp_path / "trecho.txt"
+    fonte.write_text("Primeiro parágrafo.\n\nSegundo parágrafo.\n", encoding="utf-8")
+    saida = tmp_path / "amostras"
+    argv = [str(fonte), "--saida", str(saida), "--modo", "ambos"]
+    assert comparar.main([*argv, "--motor", "falso:a", "--motor", "piper:x"]) == 0
+    resumo = json.loads((saida / "resumo.json").read_text(encoding="utf-8"))
+    assert resumo["falso:a:segmento"]["modo"] == "segmento"
+    assert resumo["falso:a:bloco"]["modo"] == "bloco"
+    assert resumo["falso:a:bloco"]["pedidos"] < resumo["falso:a:segmento"]["pedidos"]
+    assert (saida / "falso-a-segmento.m4a").exists()
+    assert (saida / "falso-a-bloco.m4a").exists()
+    assert "sem modo bloco" in resumo["piper:x:bloco"]["erro"]

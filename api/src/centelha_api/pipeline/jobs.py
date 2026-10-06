@@ -171,6 +171,8 @@ def executar(
             _dicionario(session, edicao.idioma),
             Path(tmp) / "capitulo.m4a",
             idioma=edicao.idioma,
+            modo=get_settings().tts_modo,
+            limite_bloco_bytes=get_settings().tts_limite_bloco_bytes,
         )
         url = armazenamento.salvar(resultado.faixa.arquivo, chave)
     faixa = FaixaAudio(
