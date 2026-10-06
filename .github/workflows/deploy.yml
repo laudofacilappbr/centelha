@@ -1,0 +1,97 @@
+name: Deploy
+
+# Leva para a VPS as imagens que o workflow "Imagens" acabou de publicar (#26).
+# Fica inerte até o dono cadastrar os segredos: sem eles, o job avisa e sai sem erro.
+#
+# Segredos (Settings → Secrets → Actions):
+#   VPS_HOST          endereço da VPS
+#   VPS_USUARIO       usuário de deploy (infra/vps/preparar.sh cria "centelha")
+#   VPS_CHAVE_SSH     chave privada do deploy (a pública foi para o preparar.sh)
+#   VPS_KNOWN_HOSTS   saída de `ssh-keyscan -t ed25519 <host>`: o job só fala com a
+#                     VPS cuja chave foi conferida, nunca aceita uma chave nova
+# Variável (Settings → Variables): DOMINIO, para a conferência depois do deploy.
+on:
+  workflow_run:
+    workflows: [Imagens]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag das imagens (SHA de um commit da main); vazio = latest"
+        required: false
+
+permissions:
+  contents: read
+
+# Um deploy por vez; o mais novo espera o anterior terminar.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: producao
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USUARIO: ${{ secrets.VPS_USUARIO }}
+      TAG: ${{ inputs.tag || github.event.workflow_run.head_sha || 'latest' }}
+    steps:
+      - name: Segredos cadastrados?
+        id: segredos
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USUARIO" ]; then
+            echo "::notice::Deploy pulado: faltam os segredos da VPS (#26)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.segredos.outputs.ok == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Chave SSH
+        if: steps.segredos.outputs.ok == 'true'
+        env:
+          CHAVE: ${{ secrets.VPS_CHAVE_SSH }}
+          CONHECIDOS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$CHAVE" > ~/.ssh/deploy
+          printf '%s\n' "$CONHECIDOS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts
+          printf 'Host vps\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/deploy\n  StrictHostKeyChecking yes\n' \
+            "$VPS_HOST" "$VPS_USUARIO" > ~/.ssh/config
+
+      - name: Compose e Caddyfile
+        if: steps.segredos.outputs.ok == 'true'
+        # O .env e os certificados ficam só na VPS; daqui vão os arquivos versionados.
+        run: scp infra/docker-compose.prod.yml infra/Caddyfile vps:/opt/centelha/
+
+      - name: Atualizar os containers
+        if: steps.segredos.outputs.ok == 'true'
+        # TAG no ambiente vence o do .env: a VPS roda exatamente as imagens deste commit.
+        # As migrações rodam na partida da api (docker-entrypoint.sh).
+        run: |
+          # A TAG pode vir digitada no disparo manual: só SHA ou "latest" chegam ao ssh.
+          [[ "$TAG" =~ ^([0-9a-f]{7,40}|latest)$ ]] || { echo "::error::TAG inválida: $TAG"; exit 1; }
+          # shellcheck disable=SC2029  # TAG é expandida aqui, de propósito
+          ssh vps "cd /opt/centelha && export TAG='$TAG' \
+            && docker compose -f docker-compose.prod.yml pull --quiet \
+            && docker compose -f docker-compose.prod.yml up -d --remove-orphans --wait --wait-timeout 300 \
+            && docker image prune -f >/dev/null \
+            && docker compose -f docker-compose.prod.yml ps"
+
+      - name: Conferir de fora
+        if: steps.segredos.outputs.ok == 'true' && vars.DOMINIO != ''
+        env:
+          DOMINIO: ${{ vars.DOMINIO }}
+        run: |
+          for url in "https://api.$DOMINIO/health" "https://$DOMINIO/"; do
+            curl -fsS --retry 10 --retry-delay 6 --retry-all-errors -o /dev/null "$url"
+            echo "ok: $url"
+          done
