@@ -202,3 +202,9 @@ def test_limite_de_desafios_por_ip(client, config, monkeypatch):
     assert client.post("/v1/dispositivos/desafio").status_code == 201
     assert client.post("/v1/dispositivos/desafio").status_code == 201
     assert client.post("/v1/dispositivos/desafio").status_code == 429
+
+
+def test_faixa_de_motor_sem_licenca_nao_recebe_chave(client, session, faixas):
+    session.query(Voz).update({Voz.motor: "piper"})
+    session.commit()
+    assert _chave(client, faixas["cifrada"], _registrar(client)).status_code == 404
