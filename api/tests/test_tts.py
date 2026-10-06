@@ -226,9 +226,28 @@ def test_sem_credencial_explica(monkeypatch):
         MotorAzure().sintetizar(PEDIDO)
 
 
-def test_piper_sem_modelo(monkeypatch, tmp_path):
-    monkeypatch.setenv("CENTELHA_PIPER_MODELOS", str(tmp_path))
-    with pytest.raises(ErroTTS, match="modelo não encontrado"):
+def test_piper_sem_url(monkeypatch):
+    monkeypatch.delenv("CENTELHA_PIPER_URL", raising=False)
+    with pytest.raises(ErroTTS, match="CENTELHA_PIPER_URL"):
+        MotorPiper().sintetizar(PEDIDO)
+
+
+def test_piper_pede_texto_puro_e_voz_ao_servico(monkeypatch, requisicoes):
+    monkeypatch.setenv("CENTELHA_PIPER_URL", "http://piper:5000/")
+    monkeypatch.setattr(_Resposta, "padrao", _wav())
+    wav = MotorPiper().sintetizar(PEDIDO)
+    req = requisicoes[0]
+    assert req.full_url == "http://piper:5000/synthesize"
+    corpo = json.loads(req.data)
+    # Texto puro (sem SSML), com a substituição do dicionário já aplicada.
+    assert corpo == {"text": PEDIDO.texto, "voice": PEDIDO.voz_id}
+    assert wav.startswith(b"RIFF")
+
+
+def test_piper_resposta_que_nao_e_wav(monkeypatch, requisicoes):
+    monkeypatch.setenv("CENTELHA_PIPER_URL", "http://piper:5000")
+    monkeypatch.setattr(_Resposta, "padrao", b"<!doctype html>")
+    with pytest.raises(ErroTTS, match="não é WAV"):
         MotorPiper().sintetizar(PEDIDO)
 
 

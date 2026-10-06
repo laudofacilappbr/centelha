@@ -53,7 +53,9 @@ services:
       CENTELHA_AUDIO_URL_BASE: https://audio.${DOMINIO}
       CENTELHA_AMBIENTE: producao
       CENTELHA_SENTRY_DSN: ${CENTELHA_SENTRY_DSN:-}
-      # Credenciais do motor de TTS escolhido (#1); vazias até a decisão.
+      # Motor inicial: Piper, no container ao lado (ADR 0005).
+      CENTELHA_PIPER_URL: http://piper:5000
+      # Motores pagos, para a migração ao Azure (ADR 0005); vazios até lá.
       CENTELHA_AZURE_TTS_KEY: ${CENTELHA_AZURE_TTS_KEY:-}
       CENTELHA_AZURE_TTS_REGION: ${CENTELHA_AZURE_TTS_REGION:-}
       CENTELHA_GOOGLE_TTS_KEY: ${CENTELHA_GOOGLE_TTS_KEY:-}
@@ -65,9 +67,18 @@ services:
     volumes: [audio:/data/audio]
     depends_on:
       postgres: { condition: service_healthy }
+      piper: { condition: service_started }
     # Só fala com o banco e com o provedor de TTS; não precisa da rede de borda,
     # mas precisa de saída para a internet, que a rede interna não tem.
     networks: [interna, saida]
+
+  # TTS local: vozes dentro da imagem, então não precisa de internet. Só na rede
+  # interna, sem porta publicada.
+  piper:
+    logging: *logs
+    image: ghcr.io/laudofacilappbr/centelha-piper:${TAG:-latest}
+    restart: unless-stopped
+    networks: [interna]
 
   postgres:
     logging: *logs
