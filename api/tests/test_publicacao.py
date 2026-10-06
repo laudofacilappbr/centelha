@@ -1,13 +1,17 @@
 import pytest
 
+from centelha_api.config import get_settings
 from centelha_api.dominio.publicacao import PublicacaoBloqueada, publicar_edicao
 from centelha_api.models import (
     Capitulo,
     Direitos,
     Edicao,
     EstadoCapitulo,
+    FaixaAudio,
     Obra,
+    PapelVoz,
     StatusDireitos,
+    Voz,
 )
 
 
@@ -74,3 +78,52 @@ def test_publica_com_direitos_aprovados(session):
     session.refresh(edicao)
     assert edicao.publicada_em is not None
     assert {c.estado for c in edicao.capitulos} == {EstadoCapitulo.PUBLICADO}
+
+
+def _faixa(session, capitulo, motor, versao):
+    voz = Voz(idioma="pt-BR", motor=motor, voz_id=f"{motor}-n", papel=PapelVoz.NARRADOR)
+    session.add(voz)
+    session.flush()
+    session.add(
+        FaixaAudio(
+            capitulo_id=capitulo.id,
+            voz_id=voz.id,
+            versao=versao,
+            url=f"https://audio.exemplo/{motor}-v{versao}.m4a",
+            duracao_ms=1000,
+            marcacoes=[],
+        )
+    )
+    session.commit()
+
+
+def test_bloqueia_audio_de_motor_sem_licenca(session):
+    """Decisão do dono em #1 (opção A): nada do Piper vai ao ar até o parecer (#3)."""
+    edicao = _edicao(
+        session,
+        [EstadoCapitulo.AUDIO_REVISADO, EstadoCapitulo.AUDIO_REVISADO],
+        StatusDireitos.APROVADO,
+    )
+    _faixa(session, edicao.capitulos[0], "azure", 1)
+    _faixa(session, edicao.capitulos[1], "azure", 1)
+    _faixa(session, edicao.capitulos[1], "piper", 2)
+    with pytest.raises(PublicacaoBloqueada, match=r"licença.*\[2\]"):
+        publicar_edicao(edicao)
+    assert edicao.publicada_em is None
+
+
+def test_faixa_antiga_do_piper_nao_bloqueia(session):
+    """Conta a faixa mais recente: regerado em motor liberado, o capítulo publica."""
+    edicao = _edicao(session, [EstadoCapitulo.AUDIO_REVISADO], StatusDireitos.APROVADO)
+    _faixa(session, edicao.capitulos[0], "piper", 1)
+    _faixa(session, edicao.capitulos[0], "azure", 2)
+    publicar_edicao(edicao)
+    assert edicao.publicada_em is not None
+
+
+def test_motor_liberado_depois_do_parecer_publica(session, monkeypatch):
+    monkeypatch.setattr(get_settings(), "tts_motores_sem_licenca", set())
+    edicao = _edicao(session, [EstadoCapitulo.AUDIO_REVISADO], StatusDireitos.APROVADO)
+    _faixa(session, edicao.capitulos[0], "piper", 1)
+    publicar_edicao(edicao)
+    assert edicao.publicada_em is not None

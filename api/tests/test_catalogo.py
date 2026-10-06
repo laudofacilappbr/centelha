@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from centelha_api.config import get_settings
 from centelha_api.models import (
     Capitulo,
     Direitos,
@@ -65,7 +66,7 @@ def catalogo(session):
     publicada.capitulos = [c1, c2]
     session.add_all([publicada, rascunho])
     session.flush()
-    voz = Voz(idioma="pt-BR", motor="piper", voz_id="x", papel=PapelVoz.NARRADOR)
+    voz = Voz(idioma="pt-BR", motor="azure", voz_id="x", papel=PapelVoz.NARRADOR)
     session.add(voz)
     session.flush()
     for versao in (1, 2):
@@ -162,3 +163,35 @@ def test_publicada_sem_registro_de_direitos_nao_aparece(client, session, catalog
     session.delete(edicao.direitos)
     session.commit()
     assert client.get(f"/v1/edicoes/{edicao.id}").status_code == 404
+
+
+def test_faixa_de_motor_sem_licenca_nao_sai_no_catalogo(client, session, catalogo, monkeypatch):
+    """Piper só em desenvolvimento até o parecer (#1, #3): regerar o capítulo no Piper
+    não troca a faixa que o app recebe."""
+    piper = Voz(idioma="pt-BR", motor="piper", voz_id="pt_BR-faber-medium", papel=PapelVoz.NARRADOR)
+    session.add(piper)
+    session.flush()
+    session.add(
+        FaixaAudio(
+            capitulo_id=catalogo["c1"].id,
+            voz_id=piper.id,
+            versao=3,
+            url="https://audio.exemplo/le/c001-v3.m4a",
+            duracao_ms=3000,
+            marcacoes=[],
+        )
+    )
+    session.commit()
+    url = f"/v1/capitulos/{catalogo['c1'].id}"
+    assert client.get(url).json()["faixa"]["versao"] == 2
+
+    monkeypatch.setattr(get_settings(), "tts_motores_sem_licenca", set())
+    assert client.get(url).json()["faixa"]["versao"] == 3
+
+
+def test_capitulo_so_com_faixa_sem_licenca_sai_sem_faixa(client, session, catalogo):
+    session.query(Voz).update({Voz.motor: "piper"})
+    session.commit()
+    r = client.get(f"/v1/capitulos/{catalogo['c1'].id}").json()
+    assert r["faixa"] is None
+    assert r["segmentos"]

@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     # padrão: preço muda por provedor e contrato, a fonte é a fatura.
     tts_preco_por_milhao: dict[str, float] = {"falso": 0.0, "piper": 0.0}
     tts_moeda: str = "BRL"
+    # Motores cujo áudio não vai ao ar: edição não publica e o catálogo não entrega a
+    # faixa. As vozes pt-BR do Piper partem do checkpoint lessac, de licença só para
+    # pesquisa; decisão do dono em #1 (opção A): nada do Piper sai até o parecer (#3).
+    # Liberado o parecer: CENTELHA_TTS_MOTORES_SEM_LICENCA='[]'.
+    tts_motores_sem_licenca: set[str] = {"piper"}
     # Pedido ao motor: "segmento" (um por segmento) ou "bloco" (segmentos da mesma voz
     # juntos, entonação contínua; só em motor com marcadores). O padrão sai da escuta (#77).
     tts_modo: Literal["segmento", "bloco"] = "segmento"

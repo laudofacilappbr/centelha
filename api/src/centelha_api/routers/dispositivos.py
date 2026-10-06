@@ -28,6 +28,7 @@ from ..models import (
     Edicao,
     EntregaChave,
     FaixaAudio,
+    Voz,
 )
 from ..pipeline import cifra
 from ..ratelimit import JanelaDeslizante, ip_do_cliente
@@ -160,7 +161,13 @@ def entregar_chave(
         select(FaixaAudio)
         .join(Capitulo, FaixaAudio.capitulo_id == Capitulo.id)
         .join(Edicao, Capitulo.edicao_id == Edicao.id)
-        .where(FaixaAudio.id == faixa_id, _publicado())
+        .join(Voz, FaixaAudio.voz_id == Voz.id)
+        # Faixa de motor sem licença liberada (#1) não sai, nem cifrada.
+        .where(
+            FaixaAudio.id == faixa_id,
+            _publicado(),
+            Voz.motor.not_in(cfg.tts_motores_sem_licenca),
+        )
     )
     if faixa is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "faixa não encontrada")

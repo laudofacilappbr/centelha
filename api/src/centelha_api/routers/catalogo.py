@@ -13,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_session
+from ..dominio.publicacao import faixa_atual
 from ..dominio.seo import CamposSeo
 from ..models import (
     Campanha,
@@ -21,7 +22,6 @@ from ..models import (
     Direitos,
     Edicao,
     EstadoCapitulo,
-    FaixaAudio,
     Publico,
     Segmento,
     StatusDireitos,
@@ -179,13 +179,8 @@ def obter_capitulo(capitulo_id: int, response: Response, session: Session = Depe
     if capitulo is None:
         raise HTTPException(404, "capítulo não encontrado")
     _cache(response)
-    # Regenerar áudio cria versão nova; o app sempre recebe a mais recente.
-    faixa = session.scalar(
-        select(FaixaAudio)
-        .where(FaixaAudio.capitulo_id == capitulo.id)
-        .order_by(FaixaAudio.versao.desc(), FaixaAudio.id.desc())
-        .limit(1)
-    )
+    # Regenerar áudio cria versão nova; o app recebe a mais recente que pode ir ao ar.
+    faixa = session.scalar(faixa_atual(capitulo.id))
     return CapituloOut(
         **CapituloResumo.model_validate(capitulo).model_dump(),
         edicao_id=capitulo.edicao_id,
