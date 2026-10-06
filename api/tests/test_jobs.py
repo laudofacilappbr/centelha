@@ -252,3 +252,17 @@ def test_cli_seed_enfileirar_e_status(session, base, capsys):
     fila_cli.main(["status", "--edicao", str(ed)])
     assert "pendente" in capsys.readouterr().out
     assert fila_cli.main([*args, "--narrador", "99999"]) == 1
+
+
+def test_cli_vozes_piper_cadastra_a_escolha_uma_vez(session, capsys):
+    from centelha_api.pipeline import fila_cli
+
+    assert fila_cli.main(["vozes-piper"]) == 0
+    assert capsys.readouterr().out.count("criada") == 2
+    assert fila_cli.main(["vozes-piper"]) == 0
+    assert capsys.readouterr().out.count("já existia") == 2
+    vozes = session.scalars(select(Voz).where(Voz.motor == "piper").order_by(Voz.id)).all()
+    assert [(v.voz_id, v.papel) for v in vozes] == [
+        ("pt_BR-faber-medium", PapelVoz.NARRADOR),
+        ("pt_BR-cadu-medium", PapelVoz.PERGUNTA),
+    ]

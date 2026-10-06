@@ -4,6 +4,8 @@
         --voz-id pt-BR-AntonioNeural --papel narrador
     (francês: --idioma fr-FR com fr-FR-HenriNeural, fr-FR-Neural2-B ou fr_FR-siwis-medium;
     a voz precisa ter o mesmo idioma da edição)
+    python -m centelha_api.pipeline.fila_cli vozes-piper
+    (as vozes pt-BR escolhidas na escuta, #1; o áudio delas não vai ao ar até o parecer, #3)
     python -m centelha_api.pipeline.fila_cli pronuncias-seed [--idioma fr-FR]
     python -m centelha_api.pipeline.fila_cli enfileirar --edicao 1 --motor azure \\
         --narrador 1 [--pergunta 2 --resposta 3] [--capitulo 5]
@@ -27,6 +29,34 @@ def _vozes_criar(s, a):
     s.add(voz)
     s.commit()
     print(f"voz {voz.id}: {voz.motor}:{voz.voz_id} ({voz.papel.value}, {voz.idioma})")
+
+
+# Escolha do dono na escuta (#1, ADR 0005): faber narra, cadu lê as perguntas.
+VOZES_PIPER = (
+    ("pt_BR-faber-medium", PapelVoz.NARRADOR),
+    ("pt_BR-cadu-medium", PapelVoz.PERGUNTA),
+)
+
+
+def _vozes_piper(s, a):
+    for voz_id, papel in VOZES_PIPER:
+        voz = s.scalar(
+            select(Voz).where(
+                Voz.idioma == "pt-BR",
+                Voz.motor == "piper",
+                Voz.voz_id == voz_id,
+                Voz.papel == papel,
+            )
+        )
+        if voz is None:
+            voz = Voz(idioma="pt-BR", motor="piper", voz_id=voz_id, papel=papel)
+            s.add(voz)
+            s.flush()
+            situacao = "criada"
+        else:
+            situacao = "já existia"
+        print(f"voz {voz.id}: piper:{voz_id} ({papel.value}, pt-BR) {situacao}")
+    s.commit()
 
 
 def _pronuncias_seed(s, a):
@@ -97,6 +127,8 @@ def main(argv: list[str] | None = None) -> int:
     v.add_argument("--voz-id", required=True)
     v.add_argument("--papel", choices=[x.value for x in PapelVoz], default="narrador")
 
+    sub.add_parser("vozes-piper")
+
     ps = sub.add_parser("pronuncias-seed")
     # O mesmo idioma da edição: o dicionário é lido por igualdade (pt-BR, fr-FR...).
     ps.add_argument("--idioma", default="pt-BR")
@@ -115,6 +147,7 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
     acoes = {
         "vozes-criar": _vozes_criar,
+        "vozes-piper": _vozes_piper,
         "pronuncias-seed": _pronuncias_seed,
         "enfileirar": _enfileirar,
         "status": _status,
