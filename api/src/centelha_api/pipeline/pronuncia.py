@@ -72,3 +72,13 @@ def documento_ssml(trechos: list[str], idioma: str = "pt-BR", pausa_ms: int = 60
     """Junta trechos já processados por aplicar() num <speak>, com pausa entre eles."""
     corpo = f'<break time="{pausa_ms}ms"/>'.join(trechos)
     return f'<speak version="1.0" xml:lang={quoteattr(idioma)}>{corpo}</speak>'
+
+
+def aplicar_texto(texto: str, entradas: list[EntradaPronuncia]) -> str:
+    """Versão em texto puro, para motores sem SSML: troca o termo pela grafia de
+    substituição. IPA não tem equivalente em texto e fica de fora."""
+    por_termo = {e.termo: e for e in entradas}
+    padrao = _padrao(entradas)
+    if padrao is None:
+        return texto
+    return padrao.sub(lambda m: por_termo[m.group(0)].substituicao or m.group(0), texto)
