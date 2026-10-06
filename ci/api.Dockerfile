@@ -4,6 +4,6 @@
 FROM python:3.12-slim
 COPY --from=ghcr.io/astral-sh/uv:0.10 /uv /bin/uv
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg \
+ && apt-get install -y --no-install-recommends ffmpeg fonts-comfortaa \
  && rm -rf /var/lib/apt/lists/*
 COPY api.sh /ci/api.sh
