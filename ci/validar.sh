@@ -6,7 +6,8 @@
 #   ci/validar.sh site       # só o site (build, astro check)
 #   ci/validar.sh infra      # compose de dev e prod, Caddyfile
 #   ci/validar.sh app        # só o app Flutter (format, analyze, testes)
-#   ci/validar.sh imagens    # build das imagens api, worker, site, piper e digitalizacao
+#   ci/validar.sh backup     # backup → apaga → restaura, com PostgreSQL e S3 locais
+#   ci/validar.sh imagens    # build das imagens api, worker, site, piper, digitalizacao e backup
 #
 # Roda o que está na worktree (commitado ou não). Cada worktree usa um projeto Docker
 # próprio, então duas sessões validam ao mesmo tempo sem colidir. Sai com código
@@ -52,6 +53,11 @@ for alvo in "${alvos[@]}"; do
       compose build -q app && compose run --rm app
       marcar app $?
       ;;
+    backup)
+      echo "### backup"
+      bash infra/backup/teste/testar.sh
+      marcar backup $?
+      ;;
     infra)
       echo "### infra"
       ok=0
@@ -71,11 +77,13 @@ for alvo in "${alvos[@]}"; do
       docker build -q -t "$projeto-site" site >/dev/null || ok=1
       docker build -q -t "$projeto-piper" infra/piper >/dev/null || ok=1
       docker build -q --target digitalizacao -t "$projeto-digitalizacao" api >/dev/null || ok=1
-      docker rmi "$projeto-api" "$projeto-worker" "$projeto-site" "$projeto-piper" "$projeto-digitalizacao" >/dev/null 2>&1
+      docker build -q -t "$projeto-backup" infra/backup >/dev/null || ok=1
+      docker rmi "$projeto-api" "$projeto-worker" "$projeto-site" "$projeto-piper" \
+        "$projeto-digitalizacao" "$projeto-backup" >/dev/null 2>&1
       marcar imagens $ok
       ;;
     *)
-      echo "alvo desconhecido: $alvo (use api, site, infra, app, imagens)" >&2
+      echo "alvo desconhecido: $alvo (use api, site, infra, app, backup, imagens)" >&2
       exit 2
       ;;
   esac
