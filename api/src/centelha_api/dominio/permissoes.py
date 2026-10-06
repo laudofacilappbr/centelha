@@ -21,6 +21,8 @@ class Permissao(enum.StrEnum):
     VER_AUDITORIA = "ver_auditoria"
     # Custo de TTS é dado financeiro: só o administrador vê.
     VER_CUSTOS = "ver_custos"
+    # Lança e publica a prestação de contas pública (#36). Só administrador.
+    EDITAR_TRANSPARENCIA = "editar_transparencia"
 
 
 # Tabela "Papéis" da especificação. Lista explícita, sem herança entre papéis: um
