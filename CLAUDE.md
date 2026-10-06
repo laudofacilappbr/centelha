@@ -14,6 +14,10 @@ Segue `RICARDO-DEFAULT/20-engenharia/fluxo-desenvolvimento/FLUXO-DE-TRABALHO.md`
   - `espera`: precondição que nenhuma sessão destrava pegando trabalho.
   - `p0`…`p3`: prioridade pela fase.
 
+## Loop de desenvolvimento
+
+`/centelha-loop` faz uma volta (próxima issue elegível → PR com CI verde); `/loop /centelha-loop` repete. Definição em [.claude/skills/centelha-loop/SKILL.md](.claude/skills/centelha-loop/SKILL.md).
+
 ## Verificação antes de abrir PR
 
 ```sh

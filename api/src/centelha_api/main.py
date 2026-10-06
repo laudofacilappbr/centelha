@@ -3,7 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .observabilidade import MiddlewareRequisicao, configurar_logs
-from .routers import admin, admin_direitos, admin_editorial, catalogo, health, waitlist
+from .routers import (
+    admin,
+    admin_audio,
+    admin_direitos,
+    admin_editorial,
+    admin_pronuncia,
+    catalogo,
+    health,
+    waitlist,
+)
 
 
 def create_app() -> FastAPI:
@@ -24,6 +33,8 @@ def create_app() -> FastAPI:
     app.include_router(admin.router)
     app.include_router(admin_direitos.router)
     app.include_router(admin_editorial.router)
+    app.include_router(admin_audio.router)
+    app.include_router(admin_pronuncia.router)
     return app
 
 

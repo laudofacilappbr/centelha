@@ -11,6 +11,9 @@ class Permissao(enum.StrEnum):
     APONTAR_ERRO_AUDIO = "apontar_erro_audio"
     EDITAR_DICIONARIO = "editar_dicionario"
     APROVAR_AUDIO = "aprovar_audio"
+    # Dispara TTS pago por caractere. Separada de APROVAR_AUDIO para poder ser
+    # retirada do revisor sem mexer no que ele aprova.
+    GERAR_AUDIO = "gerar_audio"
     EDITAR_DIREITOS = "editar_direitos"
     APROVAR_DIREITOS = "aprovar_direitos"
     PUBLICAR = "publicar"
@@ -33,6 +36,8 @@ PERMISSOES_POR_PAPEL: dict[PapelUsuario, frozenset[Permissao]] = {
             Permissao.APONTAR_ERRO_AUDIO,
             Permissao.EDITAR_DICIONARIO,
             Permissao.APROVAR_AUDIO,
+            # Decisão do dono em 2026-10-05 (#64): o revisor de áudio pode gerar.
+            Permissao.GERAR_AUDIO,
         }
     ),
 }

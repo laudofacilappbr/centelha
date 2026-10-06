@@ -68,6 +68,19 @@ def aplicar(texto: str, entradas: list[EntradaPronuncia]) -> str:
     return "".join(partes)
 
 
+def termos_usados(texto: str, entradas: list[EntradaPronuncia]) -> set[str]:
+    """Termos do dicionário que aplicar() usaria neste texto.
+
+    Mesmo padrão da síntese, com o termo mais longo primeiro: com "Allan Kardec" no
+    dicionário, mudar "Kardec" não afeta o trecho "Allan Kardec". Saber quais capítulos
+    regenerar por outra regra (um LIKE, por exemplo) regeneraria capítulos à toa ou
+    deixaria de regenerar algum."""
+    padrao = _padrao(entradas)
+    if padrao is None:
+        return set()
+    return {m.group(0) for m in padrao.finditer(texto)}
+
+
 def documento_ssml(trechos: list[str], idioma: str = "pt-BR", pausa_ms: int = 600) -> str:
     """Junta trechos já processados por aplicar() num <speak>, com pausa entre eles."""
     corpo = f'<break time="{pausa_ms}ms"/>'.join(trechos)
