@@ -7,15 +7,29 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY src ./src
 RUN uv sync --frozen --no-dev
 
-FROM python:3.12-slim
-RUN useradd --system --uid 10001 centelha
+FROM python:3.12-slim AS base
+RUN useradd --system --uid 10001 centelha \
+ && mkdir -p /data/audio && chown centelha /data/audio
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
 COPY --from=build /app/src /app/src
 COPY alembic.ini ./
 COPY migrations ./migrations
 COPY docker-entrypoint.sh /usr/local/bin/
-ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 CENTELHA_AUDIO_DIR=/data/audio
+
+# Worker da fila de áudio: precisa de ffmpeg; a API não. docker build --target worker
+FROM base AS worker
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
+COPY worker-entrypoint.sh /usr/local/bin/
+# Começa como root só para o chown do volume; o entrypoint troca para "centelha".
+ENTRYPOINT ["worker-entrypoint.sh"]
+CMD ["python", "-m", "centelha_api.pipeline.worker"]
+
+# Último estágio = alvo padrão do docker build.
+FROM base AS api
 USER centelha
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \

@@ -1,6 +1,7 @@
 """API pública do catálogo: leitura, sem autenticação, com cache na Cloudflare.
 
-Só expõe o que foi publicado: edição com publicada_em e capítulo no estado "publicado".
+Só expõe o que foi publicado: edição com publicada_em e direitos aprovados, e capítulo
+no estado "publicado".
 Nada aqui escreve; endpoints do admin ficam em outro prefixo, com autenticação.
 """
 
@@ -14,11 +15,13 @@ from sqlalchemy.orm import Session, selectinload
 from ..db import get_session
 from ..models import (
     Capitulo,
+    Direitos,
     Edicao,
     EstadoCapitulo,
     FaixaAudio,
     Publico,
     Segmento,
+    StatusDireitos,
     TipoSegmento,
 )
 
@@ -97,13 +100,22 @@ class QuestaoOut(_Base):
     segmentos: list[SegmentoOut]
 
 
+def _edicao_visivel():
+    # Direitos conferidos de novo na leitura, não só em publicar_edicao: se os direitos
+    # de uma edição já publicada forem revogados ou voltarem a pendente, ela sai do ar
+    # na próxima requisição, sem depender de alguém lembrar de despublicar.
+    return Edicao.publicada_em.is_not(None) & Edicao.direitos.has(
+        Direitos.status == StatusDireitos.APROVADO
+    )
+
+
 def _publicado():
-    return (Capitulo.estado == EstadoCapitulo.PUBLICADO) & Edicao.publicada_em.is_not(None)
+    return (Capitulo.estado == EstadoCapitulo.PUBLICADO) & _edicao_visivel()
 
 
 def _edicao_publicada(session: Session, edicao_id: int) -> Edicao:
-    edicao = session.get(Edicao, edicao_id)
-    if edicao is None or edicao.publicada_em is None:
+    edicao = session.scalar(select(Edicao).where(Edicao.id == edicao_id, _edicao_visivel()))
+    if edicao is None:
         raise HTTPException(404, "edição não encontrada")
     return edicao
 
@@ -116,7 +128,7 @@ def listar_obras(
     session: Session = Depends(get_session),
 ):
     _cache(response)
-    filtro = Edicao.publicada_em.is_not(None)
+    filtro = _edicao_visivel()
     if idioma:
         filtro &= Edicao.idioma == idioma
     if publico:

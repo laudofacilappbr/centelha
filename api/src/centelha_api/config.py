@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     # distribuída contra uma conta; por IP barra a varredura de muitas contas.
     admin_login_limite: int = 10
     admin_login_janela_segundos: int = 900
+    # Áudio: o worker grava em audio_dir; Caddy serve essa pasta em audio_url_base,
+    # com a Cloudflare na frente fazendo cache.
+    audio_dir: str = "./audio"
+    audio_url_base: str = "http://localhost:8000/audio"
+    # Worker: intervalo de consulta da fila e prazo para um job "executando" ser
+    # considerado abandonado (worker que morreu) e voltar à fila.
+    worker_intervalo_segundos: float = 5.0
+    worker_lease_minutos: int = 30
 
 
 @lru_cache

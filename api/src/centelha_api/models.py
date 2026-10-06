@@ -13,6 +13,7 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -267,3 +268,54 @@ class InscricaoListaEspera(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
     origem: Mapped[str] = mapped_column(String(40))
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EstadoJob(enum.StrEnum):
+    PENDENTE = "pendente"
+    EXECUTANDO = "executando"
+    CONCLUIDO = "concluido"
+    FALHOU = "falhou"
+
+
+class JobAudio(Base):
+    """Geração do áudio de um capítulo, na fila do próprio PostgreSQL.
+
+    O worker pega com SELECT ... FOR UPDATE SKIP LOCKED; com vários workers, cada job
+    sai para um só. Worker que morre no meio deixa o job em "executando" com lease
+    vencido, e outro worker o retoma.
+    """
+
+    __tablename__ = "job_audio"
+    __table_args__ = (
+        # Um job ativo por capítulo: pedir duas vezes não gera (nem cobra) duas vezes.
+        Index(
+            "uq_job_audio_ativo_por_capitulo",
+            "capitulo_id",
+            unique=True,
+            postgresql_where="estado IN ('pendente', 'executando')",
+        ),
+        Index("ix_job_audio_fila", "estado", "disponivel_em"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    capitulo_id: Mapped[int] = mapped_column(ForeignKey("capitulo.id"), index=True)
+    motor: Mapped[str] = mapped_column(String(40))
+    voz_narrador_id: Mapped[int] = mapped_column(ForeignKey("voz.id"))
+    voz_pergunta_id: Mapped[int | None] = mapped_column(ForeignKey("voz.id"))
+    voz_resposta_id: Mapped[int | None] = mapped_column(ForeignKey("voz.id"))
+    estado: Mapped[EstadoJob] = mapped_column(_enum(EstadoJob), default=EstadoJob.PENDENTE)
+    tentativas: Mapped[int] = mapped_column(default=0)
+    max_tentativas: Mapped[int] = mapped_column(default=3)
+    disponivel_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    lease_ate: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    erro: Mapped[str | None] = mapped_column(Text)
+    caracteres: Mapped[int | None]
+    faixa_id: Mapped[int | None] = mapped_column(ForeignKey("faixa_audio.id"))
+    solicitado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    iniciado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    concluido_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    capitulo: Mapped[Capitulo] = relationship()
