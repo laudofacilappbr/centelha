@@ -1,7 +1,7 @@
 """campanhas
 
 Revision ID: 3566d40a6ae7
-Revises: af91f417829a
+Revises: ef840e26776f
 Create Date: 2026-10-06 13:47:40.849205
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '3566d40a6ae7'
-down_revision: Union[str, Sequence[str], None] = 'af91f417829a'
+down_revision: Union[str, Sequence[str], None] = 'ef840e26776f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

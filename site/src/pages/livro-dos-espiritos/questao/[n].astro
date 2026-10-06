@@ -6,6 +6,7 @@ import StoreButtons from '../../../components/StoreButtons.astro';
 import { slugCapitulo, nomeCapitulo, resumir, type Obra, type Edicao } from '../../../lib/catalogo';
 import { questoesDoLivroDosEspiritos, urlQuestao, type Questao } from '../../../lib/questoes';
 import { temasDaQuestao, urlTema } from '../../../lib/temas';
+import { termosDaQuestao, urlTermo } from '../../../lib/glossario';
 
 export async function getStaticPaths() {
   const dados = await questoesDoLivroDosEspiritos();
@@ -30,6 +31,7 @@ const resposta = q.segmentos.find((s) => s.tipo === 'resposta' && !s.subquestao)
 const capUrl = `/obras/${obra.slug}/${slugCapitulo(q.capitulo)}`;
 const url = new URL(urlQuestao(q.numero), Astro.site).href;
 const relacionados = await temasDaQuestao(q.numero);
+const termos = await termosDaQuestao(q.numero);
 
 const ld = [
   {
@@ -72,6 +74,20 @@ const ld = [
             {relacionados.map((t) => (
               <li>
                 <a href={urlTema(t.slug)}>{t.titulo}</a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+    {
+      termos.length > 0 && (
+        <aside class="relacionados" aria-labelledby="termos-questao">
+          <h2 id="termos-questao">Termos desta questão</h2>
+          <ul>
+            {termos.map((t) => (
+              <li>
+                <a href={urlTermo(t.slug)}>{t.termo}</a>
               </li>
             ))}
           </ul>

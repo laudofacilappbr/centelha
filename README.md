@@ -62,6 +62,8 @@ Dicionário de pronúncia em `/v1/admin/pronuncias` (revisor de áudio ou admini
 
 Apoio ao projeto em `PUT /v1/admin/apoio` (só administrador): liga e desliga, quem recebe, valores sugeridos e os meios (compra no app, chave Pix, link https). Nasce desligado. Para ligar, é preciso informar quem recebe, ao menos um meio e um valor. Chave Pix CPF é recusada porque publicaria o documento de quem recebe. O app lê `apoio` em `GET /v1/config` e o site monta `/apoie` com `GET /v1/apoio`, que devolve só `ligado: false` enquanto o apoio estiver desligado. O site só mostra a mudança no próximo build.
 
+Glossário em `/v1/admin/glossario` (só administrador). Cada termo tem uma definição curta e as referências dos trechos de Kardec que a fundamentam (`LE-93`, `LE-C001`). A resposta lista em `nao_resolvidas` as referências que ainda não apontam para trecho publicado. Só se publica um termo com ao menos uma referência resolvida. O slug vira a URL `/glossario/<slug>` e não muda depois de publicado. O site lê `GET /v1/glossario` e monta o índice, a página de cada termo e "Termos desta questão".
+
 Campanhas de caridade em `/v1/admin/instituicoes` e `/v1/admin/campanhas` (só administrador). A instituição parceira tem CNPJ (o dígito verificador é conferido), descrição, chave Pix e página de doação. O dinheiro vai direto para ela. Regras para publicar uma campanha:
 
 - a instituição precisa ter Pix ou página de doação;

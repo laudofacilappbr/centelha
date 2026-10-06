@@ -1,0 +1,41 @@
+# Teste de ponta a ponta do backup (ci/validar.sh backup): PostgreSQL e um S3 locais
+# no lugar do banco de produção; rclone serve s3 no lugar do R2/B2.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment: { POSTGRES_USER: centelha, POSTGRES_PASSWORD: centelha, POSTGRES_DB: centelha }
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U centelha -d centelha"]
+      interval: 2s
+      retries: 30
+
+  # S3 local: o próprio rclone servindo uma pasta. Cada subpasta é um bucket.
+  s3:
+    image: rclone/rclone:1.69
+    # O bucket (pasta) precisa existir antes do serve, que guarda a listagem em cache.
+    entrypoint: ["sh", "-c"]
+    command:
+      - mkdir -p /dados/centelha-backup && exec rclone serve s3 /dados --addr :9000
+        --auth-key teste,teste-senha-longa
+    tmpfs: [/dados]
+
+  backup:
+    build: ..
+    environment:
+      PGHOST: postgres
+      PGUSER: centelha
+      PGPASSWORD: centelha
+      PGDATABASE: centelha
+      BACKUP_S3_ENDPOINT: http://s3:9000
+      BACKUP_S3_BUCKET: centelha-backup
+      BACKUP_S3_ACCESS_KEY: teste
+      BACKUP_S3_SECRET_KEY: teste-senha-longa
+      BACKUP_SENHA: senha-de-teste
+    volumes: [audio:/data/audio]
+    depends_on:
+      postgres: { condition: service_healthy }
+      s3: { condition: service_started }
+
+volumes:
+  audio:

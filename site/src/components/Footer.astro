@@ -26,6 +26,8 @@ const kids = Astro.url.pathname.startsWith('/kids');
         <ul>
           <li><a href="/sobre">Sobre o Centelha</a></li>
           <li><a href="/como-fazemos">Como fazemos</a></li>
+          <li><a href="/temas">Temas</a></li>
+          <li><a href="/glossario">Glossário</a></li>
           <li><a href="/kids">Centelha Kids</a></li>
           <li><a href="/transparencia">Transparência</a></li>
           {!kids && <li>{apoioLigado ? <a href="/apoie">Apoie</a> : <span class="muted">Apoie (em breve)</span>}</li>}

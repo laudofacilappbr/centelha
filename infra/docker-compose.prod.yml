@@ -80,6 +80,30 @@ services:
     restart: unless-stopped
     networks: [interna]
 
+  # Backup diário do banco e do áudio, cifrado, para um bucket S3 (R2 ou B2). Restaurar:
+  # infra/backup/restaurar.sh. Sem BACKUP_SENHA guardada fora da VPS, não há volta.
+  backup:
+    logging: *logs
+    image: ghcr.io/laudofacilappbr/centelha-backup:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      PGHOST: postgres
+      PGUSER: centelha
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: centelha
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+      BACKUP_S3_ACCESS_KEY: ${BACKUP_S3_ACCESS_KEY:-}
+      BACKUP_S3_SECRET_KEY: ${BACKUP_S3_SECRET_KEY:-}
+      BACKUP_SENHA: ${BACKUP_SENHA:-}
+      BACKUP_RETENCAO_DIAS: ${BACKUP_RETENCAO_DIAS:-30}
+      BACKUP_HORA: ${BACKUP_HORA:-6}
+    volumes: [audio:/data/audio]
+    depends_on:
+      postgres: { condition: service_healthy }
+    # Banco pela rede interna; bucket pela internet.
+    networks: [interna, saida]
+
   postgres:
     logging: *logs
     image: postgres:17-alpine
