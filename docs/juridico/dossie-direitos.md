@@ -26,7 +26,7 @@ O Centelha publica, num app gratuito para iOS e Android e num site, audiolivros 
 **Fatos**
 - Allan Kardec morreu em 1869: os originais franceses estão em domínio público.
 - Luís Olímpio Guillon Ribeiro nasceu em 17/1/1875 e morreu em 26/10/1943 ([O Consolador](https://www.oconsolador.com.br/ano6/284/cartaaoleitor_ingles.html)). Traduziu quase toda a obra de Kardec para a FEB.
-- Decisão do dono (#2): usar uma edição FEB antiga (décadas de 1940–1950), digitalizada.
+- Decisão do dono (#2): usar uma edição FEB antiga (décadas de 1940–1950) como prova de origem. Depois, em 6/10/2026, o dono escolheu PDFs da FEB como texto de trabalho, conferidos por amostragem contra esse exemplar: a 131ª ed. de 2013 do Evangelho e a 76ª ed. de 1995 do LE. As fichas [LE](fichas/o-livro-dos-espiritos-pt-guillon.md) e [ESE](fichas/o-evangelho-segundo-o-espiritismo-pt-guillon.md) dizem o que foi retirado.
 
 **Lei 9.610/98**
 - Art. 7º, XI: protege "as adaptações, traduções e outras transformações de obras originais, apresentadas como criação intelectual nova". A tradução tem direito próprio, independente do original.

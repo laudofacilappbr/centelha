@@ -3,6 +3,7 @@
 centelha-ingestao arquivo.epub --perfil perguntas            # só mostra o resumo
 centelha-ingestao arquivo.epub --perfil perguntas --json saida.json
 centelha-ingestao arquivo.epub --perfil perguntas --edicao-id 1 [--substituir]
+centelha-ingestao arquivo.pdf --paginas 13-494 --cortar-em "Nota Especial" ...
 """
 
 import argparse
@@ -12,7 +13,15 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .estrutura import estruturar, resumo
-from .leitores import ler
+from .leitores import cortar_em, ler
+
+
+def _faixa(valor: str) -> tuple[int, int]:
+    try:
+        primeira, ultima = (int(x) for x in valor.split("-"))
+    except ValueError:
+        raise argparse.ArgumentTypeError("use primeira-última, ex.: 13-494") from None
+    return primeira, ultima
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -22,9 +31,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", type=Path, help="grava a estrutura para revisão")
     parser.add_argument("--edicao-id", type=int, help="grava no banco nesta edição")
     parser.add_argument("--substituir", action="store_true")
+    parser.add_argument(
+        "--paginas",
+        type=_faixa,
+        help="PDF: primeira-última página da obra (deixa de fora folha de rosto, nota da "
+        "editora, sumário e índice)",
+    )
+    parser.add_argument(
+        "--cortar-em",
+        metavar="TEXTO",
+        help="descarta do parágrafo que começa com TEXTO em diante (nota da editora no fim)",
+    )
     args = parser.parse_args(argv)
 
-    capitulos = estruturar(ler(args.arquivo), args.perfil)
+    paragrafos = ler(args.arquivo, args.paginas)
+    if args.cortar_em:
+        paragrafos = cortar_em(paragrafos, args.cortar_em)
+    capitulos = estruturar(paragrafos, args.perfil)
     print(json.dumps(resumo(capitulos), ensure_ascii=False, indent=2))
 
     if args.json:
