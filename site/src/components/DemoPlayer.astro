@@ -1,17 +1,24 @@
 ---
 /**
  * Player de demonstração: questão 88 de O Livro dos Espíritos com o texto
- * destacado acompanhando o áudio. As marcações de tempo ficam em
- * src/data/q88.json. O áudio (public/audio/q88.mp3) é opcional: se faltar,
- * o player mostra "áudio de demonstração em breve" e o texto continua legível.
- * O arquivo de áudio só é baixado quando a pessoa toca em play.
+ * destacado acompanhando o áudio. Dados de src/lib/demo.ts: da API quando a obra
+ * está publicada (o trecho da questão dentro do áudio do capítulo), senão de
+ * src/data/q88.json. Sem áudio, o player mostra "áudio de demonstração em breve"
+ * e o texto continua legível. O áudio só é baixado quando a pessoa toca em play.
  */
-import q88 from '../data/q88.json';
+import { demoQ88 } from '../lib/demo';
 
+const q88 = await demoQ88();
 const segmentos = q88.segmentos;
 ---
 
-<div class="player card" data-player data-audio={q88.audio}>
+<div
+  class="player card"
+  data-player
+  data-audio={q88.audio?.url ?? ''}
+  data-inicio-audio={q88.audio?.inicio ?? 0}
+  data-fim-audio={q88.audio?.fim ?? 0}
+>
   <div class="player-head">
     <img src="/brand/symbol-flat.svg" alt="" width="40" height="40" class="spark" />
     <div>
@@ -20,7 +27,7 @@ const segmentos = q88.segmentos;
     </div>
   </div>
 
-  {/* TODO: conferir redação na edição-fonte (Guillon Ribeiro, domínio público) */}
+  {/* Texto estático (sem API): conferir redação na edição-fonte, Guillon Ribeiro. */}
   <blockquote class="texto" lang="pt-BR" data-texto>
     {
       segmentos.map((s, i) => (
@@ -64,6 +71,10 @@ const segmentos = q88.segmentos;
 
   document.querySelectorAll<HTMLElement>('[data-player]').forEach((root) => {
     const src = root.dataset.audio ?? '';
+    // Trecho da questão dentro do áudio do capítulo, em segundos. O tempo mostrado,
+    // a barra e o destaque são relativos a ele; fora dele, o player não toca.
+    const ini = Number(root.dataset.inicioAudio) || 0;
+    const fimAudio = Number(root.dataset.fimAudio) || 0;
     const controls = root.querySelector<HTMLElement>('[data-controls]')!;
     const play = root.querySelector<HTMLButtonElement>('[data-play]')!;
     const seek = root.querySelector<HTMLInputElement>('[data-seek]')!;
@@ -76,12 +87,20 @@ const segmentos = q88.segmentos;
       inicio: Number(el.dataset.inicio),
       fim: Number(el.dataset.fim),
     }));
-    const total = tempos.length ? tempos[tempos.length - 1].fim : 0;
+    const total = fimAudio > ini ? fimAudio - ini : tempos.length ? tempos[tempos.length - 1].fim : 0;
     dur.textContent = fmt(total);
     controls.hidden = false;
 
     let audio: HTMLAudioElement | null = null;
-    let indisponivel = false;
+    let indisponivel = !src;
+    if (indisponivel) {
+      play.disabled = true;
+      status.textContent = 'Áudio de demonstração em breve. Enquanto isso, leia o trecho acima.';
+    }
+    const rel = () => (audio ? audio.currentTime - ini : 0);
+    // Parou no fim da questão: o retorno ao início dispara outro timeupdate, que não
+    // deve destacar o primeiro trecho como se estivesse tocando.
+    let noFim = false;
 
     const marcarIndisponivel = () => {
       indisponivel = true;
@@ -104,12 +123,27 @@ const segmentos = q88.segmentos;
 
     const atualizar = () => {
       if (!audio) return;
-      const d = Number.isFinite(audio.duration) ? audio.duration : total;
-      cur.textContent = fmt(audio.currentTime);
+      // Arquivo só da questão (estático): a duração real manda. Trecho do capítulo:
+      // a duração é a do trecho, não a do arquivo.
+      const d = fimAudio > ini ? total : Number.isFinite(audio.duration) ? audio.duration : total;
+      if (fimAudio > ini && audio.currentTime >= fimAudio) {
+        // Fim da questão, não do arquivo: o capítulo continua, a demonstração não.
+        noFim = true;
+        audio.pause();
+        audio.currentTime = ini;
+      }
+      if (noFim) {
+        cur.textContent = fmt(0);
+        seek.value = '0';
+        destacar(-1);
+        return;
+      }
+      const t = Math.max(0, rel());
+      cur.textContent = fmt(t);
       dur.textContent = fmt(d);
-      seek.value = d ? String((audio.currentTime / d) * 100) : '0';
-      seek.setAttribute('aria-valuetext', `${fmt(audio.currentTime)} de ${fmt(d)}`);
-      destacar(audio.currentTime);
+      seek.value = d ? String((t / d) * 100) : '0';
+      seek.setAttribute('aria-valuetext', `${fmt(t)} de ${fmt(d)}`);
+      destacar(t);
     };
 
     const criarAudio = () => {
@@ -119,6 +153,7 @@ const segmentos = q88.segmentos;
       a.addEventListener('timeupdate', atualizar);
       a.addEventListener('loadedmetadata', atualizar);
       a.addEventListener('play', () => {
+        noFim = false;
         root.classList.add('is-playing');
         play.setAttribute('aria-label', 'Pausar');
         seek.disabled = false;
@@ -128,6 +163,9 @@ const segmentos = q88.segmentos;
         play.setAttribute('aria-label', 'Ouvir a questão 88');
       });
       a.addEventListener('ended', () => destacar(-1));
+      a.addEventListener('loadedmetadata', () => {
+        if (a.currentTime < ini) a.currentTime = ini;
+      });
       a.src = src;
       return a;
     };
@@ -135,14 +173,9 @@ const segmentos = q88.segmentos;
     play.addEventListener('click', async () => {
       if (indisponivel) return;
       if (!audio) {
-        // Confere se o arquivo existe antes de criar o player (só no primeiro toque).
-        try {
-          const r = await fetch(src, { method: 'HEAD' });
-          const tipo = r.headers.get('content-type') ?? '';
-          if (!r.ok || !tipo.startsWith('audio')) return marcarIndisponivel();
-        } catch {
-          return marcarIndisponivel();
-        }
+        // Sem checagem prévia por fetch: o áudio vem de outra origem (domínio de áudio
+        // na Cloudflare), e um fetch sem CORS falha sempre, dando o áudio como ausente.
+        // O <audio> não precisa de CORS; arquivo ausente cai no evento 'error'.
         audio = criarAudio();
       }
       if (audio.paused) {
@@ -155,8 +188,11 @@ const segmentos = q88.segmentos;
     });
 
     seek.addEventListener('input', () => {
-      if (!audio || !Number.isFinite(audio.duration)) return;
-      audio.currentTime = (Number(seek.value) / 100) * audio.duration;
+      if (!audio) return;
+      noFim = false;
+      const d = fimAudio > ini ? total : audio.duration;
+      if (!Number.isFinite(d)) return;
+      audio.currentTime = ini + (Number(seek.value) / 100) * d;
       atualizar();
     });
   });
