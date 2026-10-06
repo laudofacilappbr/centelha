@@ -2,7 +2,9 @@
 
     python -m centelha_api.pipeline.fila_cli vozes-criar --idioma pt-BR --motor azure \\
         --voz-id pt-BR-AntonioNeural --papel narrador
-    python -m centelha_api.pipeline.fila_cli pronuncias-seed            # nomes franceses
+    (francês: --idioma fr-FR com fr-FR-HenriNeural, fr-FR-Neural2-B ou fr_FR-siwis-medium;
+    a voz precisa ter o mesmo idioma da edição)
+    python -m centelha_api.pipeline.fila_cli pronuncias-seed [--idioma fr-FR]
     python -m centelha_api.pipeline.fila_cli enfileirar --edicao 1 --motor azure \\
         --narrador 1 [--pergunta 2 --resposta 3] [--capitulo 5]
     python -m centelha_api.pipeline.fila_cli status [--edicao 1]
@@ -16,7 +18,7 @@ from sqlalchemy import func, select
 from ..db import SessionLocal
 from ..models import Capitulo, EstadoJob, JobAudio, PapelVoz, Pronuncia, Voz
 from .jobs import ESTADOS_QUE_GERAM, JobRecusado, enfileirar
-from .pronuncia import SEED_PT_BR
+from .pronuncia import seed
 
 
 def _vozes_criar(s, a):
@@ -27,10 +29,10 @@ def _vozes_criar(s, a):
 
 
 def _pronuncias_seed(s, a):
-    existentes = set(s.scalars(select(Pronuncia.termo).where(Pronuncia.idioma == "pt-BR")))
-    novas = [e for e in SEED_PT_BR if e.termo not in existentes]
+    existentes = set(s.scalars(select(Pronuncia.termo).where(Pronuncia.idioma == a.idioma)))
+    novas = [e for e in seed(a.idioma) if e.termo not in existentes]
     s.add_all(
-        Pronuncia(idioma="pt-BR", termo=e.termo, substituicao=e.substituicao, ipa=e.ipa)
+        Pronuncia(idioma=a.idioma, termo=e.termo, substituicao=e.substituicao, ipa=e.ipa)
         for e in novas
     )
     s.commit()
@@ -94,7 +96,9 @@ def main(argv: list[str] | None = None) -> int:
     v.add_argument("--voz-id", required=True)
     v.add_argument("--papel", choices=[x.value for x in PapelVoz], default="narrador")
 
-    sub.add_parser("pronuncias-seed")
+    ps = sub.add_parser("pronuncias-seed")
+    # O mesmo idioma da edição: o dicionário é lido por igualdade (pt-BR, fr-FR...).
+    ps.add_argument("--idioma", default="pt-BR")
 
     e = sub.add_parser("enfileirar")
     e.add_argument("--edicao", type=int, required=True)

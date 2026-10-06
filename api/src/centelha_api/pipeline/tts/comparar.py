@@ -5,6 +5,7 @@
         --motor google:pt-BR-Neural2-B \\
         --motor piper:pt_BR-faber-medium \\
         [--perfil perguntas --voz-pergunta azure:pt-BR-FranciscaNeural]
+        [--idioma fr-FR]   # trecho em francês, com vozes fr-FR-*
 
 Cada motor vira um .m4a na pasta de saída, e resumo.json traz caracteres, duração e
 tempo de síntese, para comparar custo junto com a escuta. Motor sem credencial é
@@ -18,7 +19,7 @@ from pathlib import Path
 
 from ..ingestao.estrutura import estruturar
 from ..ingestao.leitores import ler
-from ..pronuncia import SEED_PT_BR
+from ..pronuncia import seed
 from .gerar import SegmentoParaVoz, Vozes, gerar_capitulo
 from .motores import ErroTTS, motor
 
@@ -38,6 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--voz-pergunta", type=_par, action="append", default=[])
     parser.add_argument("--voz-resposta", type=_par, action="append", default=[])
     parser.add_argument("--perfil", choices=["generico", "perguntas"], default="generico")
+    parser.add_argument("--idioma", default="pt-BR")
     args = parser.parse_args(argv)
 
     segmentos = [
@@ -54,7 +56,9 @@ def main(argv: list[str] | None = None) -> int:
         vozes = Vozes(voz, extras_p.get(nome), extras_r.get(nome))
         destino = args.saida / f"{nome}-{voz}.m4a"
         try:
-            r = gerar_capitulo(segmentos, motor(nome), vozes, SEED_PT_BR, destino)
+            r = gerar_capitulo(
+                segmentos, motor(nome), vozes, seed(args.idioma), destino, args.idioma
+            )
         except ErroTTS as e:
             resumo[f"{nome}:{voz}"] = {"erro": str(e)}
             print(f"{nome}: {e}", file=sys.stderr)
