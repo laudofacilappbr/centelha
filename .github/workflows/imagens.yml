@@ -23,6 +23,7 @@ jobs:
           - { servico: worker, contexto: api, alvo: worker }
           - { servico: site, contexto: site, alvo: "" }
           - { servico: piper, contexto: infra/piper, alvo: "" }
+          - { servico: backup, contexto: infra/backup, alvo: "" }
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
