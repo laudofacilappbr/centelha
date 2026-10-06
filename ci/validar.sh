@@ -7,9 +7,11 @@
 #   ci/validar.sh infra      # compose de dev e prod, Caddyfile
 #   ci/validar.sh app        # só o app Flutter (format, analyze, testes)
 #   ci/validar.sh backup     # backup → apaga → restaura, com PostgreSQL e S3 locais
+#   ci/validar.sh regenerar  # site-construtor: publicação no banco chega ao site (#42)
 #   ci/validar.sh vps        # preparar.sh num Ubuntu 24.04 e o firewall da Cloudflare com
 #                            # pacote de verdade; actionlint dos workflows
-#   ci/validar.sh imagens    # build das imagens api, worker, site, piper, digitalizacao e backup
+#   ci/validar.sh imagens    # build das imagens api, worker, site, site-construtor, piper,
+#                            # digitalizacao e backup
 #
 # Roda o que está na worktree (commitado ou não). Cada worktree usa um projeto Docker
 # próprio, então duas sessões validam ao mesmo tempo sem colidir. Sai com código
@@ -60,6 +62,11 @@ for alvo in "${alvos[@]}"; do
       bash infra/backup/teste/testar.sh
       marcar backup $?
       ;;
+    regenerar)
+      echo "### regenerar"
+      bash site/regenerar/teste/testar.sh
+      marcar regenerar $?
+      ;;
     vps)
       echo "### vps"
       ok=0
@@ -84,15 +91,16 @@ for alvo in "${alvos[@]}"; do
       docker build -q --target api -t "$projeto-api" api >/dev/null || ok=1
       docker build -q --target worker -t "$projeto-worker" api >/dev/null || ok=1
       docker build -q -t "$projeto-site" site >/dev/null || ok=1
+      docker build -q --target construtor -t "$projeto-site-construtor" site >/dev/null || ok=1
       docker build -q -t "$projeto-piper" infra/piper >/dev/null || ok=1
       docker build -q --target digitalizacao -t "$projeto-digitalizacao" api >/dev/null || ok=1
       docker build -q -t "$projeto-backup" infra/backup >/dev/null || ok=1
-      docker rmi "$projeto-api" "$projeto-worker" "$projeto-site" "$projeto-piper" \
+      docker rmi "$projeto-api" "$projeto-worker" "$projeto-site" "$projeto-site-construtor" "$projeto-piper" \
         "$projeto-digitalizacao" "$projeto-backup" >/dev/null 2>&1
       marcar imagens $ok
       ;;
     *)
-      echo "alvo desconhecido: $alvo (use api, site, infra, app, backup, vps, imagens)" >&2
+      echo "alvo desconhecido: $alvo (use api, site, infra, app, backup, regenerar, vps, imagens)" >&2
       exit 2
       ;;
   esac

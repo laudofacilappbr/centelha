@@ -20,12 +20,23 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-RUN npm run build
+RUN npm run build && cd dist && find . -type f -exec md5sum {} + | sort -k2 | md5sum | cut -c1-12 > .versao
+
+# ---------- construtor (#42) ----------
+# Serviço site-construtor: regera o site com o conteúdo da API quando ele muda.
+FROM build AS construtor
+COPY regenerar/regenerar.sh /usr/local/bin/regenerar
+RUN chown -R node:node /app
+USER node
+CMD ["sh", "/usr/local/bin/regenerar"]
 
 # ---------- runtime ----------
 FROM nginx:alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
+# Serve /srv/site/atual: o site da imagem ou o que o construtor gerou depois (#42).
+COPY regenerar/40-site-versao.sh /docker-entrypoint.d/40-site-versao.sh
+RUN chmod +x /docker-entrypoint.d/40-site-versao.sh
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
