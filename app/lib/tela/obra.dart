@@ -45,7 +45,12 @@ class _TelaObraState extends State<TelaObra> {
                 atual: _edicao,
                 escolher: (e) => setState(() => _edicao = e),
               ),
-            _BuscaQuestao(api: widget.api, edicaoId: edicao.id),
+            _BuscaQuestao(
+              api: widget.api,
+              edicaoId: edicao.id,
+              edicao: edicao.titulo,
+              autor: widget.obra.autor,
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Text(
@@ -57,7 +62,13 @@ class _TelaObraState extends State<TelaObra> {
               ListTile(
                 title: Text(c.titulo),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => abrirCapitulo(context, widget.api, c),
+                onTap: () => abrirCapitulo(
+                  context,
+                  widget.api,
+                  c,
+                  edicao: edicao.titulo,
+                  autor: widget.obra.autor,
+                ),
               ),
           ],
         ),
@@ -70,6 +81,8 @@ void abrirCapitulo(
   BuildContext context,
   CatalogoApi api,
   CapituloResumo capitulo, {
+  required String edicao,
+  required String autor,
   int? questao,
   String? subquestao,
 }) {
@@ -78,6 +91,8 @@ void abrirCapitulo(
       builder: (_) => TelaCapitulo(
         api: api,
         resumo: capitulo,
+        edicao: edicao,
+        autor: autor,
         questao: questao,
         subquestao: subquestao,
       ),
@@ -151,10 +166,17 @@ class _EscolhaEdicao extends StatelessWidget {
 }
 
 class _BuscaQuestao extends StatefulWidget {
-  const _BuscaQuestao({required this.api, required this.edicaoId});
+  const _BuscaQuestao({
+    required this.api,
+    required this.edicaoId,
+    required this.edicao,
+    required this.autor,
+  });
 
   final CatalogoApi api;
   final int edicaoId;
+  final String edicao;
+  final String autor;
 
   @override
   State<_BuscaQuestao> createState() => _BuscaQuestaoState();
@@ -189,6 +211,8 @@ class _BuscaQuestaoState extends State<_BuscaQuestao> {
         context,
         widget.api,
         questao.capitulo,
+        edicao: widget.edicao,
+        autor: widget.autor,
         questao: busca.numero,
         subquestao: busca.sub,
       );

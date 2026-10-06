@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../api/catalogo_api.dart';
 import '../l10n/app_localizations.dart';
+import '../player/barra_player.dart';
+import '../player/reprodutor.dart';
 import '../tema/centelha_tema.dart';
 import 'comum.dart';
 
@@ -11,12 +13,18 @@ class TelaCapitulo extends StatelessWidget {
     super.key,
     required this.api,
     required this.resumo,
+    required this.edicao,
+    required this.autor,
     this.questao,
     this.subquestao,
   });
 
   final CatalogoApi api;
   final CapituloResumo resumo;
+
+  /// Para a tela de bloqueio: título da edição e autor.
+  final String edicao;
+  final String autor;
   final int? questao;
   final String? subquestao;
 
@@ -26,10 +34,25 @@ class TelaCapitulo extends StatelessWidget {
       appBar: AppBar(title: Text(resumo.titulo)),
       body: Carregavel<Capitulo>(
         carregar: () => api.capitulo(resumo.id),
-        construir: (context, capitulo) => TextoCapitulo(
-          segmentos: capitulo.segmentos,
-          questao: questao,
-          subquestao: subquestao,
+        construir: (context, capitulo) => Column(
+          children: [
+            Expanded(
+              child: TextoCapitulo(
+                segmentos: capitulo.segmentos,
+                questao: questao,
+                subquestao: subquestao,
+              ),
+            ),
+            if (capitulo.faixa != null)
+              BarraPlayer(
+                capitulo: capitulo,
+                info: InfoFaixa(
+                  titulo: resumo.titulo,
+                  edicao: edicao,
+                  autor: autor,
+                ),
+              ),
+          ],
         ),
       ),
     );

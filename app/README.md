@@ -38,3 +38,9 @@ bash ci/validar.sh app   # na raiz: format, analyze e testes em Docker
 
 - O `applicationId`/bundle id (`app.centelha.centelha`) não pode mudar depois do primeiro envio. Confirme antes.
 - Ícone, splash e assinatura dos builds ainda não estão configurados.
+
+## Player
+
+`lib/player/`: `reprodutor.dart` é o motor (just_audio dentro do audio_service, com segundo plano e controles na tela de bloqueio); `controle_player.dart` é o estado para as telas (velocidade, timer de sono, marcadores); `progresso.dart` guarda posição, marcadores e velocidade no aparelho. A posição guarda o segmento junto: se o áudio for regenerado, a retomada cai no começo do mesmo segmento.
+
+Faixa com `formato` diferente de `m4a` (áudio cifrado, #73) ainda não toca: a decifragem entra em `fonteDe()`.

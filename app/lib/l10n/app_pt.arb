@@ -59,5 +59,44 @@
   },
   "pergunta": "Pergunta",
   "resposta": "Resposta",
-  "outraEdicao": "Edição"
+  "outraEdicao": "Edição",
+  "tocar": "Tocar",
+  "pausar": "Pausar",
+  "voltar15": "Voltar 15 segundos",
+  "avancar15": "Avançar 15 segundos",
+  "velocidade": "Velocidade",
+  "timerSono": "Timer de sono",
+  "timerDesligado": "Desligado",
+  "timerMinutos": "{minutos} min",
+  "@timerMinutos": {
+    "placeholders": {
+      "minutos": {
+        "type": "int"
+      }
+    }
+  },
+  "timerRestante": "Para em {minutos} min",
+  "@timerRestante": {
+    "placeholders": {
+      "minutos": {
+        "type": "int"
+      }
+    }
+  },
+  "marcar": "Marcar este trecho",
+  "marcadores": "Marcadores",
+  "semMarcadores": "Nenhum marcador neste capítulo.",
+  "marcadorSalvo": "Marcador salvo em {tempo}.",
+  "@marcadorSalvo": {
+    "placeholders": {
+      "tempo": {
+        "type": "String"
+      }
+    }
+  },
+  "remover": "Remover",
+  "continuarOuvindo": "Continuar ouvindo",
+  "ouvirEsteCapitulo": "Ouvir este capítulo",
+  "audioIndisponivel": "O áudio deste capítulo precisa de uma versão mais nova do app.",
+  "posicao": "Posição"
 }

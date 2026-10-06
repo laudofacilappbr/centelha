@@ -4,6 +4,9 @@ import '../api/catalogo_api.dart';
 import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
 import '../tema/centelha_tema.dart';
+import '../player/controle_player.dart';
+import '../player/progresso.dart';
+import 'capitulo.dart';
 import 'comum.dart';
 import 'configuracoes.dart';
 import 'obra.dart';
@@ -74,12 +77,21 @@ class _TelaInicioState extends State<TelaInicio> {
               _recarregar();
               await _obras.catchError((_) => <Obra>[]);
             },
-            child: ListView.separated(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: obras.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, i) =>
-                  _CartaoObra(api: widget.api, obra: obras[i], idioma: idioma),
+              children: [
+                if (EscopoPlayer.of(context).armazem.ultimo() case final u?)
+                  _ContinuarOuvindo(api: widget.api, ultimo: u),
+                for (final obra in obras)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _CartaoObra(
+                      api: widget.api,
+                      obra: obra,
+                      idioma: idioma,
+                    ),
+                  ),
+              ],
             ),
           );
         },
@@ -147,6 +159,53 @@ class _CartaoObra extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContinuarOuvindo extends StatelessWidget {
+  const _ContinuarOuvindo({required this.api, required this.ultimo});
+
+  final CatalogoApi api;
+  final UltimoOuvido ultimo;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final tema = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Card(
+        margin: EdgeInsets.zero,
+        color: tema.colorScheme.surfaceContainerHighest,
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          leading: Icon(
+            Icons.play_circle,
+            color: tema.colorScheme.primary,
+            size: 40,
+          ),
+          title: Text(t.continuarOuvindo, style: tema.textTheme.labelSmall),
+          subtitle: Text(
+            '${ultimo.capitulo.titulo}\n${ultimo.info.edicao}',
+            style: tema.textTheme.titleSmall,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => TelaCapitulo(
+                api: api,
+                resumo: ultimo.capitulo,
+                edicao: ultimo.info.edicao,
+                autor: ultimo.info.autor,
+              ),
+            ),
           ),
         ),
       ),

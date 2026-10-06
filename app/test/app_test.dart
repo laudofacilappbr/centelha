@@ -9,6 +9,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'catalogo_api_test.dart' show obrasJson, respostaJson;
+import 'reprodutor_falso.dart';
 
 Future<PreferenciaIdioma> _idioma([
   Map<String, Object> salvo = const {},
@@ -32,7 +33,13 @@ void main() {
   testWidgets('mostra as obras no idioma do aparelho', (tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('pt', 'BR')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    await tester.pumpWidget(CentelhaApp(api: _api(), idioma: await _idioma()));
+    await tester.pumpWidget(
+      CentelhaApp(
+        api: _api(),
+        idioma: await _idioma(),
+        player: (await playerFalso()).$1,
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Obras'), findsOneWidget);
     expect(find.text('O Livro dos Espíritos'), findsOneWidget);
@@ -45,7 +52,13 @@ void main() {
   ) async {
     tester.platformDispatcher.localesTestValue = const [Locale('fr', 'CA')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    await tester.pumpWidget(CentelhaApp(api: _api(), idioma: await _idioma()));
+    await tester.pumpWidget(
+      CentelhaApp(
+        api: _api(),
+        idioma: await _idioma(),
+        player: (await playerFalso()).$1,
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Œuvres'), findsOneWidget);
     expect(find.text('Le Livre des Esprits'), findsOneWidget);
@@ -57,7 +70,13 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('pt', 'BR')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     final idioma = await _idioma();
-    await tester.pumpWidget(CentelhaApp(api: _api(), idioma: idioma));
+    await tester.pumpWidget(
+      CentelhaApp(
+        api: _api(),
+        idioma: idioma,
+        player: (await playerFalso()).$1,
+      ),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Configurações'));
@@ -77,7 +96,11 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('pt', 'BR')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(
-      CentelhaApp(api: _api(falhasAntes: 1), idioma: await _idioma()),
+      CentelhaApp(
+        api: _api(falhasAntes: 1),
+        idioma: await _idioma(),
+        player: (await playerFalso()).$1,
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Não foi possível carregar'), findsOneWidget);
@@ -93,7 +116,13 @@ void main() {
     tester.platformDispatcher.textScaleFactorTestValue = 1.3;
     addTearDown(tester.view.reset);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    await tester.pumpWidget(CentelhaApp(api: _api(), idioma: await _idioma()));
+    await tester.pumpWidget(
+      CentelhaApp(
+        api: _api(),
+        idioma: await _idioma(),
+        player: (await playerFalso()).$1,
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Allan Kardec · 1857'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.settings_outlined));
