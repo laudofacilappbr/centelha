@@ -19,11 +19,23 @@ PAUSA_PADRAO_MS = 600
 
 
 @dataclass(frozen=True)
+class MarcaSegmento:
+    """Onde um segmento começa e termina dentro do áudio de um bloco, em ms relativos."""
+
+    segmento_id: int
+    inicio_ms: int
+    fim_ms: int
+
+
+@dataclass(frozen=True)
 class TrechoAudio:
     segmento_id: int
     wav: Path
     # Pausa depois deste trecho; None usa a padrão. Título pede pausa maior que parágrafo.
     pausa_depois_ms: int | None = None
+    # Trecho sintetizado em bloco (vários segmentos num pedido): o tempo de cada um,
+    # vindo dos marcadores do motor. None = o trecho inteiro é um segmento só.
+    marcas: tuple[MarcaSegmento, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -78,13 +90,15 @@ def juntar_wav(trechos: list[TrechoAudio], destino: Path, pausa_ms: int = PAUSA_
                 n = entrada.getnframes()
                 saida.writeframes(entrada.readframes(n))
             canais, largura, taxa = formato
-            marcacoes.append(
-                {
-                    "segmento_id": trecho.segmento_id,
-                    "inicio_ms": _ms(total, taxa),
-                    "fim_ms": _ms(total + n, taxa),
-                }
-            )
+            inicio, fim = _ms(total, taxa), _ms(total + n, taxa)
+            for m in trecho.marcas or (MarcaSegmento(trecho.segmento_id, 0, fim - inicio),):
+                marcacoes.append(
+                    {
+                        "segmento_id": m.segmento_id,
+                        "inicio_ms": min(inicio + m.inicio_ms, fim),
+                        "fim_ms": min(inicio + m.fim_ms, fim),
+                    }
+                )
             total += n
             if i < len(trechos) - 1:
                 pausa = trecho.pausa_depois_ms if trecho.pausa_depois_ms is not None else pausa_ms

@@ -3,6 +3,11 @@
 A escolha do motor é decisão humana pela escuta (#1). Até lá, cada adaptador recebe o
 mesmo trecho e o script de comparação gera as amostras lado a lado.
 
+Motores com marcadores (`sintetizar_com_marcas`) aceitam um bloco de vários segmentos
+num pedido só e devolvem o tempo de cada `<mark>`; os demais recebem um segmento por
+pedido. Hoje: Google (v1beta1, timepoints) e o falso. O Azure por REST devolve só o
+áudio; os bookmarks dele chegam apenas pelo Speech SDK.
+
 Credenciais vêm de variáveis de ambiente, nunca do código:
   CENTELHA_AZURE_TTS_KEY, CENTELHA_AZURE_TTS_REGION
   CENTELHA_GOOGLE_TTS_KEY
@@ -13,6 +18,7 @@ import base64
 import json
 import math
 import os
+import re
 import struct
 import subprocess
 import urllib.request
@@ -50,6 +56,21 @@ class Motor(Protocol):
     aceita_ssml: bool
 
     def sintetizar(self, pedido: Pedido) -> bytes: ...
+
+
+@dataclass(frozen=True)
+class SinteseMarcada:
+    wav: bytes
+    # Nome do <mark> → ms desde o início do áudio.
+    marcas_ms: dict[str, int]
+
+
+class MotorComMarcas(Motor, Protocol):
+    def sintetizar_com_marcas(self, pedido: Pedido) -> SinteseMarcada: ...
+
+
+def aceita_marcas(motor: Motor) -> bool:
+    return callable(getattr(motor, "sintetizar_com_marcas", None))
 
 
 def _wav_pcm(amostras: bytes, taxa: int = TAXA_PADRAO) -> bytes:
@@ -93,15 +114,34 @@ class MotorFalso:
     ms_por_caractere: int = 20
     pedidos: list[Pedido] = field(default_factory=list)
 
-    def sintetizar(self, pedido: Pedido) -> bytes:
-        self.pedidos.append(pedido)
-        n = max(1, round(TAXA_PADRAO * self.ms_por_caractere * len(pedido.texto) / 1000))
-        freq = 220 + (sum(map(ord, pedido.voz_id)) % 220)
-        amostras = b"".join(
+    def _tom(self, caracteres: int, voz_id: str) -> bytes:
+        n = max(1, round(TAXA_PADRAO * self.ms_por_caractere * caracteres / 1000))
+        freq = 220 + (sum(map(ord, voz_id)) % 220)
+        return b"".join(
             struct.pack("<h", int(3000 * math.sin(2 * math.pi * freq * i / TAXA_PADRAO)))
             for i in range(n)
         )
-        return _wav_pcm(amostras)
+
+    def sintetizar(self, pedido: Pedido) -> bytes:
+        self.pedidos.append(pedido)
+        return _wav_pcm(self._tom(len(pedido.texto), pedido.voz_id))
+
+    def sintetizar_com_marcas(self, pedido: Pedido) -> SinteseMarcada:
+        """Lê o SSML do bloco: texto vira tom, <break> vira silêncio, <mark> anota o tempo."""
+        self.pedidos.append(pedido)
+        amostras = bytearray()
+        marcas: dict[str, int] = {}
+        for marca, pausa, texto in _RE_SSML_FALSO.findall(pedido.ssml):
+            if marca:
+                marcas[marca] = round(len(amostras) // 2 * 1000 / TAXA_PADRAO)
+            elif pausa:
+                amostras += bytes(2 * round(TAXA_PADRAO * int(pausa) / 1000))
+            elif texto.strip():
+                amostras += self._tom(len(texto), pedido.voz_id)
+        return SinteseMarcada(_wav_pcm(bytes(amostras)), marcas)
+
+
+_RE_SSML_FALSO = re.compile(r'<mark name="([^"]+)"/>|<break time="(\d+)ms"/>|<[^>]+>|([^<]+)')
 
 
 @dataclass
@@ -132,23 +172,41 @@ class MotorGoogle:
     nome: str = "google"
     aceita_ssml: bool = True
 
-    def sintetizar(self, pedido: Pedido) -> bytes:
+    def _chamar(self, pedido: Pedido, versao: str, extra: dict) -> tuple[bytes, dict]:
         chave = _exigir("CENTELHA_GOOGLE_TTS_KEY")
         corpo = {
             "input": {"ssml": f"<speak>{pedido.ssml}</speak>"},
             "voice": {"languageCode": pedido.idioma, "name": pedido.voz_id},
             # LINEAR16 já vem com cabeçalho WAV.
             "audioConfig": {"audioEncoding": "LINEAR16", "sampleRateHertz": TAXA_PADRAO},
+            **extra,
         }
         resposta = _post(
-            "https://texttospeech.googleapis.com/v1/text:synthesize",
+            f"https://texttospeech.googleapis.com/{versao}/text:synthesize",
             json.dumps(corpo).encode("utf-8"),
             {"Content-Type": "application/json", "X-Goog-Api-Key": chave},
         )
         try:
-            return base64.b64decode(json.loads(resposta)["audioContent"])
+            dados = json.loads(resposta)
+            return base64.b64decode(dados["audioContent"]), dados
         except (KeyError, ValueError) as e:
             raise ErroTTS("google: resposta sem audioContent") from e
+
+    def sintetizar(self, pedido: Pedido) -> bytes:
+        return self._chamar(pedido, "v1", {})[0]
+
+    def sintetizar_com_marcas(self, pedido: Pedido) -> SinteseMarcada:
+        # Os timepoints de <mark> só existem na v1beta1.
+        wav, dados = self._chamar(pedido, "v1beta1", {"enableTimePointing": ["SSML_MARK"]})
+        try:
+            # JSON de proto3 omite o valor zero: marca no início do áudio vem sem timeSeconds.
+            marcas = {
+                t["markName"]: round(float(t.get("timeSeconds", 0)) * 1000)
+                for t in dados.get("timepoints", [])
+            }
+        except (KeyError, TypeError, ValueError) as e:
+            raise ErroTTS("google: timepoints inválidos") from e
+        return SinteseMarcada(wav, marcas)
 
 
 @dataclass

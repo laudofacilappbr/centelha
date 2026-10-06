@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 from sqlalchemy import func, select
 
+from centelha_api.config import get_settings
 from centelha_api.db import SessionLocal
 from centelha_api.models import (
     Capitulo,
@@ -112,6 +113,19 @@ def test_ciclo_completo_gera_faixa_e_avanca_capitulo(session, base, armazenament
     _enfileirar(session, base)
     worker.processar_um(SessionLocal, armazenamento, MotorFalso())
     assert sorted(session.scalars(select(FaixaAudio.versao)).all()) == [1, 2]
+
+
+def test_modo_bloco_vem_da_configuracao(session, base, armazenamento, monkeypatch):
+    monkeypatch.setattr(get_settings(), "tts_modo", "bloco")
+    job = _enfileirar(session, base, resposta=base["resposta"])
+    motor = MotorFalso()
+    assert worker.processar_um(SessionLocal, armazenamento, motor) is True
+
+    session.expire_all()
+    faixa = session.get(FaixaAudio, session.get(JobAudio, job.id).faixa_id)
+    # Os dois segmentos do narrador num pedido; a resposta, em outra voz, noutro.
+    assert [p.voz_id for p in motor.pedidos] == ["n", "r"]
+    assert [m["segmento_id"] for m in faixa.marcacoes] == [s.id for s in base["cap"].segmentos]
 
 
 def test_fila_vazia(session):
