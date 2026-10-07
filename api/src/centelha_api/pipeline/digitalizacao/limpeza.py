@@ -63,14 +63,24 @@ def _normal(linha: str) -> str:
 _NUMERO_NA_PONTA = re.compile(r"^(\d{1,4}|[IVXLC]{1,6})\b|\b(\d{1,4}|[IVXLC]{1,6})[.]?$")
 
 
+_ARABICO_NA_PONTA = re.compile(r"^\d{1,4}\b|\b\d{1,4}[.]?$")
+
+
 def _cabecalho_numerado(linha: str) -> bool:
     """Número de página na ponta e o resto em maiúsculas. Linha de texto com número no
-    fim ("la phrase 2.", "Matthieu, ch. V, v. 3") é minúscula e fica."""
-    letras = [c for c in _NUMERO_NA_PONTA.sub("", linha) if c.isalpha()]
-    return bool(_NUMERO_NA_PONTA.search(linha)) and len(letras) >= 3 and "".join(letras).isupper()
+    fim ("la phrase 2.", "Matthieu, ch. V, v. 3") é minúscula e fica.
+
+    Romano só conta como número de página quando o resto não é rótulo: em "IV
+    INTRODUCTION." é a página; em "CHAPITRE V", título que abre o capítulo, é o
+    número do capítulo."""
+    resto = _NUMERO_NA_PONTA.sub("", linha)
+    letras = "".join(c for c in resto if c.isalpha())
+    if not _NUMERO_NA_PONTA.search(linha) or len(letras) < 3 or not letras.isupper():
+        return False
+    return bool(_ARABICO_NA_PONTA.search(linha)) or _normal(resto) not in _ROTULOS
 
 
-def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> set[str]:
+def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> tuple[set[str], set[str]]:
     """Assinaturas de cabeçalho ou rodapé: nas 2 primeiras ou 2 últimas linhas.
 
     Duas regras. A linha que se repete em muitas páginas (o título da obra). E a que
@@ -79,7 +89,7 @@ def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> set[str]:
     aparece nas páginas dele, longe dos 30% do livro. Subtítulo repetido ("Instructions
     des Esprits") não tem número, e linha de texto com número no fim não é maiúscula."""
     if len(paginas) < 3:
-        return set()
+        return set(), set()
     contagem: Counter[str] = Counter()
     numeradas: Counter[str] = Counter()
     for linhas in paginas:
@@ -89,7 +99,9 @@ def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> set[str]:
             {a for linha in bordas if _cabecalho_numerado(linha) and (a := _assinatura(linha))}
         )
     muitas = {a for a, n in contagem.items() if n >= max(3, minimo * len(paginas))}
-    return muitas | {a for a, n in numeradas.items() if n >= 3}
+    # A segunda regra só vale para a linha que tem o número: o título "CHAPITRE V" que
+    # abre o capítulo tem a mesma assinatura do cabeçalho "62 CHAPITRE V." e fica.
+    return muitas, {a for a, n in numeradas.items() if n >= 3}
 
 
 def _sem_ruido(linha: str) -> str:
@@ -104,7 +116,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
         ]
         for p in texto_ocr.replace("\r\n", "\n").split("\f")
     ]
-    repetidas = _repetidas([[linha for linha in p if linha] for p in paginas])
+    repetidas, numeradas = _repetidas([[linha for linha in p if linha] for p in paginas])
 
     paragrafos: list[Paragrafo] = []
     atual: list[str] = []
@@ -133,6 +145,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
                     _NUMERO_PAGINA.match(linha)
                     or _ROMANO_PAGINA.match(linha)
                     or _assinatura(linha) in repetidas
+                    or (_assinatura(linha) in numeradas and _cabecalho_numerado(linha))
                 ):
                     uteis.pop(borda)
                     while uteis and not uteis[borda]:
