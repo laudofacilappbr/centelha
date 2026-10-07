@@ -105,6 +105,15 @@ final _rotas = <String, Object>{
     'capitulo': _capitulo(10, 1, 'Capítulo I — De Deus'),
     'segmentos': <Object>[],
   },
+  // A questão 88 existe na edição francesa; a 1, não (cai no capítulo de mesma
+  // referência).
+  '/v1/edicoes/2/questoes/88': {
+    'edicao_id': 2,
+    'numero': 88,
+    'referencia': 'LE-88',
+    'capitulo': _capitulo(20, 1, 'Chapitre premier — Dieu'),
+    'segmentos': <Object>[],
+  },
 };
 
 /// Caminhos pedidos, na ordem, para conferir o que o app buscou.

@@ -79,5 +79,7 @@
   "apagarDownloadTitulo": "¿Borrar el capítulo descargado?",
   "apagarDownloadTexto": "Sigue en la app para escucharlo con internet.",
   "apagar": "Borrar",
-  "cancelar": "Cancelar"
+  "cancelar": "Cancelar",
+  "lerEmOutroIdioma": "Leer en otro idioma",
+  "posicaoNaoEncontrada": "Esta parte no está en {edicao}."
 }
