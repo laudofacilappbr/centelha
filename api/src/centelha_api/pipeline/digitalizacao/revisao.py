@@ -53,7 +53,7 @@ def _contexto(texto: str, inicio: int, fim: int, margem: int = 30) -> str:
     return ("…" if a else "") + texto[a:b].replace("\n", " ") + ("…" if b < len(texto) else "")
 
 
-def suspeitas(paragrafos: list[Paragrafo]) -> list[Achado]:
+def suspeitas(paragrafos: list[Paragrafo], idioma: str = "por") -> list[Achado]:
     achados: list[Achado] = []
     vocabulario = Counter(w.lower() for p in paragrafos for w in _PALAVRA.findall(p.texto))
     for p in paragrafos:
@@ -79,7 +79,7 @@ def suspeitas(paragrafos: list[Paragrafo]) -> list[Achado]:
                         )
             # O trema de 1943 (freqüente, tranqüilo) costuma sair do OCR como "ii" e às
             # vezes com q lido como g: "fregiiente". Em português, "ii" quase não existe.
-            if "ii" in w and not w.startswith("xii"):
+            if idioma == "por" and "ii" in w and not w.startswith("xii"):
                 achados.append(
                     Achado(
                         p.pagina,
@@ -169,12 +169,14 @@ def revisar(
     trocas: list[Troca] | None = None,
     referencia: str | None = None,
     perfil: str | None = None,
+    idioma: str = "por",
 ) -> Relatorio:
     texto = "\n".join(p.texto for p in paragrafos)
     rel = Relatorio(
-        achados=suspeitas(paragrafos),
+        achados=suspeitas(paragrafos, idioma),
         trocas=trocas or [],
-        conferir_circunflexo=a_conferir(texto),
+        # Circunflexo a conferir é regra da grafia portuguesa de 1943.
+        conferir_circunflexo=a_conferir(texto) if idioma == "por" else [],
     )
     if referencia:
         rel.achados += diferencas(paragrafos, referencia)

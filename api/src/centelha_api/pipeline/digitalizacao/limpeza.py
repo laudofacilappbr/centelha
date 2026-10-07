@@ -8,6 +8,8 @@ Saída: parágrafos com a página de origem, para o relatório apontar onde conf
 - Número de página sozinho na linha sai.
 - Palavra hifenizada no fim da linha, ou no fim da página, é juntada.
 - Ligaduras e espaços estranhos são normalizados; aspas ficam como no exemplar.
+- Ruído da margem sai: "|", "|}" e "|n" no começo ou no fim da linha são a borda da
+  página vizinha que entrou no escaneado (fac-símile da Library of Congress, #45).
 """
 
 import re
@@ -20,6 +22,10 @@ _NUMERO_PAGINA = re.compile(r"^[\s\-–—.]*\d{1,4}[\s\-–—.]*$")
 _ROMANO_PAGINA = re.compile(r"^\s*[ivxlc]{1,7}\s*$", re.IGNORECASE)
 # Fim de linha com hífen depois de letra minúscula: "pala-" + "vra".
 _HIFEN_FINAL = re.compile(r"(\w)[-¬]$")
+# Token que começa com barra ou chave, na ponta da linha. Nenhum livro do acervo usa
+# "|" nem chaves: é a lombada ou a página ao lado. Palavra antes da barra ("à|m") fica.
+_RUIDO_INICIO = re.compile(r"^(?:[|{}\\]+\S?\s+)+")
+_RUIDO_FIM = re.compile(r"(?:\s+[|{}\\]+\S{0,2})+$")
 
 
 @dataclass(frozen=True)
@@ -45,9 +51,16 @@ def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> set[str]:
     return {a for a, n in contagem.items() if n >= max(3, minimo * len(paginas))}
 
 
+def _sem_ruido(linha: str) -> str:
+    return _RUIDO_FIM.sub("", _RUIDO_INICIO.sub("", linha))
+
+
 def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
     paginas = [
-        [_ESPACOS.sub(" ", linha.translate(_LIGADURAS)).strip() for linha in p.split("\n")]
+        [
+            _sem_ruido(_ESPACOS.sub(" ", linha.translate(_LIGADURAS)).strip())
+            for linha in p.split("\n")
+        ]
         for p in texto_ocr.replace("\r\n", "\n").split("\f")
     ]
     repetidas = _repetidas([[linha for linha in p if linha] for p in paginas])

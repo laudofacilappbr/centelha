@@ -29,11 +29,12 @@ COPY worker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["worker-entrypoint.sh"]
 CMD ["python", "-m", "centelha_api.pipeline.worker"]
 
-# Digitalização do exemplar (#86): Tesseract com o modelo de português. Ferramenta de
+# Digitalização do exemplar (#86): Tesseract com os modelos de português e de francês
+# (originais de Kardec, #45). Ferramenta de
 # uso local, não vai para a VPS. docker build --target digitalizacao
 FROM base AS digitalizacao
 RUN apt-get update \
- && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-por \
+ && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-por tesseract-ocr-fra \
  && rm -rf /var/lib/apt/lists/*
 USER centelha
 WORKDIR /dados

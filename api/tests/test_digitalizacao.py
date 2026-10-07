@@ -218,3 +218,46 @@ def test_cli_processar_grava_texto_e_revisao(tmp_path, capsys):
     assert "# Revisão: le.paginas" in revisao
     assert "| Êle | Ele | acento diferencial (1971) | 1 |" in revisao
     assert "Total: 3 (de 1 a 3)" in revisao
+
+
+def test_cli_em_frances_nao_atualiza_grafia_nem_procura_trema(tmp_path, monkeypatch):
+    """Originais de Kardec (#45): "Êle" e "ii" são regras do português de 1943. Em
+    francês, "même" e "fête" ficam como estão, e o OCR usa o modelo fra."""
+    pedidos: list[str] = []
+
+    def falso(imagem: Path, idioma: str) -> str:
+        pedidos.append(idioma)
+        return "Il en est de même pour la fête; ii n'y a rien.\n\nSecond paragraphe."
+
+    monkeypatch.setattr(ocr, "_tesseract", falso)
+    pasta = tmp_path / "paginas"
+    pasta.mkdir()
+    (pasta / "001.png").write_bytes(b"\x89PNG")
+    saida = tmp_path / "ese-fr"
+    assert cli.main(["tudo", str(pasta), "--saida", str(saida), "--idioma", "fra"]) == 0
+    assert pedidos == ["fra"]
+    assert "Il en est de même pour la fête" in (saida / "texto.txt").read_text(encoding="utf-8")
+    revisao = (saida / "revisao.md").read_text(encoding="utf-8")
+    assert "trema lido como ii" not in revisao
+
+
+def test_idioma_fora_da_imagem_e_recusado(tmp_path):
+    with pytest.raises(SystemExit):
+        cli.main(["ocr", str(tmp_path), "-o", str(tmp_path / "x.txt"), "--idioma", "deu"])
+
+
+def test_limpeza_tira_ruido_da_margem_sem_perder_palavra():
+    """O fac-símile da Library of Congress pega a borda da página vizinha: o Tesseract
+    a lê como "|", "|}" ou "|n" na ponta da linha. Nenhum livro do acervo usa "|"."""
+    pagina = (
+        "Jésus indique la compensation |\n"
+        "| qui attend ceux qui souffrent, et la |}\n"
+        "résignation qui fait bénir la souffrance |n\n"
+        "comme le prélude de la guérison, à|m la fin.\n"
+    )
+    [p] = limpar_paginas(pagina)
+    assert p.texto == (
+        "Jésus indique la compensation qui attend ceux qui souffrent, et la "
+        "résignation qui fait bénir la souffrance comme le prélude de la guérison, "
+        "à|m la fin."
+    )
