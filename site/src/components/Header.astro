@@ -1,7 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import ThemeToggle from './ThemeToggle.astro';
-import { TEXTOS, urlObras, type Lingua } from '../lib/idiomas';
+import { TEXTOS, urlInicio, urlObras, type Lingua } from '../lib/idiomas';
 import { CAMINHOS, CONTEUDO } from '../lib/institucional';
 
 interface Props {
@@ -29,7 +29,7 @@ const atual = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/
 
 <header class="site-header">
   <div class="container bar">
-    <a href={t ? urlObras(lingua) : '/'} class="brand" aria-label={t?.inicio ?? 'Centelha — página inicial'}>
+    <a href={outra ? urlInicio(outra) : '/'} class="brand" aria-label={t?.inicio ?? 'Centelha — página inicial'}>
       <Logo width={140} />
     </a>
     <nav aria-label={t?.menu ?? 'Principal'} class="nav">
