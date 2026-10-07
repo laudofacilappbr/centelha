@@ -10,7 +10,9 @@ recifrar antes de o app decifrar tiraria o áudio do ar.
 Ordem, por faixa, e por quê:
 1. cifra o .m4a com chave nova e grava o .cent ao lado (mesmo nome, outra extensão);
 2. troca url, formato e chave no banco e faz commit;
-3. só então apaga o .m4a do volume e pede o purge da URL antiga na Cloudflare.
+3. só então apaga o .m4a do volume e pede o purge na Cloudflare: da URL antiga do
+   áudio e do JSON público do capítulo (/v1/capitulos/{id}), que a CDN guarda por
+   1 h com a URL da faixa dentro. Sem o segundo, o app receberia o .m4a apagado.
 
 Apagar antes do commit deixaria o banco apontando para arquivo inexistente. Pedir o
 purge antes de apagar deixaria a CDN buscar o .m4a de novo na origem e guardá-lo com
@@ -152,7 +154,15 @@ def purgar(urls: list[str], zona: str, token: str, enviar: Enviar = _enviar) -> 
 class Relatorio:
     recifradas: list[int] = field(default_factory=list)
     apagados: list[str] = field(default_factory=list)
+    # Capítulos cujo JSON público ainda pode ter, no cache, a URL do .m4a apagado.
+    capitulos: list[int] = field(default_factory=list)
     falhas: list[str] = field(default_factory=list)
+
+    def para_purgar(self, api_publica: str) -> list[str]:
+        """URLs do purge; sem o endereço público da api, só as do áudio."""
+        base = api_publica.rstrip("/")
+        jsons = [f"{base}/v1/capitulos/{c}" for c in self.capitulos] if base else []
+        return self.apagados + jsons
 
 
 def executar(
@@ -171,6 +181,8 @@ def executar(
         try:
             apagar_aberto(aberto, mestra)
             rel.apagados.append(aberto.url)
+            if aberto.faixa.capitulo_id not in rel.capitulos:
+                rel.capitulos.append(aberto.faixa.capitulo_id)
         except (ErroRecifrar, cifra.ErroCifra, OSError) as e:
             rel.falhas.append(str(e))
     return rel
@@ -213,18 +225,25 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(rel.recifradas)} faixas cifradas; {len(rel.apagados)} .m4a apagados.")
     for falha in rel.falhas:
         print(f"falha: {falha}", file=sys.stderr)
-    if rel.apagados:
+    urls = rel.para_purgar(cfg.api_url_publica)
+    if rel.capitulos and not cfg.api_url_publica:
+        print(
+            "Sem CENTELHA_API_URL_PUBLICA: purgue também /v1/capitulos/<id> dos capítulos "
+            + ", ".join(map(str, rel.capitulos)),
+            file=sys.stderr,
+        )
+    if urls:
         if cfg.cloudflare_zone_id and cfg.cloudflare_token:
             try:
-                purgar(rel.apagados, cfg.cloudflare_zone_id, cfg.cloudflare_token, _enviar)
-                print(f"purge pedido para {len(rel.apagados)} URLs.")
+                purgar(urls, cfg.cloudflare_zone_id, cfg.cloudflare_token, _enviar)
+                print(f"purge pedido para {len(urls)} URLs.")
             except ErroPurge as e:
                 print(f"{e}\nPurgue à mão no painel da Cloudflare:", file=sys.stderr)
-                print("\n".join(rel.apagados), file=sys.stderr)
+                print("\n".join(urls), file=sys.stderr)
                 return 1
         else:
             print("Sem CENTELHA_CLOUDFLARE_ZONE_ID/TOKEN. Purgue à mão estas URLs:")
-            print("\n".join(rel.apagados))
+            print("\n".join(urls))
     return 1 if rel.falhas else 0
 
 

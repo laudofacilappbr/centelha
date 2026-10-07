@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     # "Zone > Cache Purge" nesta zona. Vazio: o comando lista as URLs para purge à mão.
     cloudflare_zone_id: str = ""
     cloudflare_token: str = ""
+    # Endereço público da api (https://api.<domínio>), para purgar /v1/capitulos/{id}.
+    api_url_publica: str = ""
     # Entrega da chave ao app atestado (ADR 0004). A chave vale 90 dias (decisão 2B):
     # depois disso o app precisa ficar online uma vez para renovar.
     chave_validade_dias: int = 90

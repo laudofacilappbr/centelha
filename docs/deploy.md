@@ -60,7 +60,7 @@ Nunca cole IP, chave, senha ou certificado em issue ou PR: o repositório é pú
 - **Ligar o áudio cifrado ([ADR 0004](decisoes/0004-audio-cifrado-e-chave-atestada.md)):** só depois que o app publicado decifrar o `.cent`.
   1. No `.env`, preencha `CENTELHA_AUDIO_CHAVE_MESTRA` (`openssl rand -base64 32`, guardada também fora da VPS) e mude `CENTELHA_AUDIO_CIFRAR=true`. Para o purge automático, preencha também `CENTELHA_CLOUDFLARE_ZONE_ID` e um token só com "Zone > Cache Purge". Rode `up -d`.
   2. `docker compose -f docker-compose.prod.yml exec worker centelha-recifrar` lista as faixas `.m4a` antigas.
-  3. Com `--executar`, o comando cifra cada faixa, faz o commit, apaga o `.m4a` depois de conferir que o `.cent` decifra nele e pede o purge da URL antiga. Sem token, ele imprime as URLs: purgue à mão no painel, porque essa lista não aparece de novo. Pode repetir: uma execução interrompida é terminada pela seguinte.
+  3. Com `--executar`, o comando cifra cada faixa, faz o commit, apaga o `.m4a` depois de conferir que o `.cent` decifra nele e pede o purge da URL antiga e do JSON do capítulo (`/v1/capitulos/{id}`, 1 h na CDN, com a URL da faixa dentro). Sem token, ele imprime as URLs: purgue à mão no painel, porque essa lista não aparece de novo. Pode repetir: uma execução interrompida é terminada pela seguinte.
 
   Até o site regerar (o construtor vê a mudança no banco), a página do capítulo ainda aponta para o `.m4a` apagado e o player dela falha.
 
