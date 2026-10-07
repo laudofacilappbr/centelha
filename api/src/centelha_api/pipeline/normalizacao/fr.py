@@ -3,6 +3,10 @@
 Mesma ordem do pt-BR: romanos com contexto, abreviações, ordinais, números soltos.
 Diferenças que pesam: em francês "Chapitre II" se lê "chapitre deux" (só o I vira
 "premier"), e o ordinal vem marcado no próprio número ("XIXe siècle", "1er", "2e").
+
+Citações de Kardec: "(Saint Matthieu, ch. v, v. 17, 18.)" se lê "chapitre cinq,
+versets dix-sept, dix-huit". Na lista de versículos ou números, "7,8" são dois números,
+não decimal. Parágrafo numerado em romano ("IV. L'âme…", na Introdução) se lê "Quatre."
 """
 
 import re
@@ -17,6 +21,8 @@ _CONTEXTOS_ROMANOS: dict[str, bool] = {
     "livre": False,
     "chapitre": False,
     "chap.": False,
+    "ch.": False,
+    "paragr.": False,
     "tome": False,
     "volume": False,
     "article": False,
@@ -25,7 +31,10 @@ _CONTEXTOS_ROMANOS: dict[str, bool] = {
 }
 
 _RE_ROMANO_CONTEXTO = re.compile(
-    r"\b(?P<palavra>" + "|".join(re.escape(p) for p in _CONTEXTOS_ROMANOS) + r")\s+" + _ROMANO,
+    r"\b(?P<palavra>"
+    + "|".join(re.escape(p) for p in _CONTEXTOS_ROMANOS)
+    + r")(?:\s+|(?<=\.)\s*)"
+    + _ROMANO,
     re.IGNORECASE,
 )
 # "XIXe siècle", "Ier", "IIe": romano com marca de ordinal. Uma letra só exige contexto,
@@ -37,6 +46,12 @@ _RE_ROMANO_ORDINAL = re.compile(
 
 _ABREVIACOES: list[tuple[str, str]] = [
     (r"\bchap\.(?=\s)", "chapitre"),
+    (r"\b[Cc]h\.(?=\s*\d)", "chapitre"),
+    (r"\bv\.\s+(?=de\s+\d)", "versets "),
+    (r"\bVoy\.", "Voyez"),
+    (r"\bvoy\.", "voyez"),
+    # Só na remissão, depois de ";" "," ou "(": "un art. Il" é a palavra no fim da frase.
+    (r"(?<=[;,(] )art\.", "article"),
     (r"\bq\.(?=\s*\d)", "question"),
     (r"\b[Nn][°o]\.?(?=\s*\d)", "numéro"),
     (r"§§\s*", "paragraphes "),
@@ -59,6 +74,16 @@ _ABREVIACOES: list[tuple[str, str]] = [
     (r"\bN\.\s?du\s?T\.", "note du traducteur"),
 ]
 _RE_ABREVIACOES = [(re.compile(p), s) for p, s in _ABREVIACOES]
+_EXTENSO = {"chap.": "chapitre", "ch.": "chapitre", "paragr.": "paragraphe"}
+
+# "v. 15, 16, 17", "v. 7,8", "v. 3-5", "nos 40,41": lista depois de versículo ou número.
+_RE_LISTA = re.compile(
+    r"\b(?P<abrev>v\.|n[°o]s\.?)\s*"
+    r"(?P<lista>\d+(?:\s*[,-]\s*\d+|\s+(?:et|à)\s+\d+)*)(?![\d,]\d)"
+)
+_RE_SEPARADOR = re.compile(r"\s*(,|-|\bet\b|\bà\b)\s*")
+# Romano que abre o parágrafo, seguido de ponto: numeração de seção.
+_RE_ROMANO_INICIAL = re.compile(r"^(?P<romano>[IVXLC]{1,7})\.(?=\s)", re.MULTILINE)
 
 _RE_ORDINAL = re.compile(r"\b(?P<n>\d{1,4})(?P<g>er|re|ère|e|ème|è)\b")
 # Milhar com ponto, espaço fino ou não separável ("1 019"); espaço comum não, para não
@@ -77,8 +102,7 @@ def _romano_com_contexto(m: re.Match[str]) -> str:
     except (KeyError, ValueError):
         return m.group(0)
     feminino = _CONTEXTOS_ROMANOS[palavra.lower()]
-    if palavra.lower() == "chap.":
-        palavra = "chapitre"
+    palavra = _EXTENSO.get(palavra.lower(), palavra)
     lido = ordinal(n, feminino) if n == 1 else cardinal(n)
     return f"{palavra} {lido}"
 
@@ -99,8 +123,32 @@ def _numero(m: re.Match[str]) -> str:
     return cardinal(int(re.sub(_SEP_MILHAR, "", m.group("n"))))
 
 
+def _lista(m: re.Match[str]) -> str:
+    partes = _RE_SEPARADOR.split(m.group("lista"))
+    numeros, separadores = partes[::2], partes[1::2]
+    lido = cardinal(int(numeros[0]))
+    for sep, n in zip(separadores, numeros[1:], strict=True):
+        lido += {",": ", ", "-": " à "}.get(sep, f" {sep} ") + cardinal(int(n))
+    mais = len(numeros) > 1
+    if m.group("abrev") == "v.":
+        return ("versets " if mais else "verset ") + lido
+    # "nos" sem o ° também é "nossos" ("nos 12 apôtres"): só a lista o faz abreviação.
+    if m.group("abrev").startswith("nos") and not mais:
+        return m.group(0)
+    return "numéros " + lido
+
+
+def _romano_inicial(m: re.Match[str]) -> str:
+    try:
+        return cardinal(romano_para_int(m.group("romano"))).capitalize() + "."
+    except (KeyError, ValueError):
+        return m.group(0)
+
+
 def normalizar(texto: str) -> str:
+    texto = _RE_ROMANO_INICIAL.sub(_romano_inicial, texto)
     texto = _RE_ROMANO_CONTEXTO.sub(_romano_com_contexto, texto)
+    texto = _RE_LISTA.sub(_lista, texto)
     texto = _RE_ROMANO_ORDINAL.sub(_romano_ordinal, texto)
     for padrao, substituto in _RE_ABREVIACOES:
         texto = padrao.sub(substituto, texto)

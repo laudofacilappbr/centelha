@@ -131,3 +131,54 @@ def test_pedido_em_frances():
     assert p.idioma == "fr-FR"
     assert p.texto == "quatre-vingt-huit. Que pensait Ânemane au dix-neuvième siècle ?"
     assert '<sub alias="Ânemane">Hahnemann</sub>' in p.ssml
+
+
+@pytest.mark.parametrize(
+    ("entrada", "esperado"),
+    [
+        (
+            "(Saint Matthieu, ch. v, v. 17, 18.)",
+            "(Saint Matthieu, chapitre cinq, versets dix-sept, dix-huit.)",
+        ),
+        (
+            "(Saint Jean, ch.xiv, v.15, 16.)",
+            "(Saint Jean, chapitre quatorze, versets quinze, seize.)",
+        ),
+        ("(Saint Luc, ch. vi, v. 7,8.)", "(Saint Luc, chapitre six, versets sept, huit.)"),
+        ("(Ch. x, v. 3-5.)", "(chapitre dix, versets trois à cinq.)"),
+        ("(Ch. iv, v. 2.)", "(chapitre quatre, verset deux.)"),
+        ("(Ch. xii, nos 40,41.)", "(chapitre douze, numéros quarante, quarante et un.)"),
+        ("(Ch. xii, n°s 4 et 5.)", "(chapitre douze, numéros quatre et cinq.)"),
+        ("(Voy. Introduction, paragr. iv.)", "(Voyez Introduction, paragraphe quatre.)"),
+    ],
+)
+def test_citacoes_de_kardec(entrada, esperado):
+    """No Évangile de 1866, 279 citações ficavam com "ch." e "v." literais, e "7,8" seria
+    decimal ("sept virgule huit") para a voz."""
+    assert normalizar(entrada) == esperado
+
+
+def test_romano_que_abre_o_paragrafo_e_numero_de_secao():
+    assert normalizar("IV. L'âme impure, en cet état.") == "Quatre. L'âme impure, en cet état."
+    assert normalizar("XVII. La vertu ne peut pas s'enseigner.").startswith("Dix-sept. La vertu")
+    # Romano inválido (erro de OCR) e romano no meio da frase ficam.
+    assert normalizar("IL. Tant que nous aurons") == "IL. Tant que nous aurons"
+    assert normalizar("le roi Louis XIV. Puis") == "le roi Louis XIV. Puis"
+
+
+def test_nos_sem_lista_e_possessivo_e_decimal_fora_de_citacao_fica():
+    assert normalizar("nos 12 apôtres") == "nos douze apôtres"
+    assert normalizar("3,5 mètres") == "3,5 mètres"
+
+
+@pytest.mark.parametrize(
+    ("entrada", "esperado"),
+    [
+        ("(Ciel et Enfer, ch. 11.)", "(Ciel et Enfer, chapitre onze.)"),
+        ("(Saint Matthieu, v. de 13 à 17.)", "(Saint Matthieu, versets de treize à dix-sept.)"),
+        ("(Voy. Introduction; art. Publicains.)", "(Voyez Introduction; article Publicains.)"),
+        ("C'est un art. Il faut", "C'est un art. Il faut"),
+    ],
+)
+def test_remissoes(entrada, esperado):
+    assert normalizar(entrada) == esperado
