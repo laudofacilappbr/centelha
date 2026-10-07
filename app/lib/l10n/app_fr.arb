@@ -71,5 +71,13 @@
   "trechoCopiado": "Extrait copié.",
   "segurarParaCompartilhar": "partager ou copier",
   "citacaoQuestao": "{obra}, question {numero}",
-  "citacaoTradutor": "Traduction de {tradutor}."
+  "citacaoTradutor": "Traduction de {tradutor}.",
+  "baixarCapitulo": "Télécharger pour écouter hors ligne",
+  "baixadoApagar": "Téléchargé. Touchez pour le supprimer de l’appareil",
+  "baixando": "Téléchargement, {pct} %",
+  "downloadFalhou": "Téléchargement impossible pour l’instant. Vérifiez la connexion et réessayez.",
+  "apagarDownloadTitulo": "Supprimer le chapitre téléchargé ?",
+  "apagarDownloadTexto": "Il reste dans l’app pour l’écouter en ligne.",
+  "apagar": "Supprimer",
+  "cancelar": "Annuler"
 }

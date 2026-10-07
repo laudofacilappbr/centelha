@@ -71,5 +71,13 @@
   "trechoCopiado": "Fragmento copiado.",
   "segurarParaCompartilhar": "compartir o copiar",
   "citacaoQuestao": "{obra}, pregunta {numero}",
-  "citacaoTradutor": "Traducción de {tradutor}."
+  "citacaoTradutor": "Traducción de {tradutor}.",
+  "baixarCapitulo": "Descargar para escuchar sin internet",
+  "baixadoApagar": "Descargado. Toca para borrarlo del dispositivo",
+  "baixando": "Descargando, {pct}%",
+  "downloadFalhou": "No se pudo descargar ahora. Revisa tu conexión e inténtalo de nuevo.",
+  "apagarDownloadTitulo": "¿Borrar el capítulo descargado?",
+  "apagarDownloadTexto": "Sigue en la app para escucharlo con internet.",
+  "apagar": "Borrar",
+  "cancelar": "Cancelar"
 }

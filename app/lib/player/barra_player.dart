@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../api/catalogo_api.dart';
 import '../chave/chaves.dart';
 import '../l10n/app_localizations.dart';
+import '../offline/downloads.dart';
 import 'controle_player.dart';
 import 'reprodutor.dart';
 
@@ -87,6 +88,11 @@ class _BarraPlayerState extends State<BarraPlayer> {
       );
     }
 
+    final downloads = player.downloads;
+    final comDownload =
+        downloads != null &&
+        downloads.podeBaixar(faixa) &&
+        player.podeTocar(faixa);
     return Material(
       color: tema.colorScheme.surface,
       elevation: 8,
@@ -94,7 +100,14 @@ class _BarraPlayerState extends State<BarraPlayer> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-          child: conteudo,
+          child: comDownload
+              ? Row(
+                  children: [
+                    Expanded(child: conteudo),
+                    BotaoDownload(downloads: downloads, faixa: faixa),
+                  ],
+                )
+              : conteudo,
         ),
       ),
     );
@@ -298,4 +311,85 @@ void _mostrarMarcadores(BuildContext context, ControlePlayer player) {
       },
     ),
   );
+}
+
+/// Baixar o capítulo para ouvir sem internet; baixado, tocar oferece apagar.
+class BotaoDownload extends StatelessWidget {
+  const BotaoDownload({
+    super.key,
+    required this.downloads,
+    required this.faixa,
+  });
+
+  final Downloads downloads;
+  final Faixa faixa;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return ListenableBuilder(
+      listenable: downloads,
+      builder: (context, _) {
+        final progresso = downloads.progresso(faixa);
+        if (progresso != null) {
+          return Semantics(
+            label: t.baixando((progresso * 100).round()),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox.square(
+                dimension: 24,
+                child: CircularProgressIndicator(
+                  value: progresso,
+                  strokeWidth: 3,
+                ),
+              ),
+            ),
+          );
+        }
+        if (downloads.baixado(faixa)) {
+          return IconButton(
+            tooltip: t.baixadoApagar,
+            icon: const Icon(Icons.download_done),
+            onPressed: () => _apagar(context),
+          );
+        }
+        return IconButton(
+          tooltip: t.baixarCapitulo,
+          icon: const Icon(Icons.download_outlined),
+          onPressed: () async {
+            final mensagens = ScaffoldMessenger.of(context);
+            try {
+              await downloads.baixar(faixa);
+            } on ErroDownload {
+              mensagens
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(t.downloadFalhou)));
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _apagar(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final apagar = await showDialog<bool>(
+      context: context,
+      builder: (dialogo) => AlertDialog(
+        title: Text(t.apagarDownloadTitulo),
+        content: Text(t.apagarDownloadTexto),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogo).pop(false),
+            child: Text(t.cancelar),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogo).pop(true),
+            child: Text(t.apagar),
+          ),
+        ],
+      ),
+    );
+    if (apagar ?? false) await downloads.apagar(faixa);
+  }
 }

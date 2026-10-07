@@ -6,11 +6,17 @@ import 'package:flutter/widgets.dart';
 
 import '../api/catalogo_api.dart';
 import '../chave/chaves.dart';
+import '../offline/downloads.dart';
 import 'progresso.dart';
 import 'reprodutor.dart';
 
 class ControlePlayer extends ChangeNotifier {
-  ControlePlayer(this._reprodutor, this._armazem, {this._chaves}) {
+  ControlePlayer(
+    this._reprodutor,
+    this._armazem, {
+    this._chaves,
+    this.downloads,
+  }) {
     _velocidade = _armazem.velocidade;
     _inscricoes = [
       _reprodutor.posicao.listen(_aoMudarPosicao),
@@ -30,6 +36,9 @@ class ControlePlayer extends ChangeNotifier {
 
   /// Sem atestador no aparelho, null: a faixa .cent fica indisponível.
   final ClienteChaves? _chaves;
+
+  /// Capítulos baixados; existe junto com as chaves (só o .cent vai para o aparelho).
+  final Downloads? downloads;
   late final List<StreamSubscription<Object?>> _inscricoes;
 
   Capitulo? _capitulo;
@@ -72,7 +81,14 @@ class ControlePlayer extends ChangeNotifier {
     _capitulo = capitulo;
     _posicao = _ultimaGravada = inicio;
     notifyListeners();
-    await _reprodutor.carregar(faixa, info, inicio, chave: chave);
+    final baixado = downloads?.baixado(faixa) ?? false;
+    await _reprodutor.carregar(
+      faixa,
+      info,
+      inicio,
+      chave: chave,
+      arquivo: baixado ? downloads!.arquivo(faixa) : null,
+    );
     await _reprodutor.velocidade(_velocidade);
     await _armazem.salvarUltimo(
       UltimoOuvido(capitulo: capitulo.resumo, info: info),

@@ -175,5 +175,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "baixarCapitulo": "Baixar para ouvir sem internet",
+  "baixadoApagar": "Baixado. Toque para apagar do aparelho",
+  "baixando": "Baixando, {pct}%",
+  "@baixando": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadFalhou": "Não deu para baixar agora. Confira a internet e tente de novo.",
+  "apagarDownloadTitulo": "Apagar o capítulo baixado?",
+  "apagarDownloadTexto": "Ele continua no app para ouvir com internet.",
+  "apagar": "Apagar",
+  "cancelar": "Cancelar"
 }
