@@ -588,3 +588,16 @@ p. 341: juntar: les Pères de l'Eglise
 p. 416: ll y a dans cette idée => Il y a dans cette idée
 p. 444: apagar: a
 p. 457: juntar: elle ne peut faire que
+
+# Estrutura para a ingestão: títulos de capítulo partidos em duas linhas e o cabeçalho
+# "24 CHAPITRE III." que perdeu o número (#45). O "CHAPITRE XVI" de "Soyez parfaits"
+# (p. 297) é erro tipográfico do próprio exemplar (cabeçalhos e sumário dizem XVII):
+# fica como impresso, à espera da decisão do dono.
+p. 13: JL. BuT DE CET OUVRAGE. => I. BUT DE CET OUVRAGE.
+p. 67: juntar: MON PÈRE.
+p. 70: apagar: CHAPITRE IIL
+p. 80: DIEU SIL NE => DIEU S’IL NE
+p. 80: juntar: DE NOUVEAU.
+p. 227: juntar: VOTRE MAIN DROITE.
+p. 398: AVEZ RECU => AVEZ REÇU
+p. 398: juntar: GRATUITEMENT.
