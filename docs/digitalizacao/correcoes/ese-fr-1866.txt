@@ -735,3 +735,58 @@ p. 477: juntar: miques; dans la
 p. 479: apagar: : 25
 p. 479: ul pe ne doit pas être => Quelle ne doit pas être
 p. 479: être i imalfaisant => être malfaisant
+
+# Rubricas das preces em versalete (#45): o OCR leu "Préface" e "Prière" de vários
+# jeitos (Prérace, PréFAGE, PRÉFACE, PriÈèRe, PRIÈRE). Ficam como se transcreve
+# versalete em texto: inicial maiúscula e o resto em minúscula.
+p. 424: 2. Prérace. => 2. Préface.
+p. 433: 5. Prérace. => 5. Préface.
+p. 434: 6. Priëre. => 6. Prière.
+p. 435: 9. Prérace. => 9. Préface.
+p. 438: 11. Prérace. => 11. Préface.
+p. 439: 12. PRiëRe. => 12. Prière.
+p. 441: 16. Prérace. => 16. Préface.
+p. 441: 47. PriÈèRe.— Âu nom => 17. Prière.— Au nom
+p. 442: 18. Prérace. => 18. Préface.
+p. 443: 20. Prérace. => 20. Préface.
+p. 444: 21. PRIÈRE. => 21. Prière.
+p. 444: 22. Prérace. => 22. Préface.
+p. 444: 24. Prérace. => 24. Préface.
+p. 445: 95. PRIÈRE. => 25. Prière.
+p. 445: 26. Prérace. => 26. Préface.
+p. 446: 28. Prérace. => 28. Préface.
+p. 447: 29. PriÈre. => 29. Prière.
+p. 447: 30. PRÉFACE. => 30. Préface.
+p. 449: 34. Prérace. => 34. Préface.
+p. 449: 35. PRIÈRE. => 35. Prière.
+p. 449: 36. PRÉFACE. => 36. Préface.
+p. 450: 37, PRIÈRE. => 37. Prière.
+p. 451: 39. PrIÈRE. => 39. Prière.
+p. 451: 40. Prérace. => 40. Préface.
+p. 454: 44. Prérace. => 44. Préface.
+p. 455: 46. PRÉFACE. => 46. Préface.
+p. 456: 48. Prérace. => 48. Préface.
+p. 457: 51. PRÉFACE. => 51. Préface.
+p. 458: 52. PRIÈRE. => 52. Prière.
+p. 459: 53. Prérace. => 53. Préface.
+p. 459: 54. PRiÈRE. => 54. Prière.
+p. 461: 57. Prérace. => 57. Préface.
+p. 462: 59. PRÉFACE. => 59. Préface.
+p. 463: 60. PRiÈRE. => 60. Prière.
+p. 466: 62. PRÉFACE. => 62. Préface.
+p. 466: 63. PRIÈRE. => 63. Prière.
+p. 467: 64. Prérace. => 64. Préface.
+p. 469: 67. PRÉFACE. => 67. Préface.
+p. 469: 69. PréFAGE. => 69. Préface.
+p. 470: 71. PRÉFACE. => 71. Préface.
+p. 471: 73. PRErACE. => 73. Préface.
+p. 473: 75. PRÉFACE. => 75. Préface.
+p. 474: 76. PRIÈRE. => 76. Prière.
+p. 475: 77. PRÉFACE. => 77. Préface.
+p. 476: 18. PRIÈRE. => 78. Prière.
+p. 477: 81. Prérace. => 81. Préface.
+p. 480: 84. Priëre. => 84. Prière.
+p. 437: 40. Prière — Dieu => 10. Prière. — Dieu
+p. 440: 43. (Autre). => 13. (Autre).
+p. 455: 471. Prière. => 47. Prière.
+p. 477: 19. Prière. (Pour le malade) => 79. Prière. (Pour le malade)
