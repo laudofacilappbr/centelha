@@ -261,3 +261,28 @@ def test_limpeza_tira_ruido_da_margem_sem_perder_palavra():
         "résignation qui fait bénir la souffrance comme le prélude de la guérison, "
         "à|m la fin."
     )
+
+
+def test_parecida_ignora_palavra_que_o_outro_texto_tambem_tem():
+    """No Évangile, 1.597 achados de "parecida" caíram para 302 com o OCR do
+    archive.org como referência: palavra que os dois OCRs leram igual é palavra boa."""
+    frequente = " ".join(["vertus"] * 6)
+    paragrafos = [
+        Paragrafo(1, f"{frequente} les versets du livre."),
+        Paragrafo(2, f"{frequente} une vcrtus mal lue."),
+    ]
+    sem = {a.trecho for a in revisar(paragrafos, idioma="fra").achados}
+    assert {"versets", "vcrtus"} <= sem
+    com = {
+        a.trecho
+        for a in revisar(paragrafos, referencia="Les versets.", idioma="fra").achados
+        if a.tipo == "parecida com palavra frequente"
+    }
+    assert com == {"vcrtus"}
+
+
+def test_parecida_nao_aponta_diferenca_so_de_acento():
+    """Maiúscula sem acento era a norma da época ("l'Evangile" × "l'évangile")."""
+    paragrafos = [Paragrafo(1, " ".join(["évangile"] * 6) + " L'Evangile du Christ.")]
+    achados = [a.trecho for a in revisar(paragrafos, idioma="fra").achados]
+    assert "Evangile" not in " ".join(achados)
