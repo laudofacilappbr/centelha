@@ -2,15 +2,21 @@
 import Logo from './Logo.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { TEXTOS, urlObras, type Lingua } from '../lib/idiomas';
+import { CAMINHOS, CONTEUDO } from '../lib/institucional';
 
 interface Props {
   lingua?: Lingua;
 }
 const { lingua = 'pt' } = Astro.props;
-// Nos outros idiomas (#48) só existe o acervo; as páginas do projeto são em português.
-const t = lingua === 'pt' ? undefined : TEXTOS[lingua];
-const links = t
-  ? [{ href: urlObras(lingua), label: t.obras }]
+// Nos outros idiomas (#48): o acervo, "Sobre" e "Como fazemos"; o resto é só em português.
+const outra = lingua === 'pt' ? undefined : lingua;
+const t = outra && TEXTOS[outra];
+const links = outra
+  ? [
+      { href: urlObras(outra), label: TEXTOS[outra].obras },
+      { href: CAMINHOS.sobre[outra], label: CONTEUDO[outra].sobre.eyebrow },
+      { href: CAMINHOS.como[outra], label: CONTEUDO[outra].como.eyebrow },
+    ]
   : [
       { href: '/obras', label: 'Obras' },
       { href: '/sobre', label: 'Sobre' },

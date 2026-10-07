@@ -1,0 +1,58 @@
+---
+/** "Sobre" e "Como fazemos" em /fr, /es e /en (#48). O texto está em lib/institucional.ts. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { CAMINHOS, CONTEUDO, type PaginaInstitucional } from '../../lib/institucional';
+import { HREFLANG, OUTRAS, type Lingua } from '../../lib/idiomas';
+
+type L = Exclude<Lingua, 'pt'>;
+
+export function getStaticPaths() {
+  return OUTRAS.flatMap((lingua) =>
+    (Object.keys(CAMINHOS) as PaginaInstitucional[]).map((pagina) => ({
+      params: { lingua, pagina: CAMINHOS[pagina][lingua].split('/').pop()! },
+      props: { lingua, pagina },
+    })),
+  );
+}
+
+const { lingua, pagina } = Astro.props as { lingua: L; pagina: PaginaInstitucional };
+const c = CONTEUDO[lingua][pagina];
+const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
+  hreflang: HREFLANG[l],
+  href: new URL(CAMINHOS[pagina][l], Astro.site).href,
+}));
+---
+
+<BaseLayout title={c.titulo} description={c.descricao} lingua={lingua} alternativas={alternativas}>
+  <PageHeader eyebrow={c.eyebrow} title={c.h1} lede={c.lede} />
+  <div class="container">
+    <article class="prose">
+      {
+        c.blocos.map((b) => {
+          if ('h2' in b) return <h2>{b.h2}</h2>;
+          if ('lista' in b) return <ul>{b.lista.map((item) => <li set:html={item} />)}</ul>;
+          if ('citacao' in b)
+            return (
+              <blockquote>
+                <p>{b.citacao}</p>
+                <footer class="muted">
+                  — <Fragment set:html={b.fonte} />
+                </footer>
+              </blockquote>
+            );
+          return <p class={b.muted ? 'muted' : undefined} set:html={b.p} />;
+        })
+      }
+      {
+        c.seguir && (
+          <p>
+            <a class="link-arrow" href={CAMINHOS[c.seguir.pagina][lingua]}>
+              {c.seguir.texto}
+            </a>
+          </p>
+        )
+      }
+    </article>
+  </div>
+</BaseLayout>
