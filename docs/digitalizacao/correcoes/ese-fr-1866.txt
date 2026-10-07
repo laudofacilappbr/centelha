@@ -514,3 +514,36 @@ p. 441: écariez => écartez
 p. 442: servit => servît
 p. 453: l’affiiction => l’affliction
 p. 456: ennernis => ennemis
+
+# "{" no lugar de "(", "1" ou "t", ou sujeira da margem colada na palavra: cada um
+# lido no recorte da linha (#45).
+p. 8: { vol. in-12 d => 1 vol. in-12 d
+p. 8: { vol. in-12. => 1 vol. in-12.
+p. 8: {er => 1er
+p. 28: {ous => tous
+p. 33: {hérapeutaï, => thérapeutaï,
+p. 37: {il => il
+p. 39: {malfaisants, => malfaisants,
+p. 39: {tel => (tel
+p. 40: {Entretiens => (Entretiens
+p. 89: {d'âme => d'âme
+p. 91: l’indi- {vidualité => l’individualité
+p. 148: {a => ta
+p. 157: {Saint => (Saint
+p. 185: {u => tu
+p. 189: {ous => tous
+p. 267: {Inous => nous
+p. 302: {tandis => tandis
+p. 317: {ous => tous
+p. 347: {Saint => (Saint
+p. 361: {Saint => (Saint
+p. 367: {ch. => (ch.
+p. 374: {cette => cette
+p. 383: {les => (les
+p. 394: {pourquoi => pourquoi
+p. 394: {matériels => matériels
+p. 439: mau- {vais => mauvais
+p. 441: {mauvais => mauvais
+p. 441: {sont => sont
+p. 443: {sources => sources
+p. 445: {notre => notre
