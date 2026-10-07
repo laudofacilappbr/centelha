@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../api/catalogo_api.dart';
+import '../chave/chaves.dart';
 import '../l10n/app_localizations.dart';
 import 'controle_player.dart';
 import 'reprodutor.dart';
@@ -59,12 +60,20 @@ class _BarraPlayerState extends State<BarraPlayer> {
     final faixa = widget.capitulo.faixa!;
 
     final Widget conteudo;
-    if (!faixa.tocavel) {
+    if (!player.podeTocar(faixa)) {
       conteudo = Text(t.audioIndisponivel, textAlign: TextAlign.center);
     } else if (!player.carregado(widget.capitulo.resumo.id)) {
       conteudo = FilledButton.icon(
         onPressed: () async {
-          await player.abrir(widget.capitulo, widget.info);
+          final mensagens = ScaffoldMessenger.of(context);
+          try {
+            await player.abrir(widget.capitulo, widget.info);
+          } on ErroChave {
+            mensagens
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(t.chaveIndisponivel)));
+            return;
+          }
           await player.alternar();
         },
         icon: const Icon(Icons.play_arrow),

@@ -41,6 +41,7 @@
   "remover": "Supprimer",
   "continuarOuvindo": "Reprendre l’écoute",
   "ouvirEsteCapitulo": "Écouter ce chapitre",
+  "chaveIndisponivel": "Impossible de débloquer l’audio pour l’instant. Vérifiez la connexion et réessayez.",
   "audioIndisponivel": "L’audio de ce chapitre demande une version plus récente de l’app.",
   "posicao": "Position",
   "acompanharLeitura": "Suivre la lecture",

@@ -41,6 +41,7 @@
   "remover": "Remove",
   "continuarOuvindo": "Continue listening",
   "ouvirEsteCapitulo": "Listen to this chapter",
+  "chaveIndisponivel": "Couldn't unlock the audio right now. Check your connection and try again.",
   "audioIndisponivel": "This chapter's audio needs a newer version of the app.",
   "posicao": "Position",
   "acompanharLeitura": "Follow along",

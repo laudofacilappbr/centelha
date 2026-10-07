@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:centelha/api/catalogo_api.dart';
 import 'package:centelha/player/controle_player.dart';
@@ -14,6 +15,7 @@ class ReprodutorFalso implements Reprodutor {
 
   final chamadas = <String>[];
   Faixa? faixa;
+  Uint8List? chave;
   InfoFaixa? info;
   Duration inicio = Duration.zero;
   double vel = 1.0;
@@ -40,9 +42,15 @@ class ReprodutorFalso implements Reprodutor {
   bool get estaTocando => _tocandoAgora;
 
   @override
-  Future<void> carregar(Faixa faixa, InfoFaixa info, Duration inicio) async {
+  Future<void> carregar(
+    Faixa faixa,
+    InfoFaixa info,
+    Duration inicio, {
+    Uint8List? chave,
+  }) async {
     chamadas.add('carregar');
     this.faixa = faixa;
+    this.chave = chave;
     this.info = info;
     this.inicio = _atual = inicio;
   }

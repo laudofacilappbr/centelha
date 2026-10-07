@@ -2,12 +2,14 @@
 // real usa just_audio dentro do audio_service (segundo plano e tela de bloqueio);
 // os testes usam uma falsa.
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../api/catalogo_api.dart';
+import '../cifra/fonte_cent.dart';
 
 /// O que aparece na tela de bloqueio e na notificação.
 class InfoFaixa {
@@ -32,7 +34,13 @@ abstract interface class Reprodutor {
   Duration get posicaoAtual;
   bool get estaTocando;
 
-  Future<void> carregar(Faixa faixa, InfoFaixa info, Duration inicio);
+  /// [chave]: a da faixa .cent, que só o app atestado recebe (ADR 0004).
+  Future<void> carregar(
+    Faixa faixa,
+    InfoFaixa info,
+    Duration inicio, {
+    Uint8List? chave,
+  });
   Future<void> tocar();
   Future<void> pausar();
   Future<void> irPara(Duration posicao);
@@ -40,9 +48,11 @@ abstract interface class Reprodutor {
   Future<void> parar();
 }
 
-/// Origem do áudio de uma faixa. Hoje, a URL do .m4a; com a #73, o .cent decifrado
-/// bloco a bloco entra aqui como StreamAudioSource, sem mudar o resto do player.
-AudioSource fonteDe(Faixa faixa) => AudioSource.uri(Uri.parse(faixa.url));
+/// Origem do áudio de uma faixa: a URL do .m4a, ou o .cent decifrado bloco a bloco
+/// (FonteCent), que baixa da CDN só o trecho que o player pede.
+AudioSource fonteDe(Faixa faixa, {Uint8List? chave}) => faixa.cifrada
+    ? FonteCent(LeitorHttp(Uri.parse(faixa.url)), chave!)
+    : AudioSource.uri(Uri.parse(faixa.url));
 
 class ReprodutorAudioService implements Reprodutor {
   ReprodutorAudioService._(this._manipulador);
@@ -87,8 +97,12 @@ class ReprodutorAudioService implements Reprodutor {
   bool get estaTocando => _player.playing;
 
   @override
-  Future<void> carregar(Faixa faixa, InfoFaixa info, Duration inicio) =>
-      _manipulador.carregar(faixa, info, inicio);
+  Future<void> carregar(
+    Faixa faixa,
+    InfoFaixa info,
+    Duration inicio, {
+    Uint8List? chave,
+  }) => _manipulador.carregar(faixa, info, inicio, chave);
 
   // play() do just_audio só termina quando a reprodução para; não esperar por ele.
   @override
@@ -114,7 +128,12 @@ class _Manipulador extends BaseAudioHandler with SeekHandler {
 
   final player = AudioPlayer();
 
-  Future<void> carregar(Faixa faixa, InfoFaixa info, Duration inicio) async {
+  Future<void> carregar(
+    Faixa faixa,
+    InfoFaixa info,
+    Duration inicio,
+    Uint8List? chave,
+  ) async {
     mediaItem.add(
       MediaItem(
         id: faixa.url,
@@ -124,7 +143,10 @@ class _Manipulador extends BaseAudioHandler with SeekHandler {
         duration: Duration(milliseconds: faixa.duracaoMs),
       ),
     );
-    await player.setAudioSource(fonteDe(faixa), initialPosition: inicio);
+    await player.setAudioSource(
+      fonteDe(faixa, chave: chave),
+      initialPosition: inicio,
+    );
   }
 
   PlaybackState _estado(PlaybackEvent evento) => PlaybackState(

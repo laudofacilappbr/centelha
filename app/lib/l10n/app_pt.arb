@@ -97,6 +97,7 @@
   "remover": "Remover",
   "continuarOuvindo": "Continuar ouvindo",
   "ouvirEsteCapitulo": "Ouvir este capítulo",
+  "chaveIndisponivel": "Não deu para liberar o áudio agora. Confira a internet e tente de novo.",
   "audioIndisponivel": "O áudio deste capítulo precisa de uma versão mais nova do app.",
   "posicao": "Posição",
   "acompanharLeitura": "Acompanhar a leitura",
