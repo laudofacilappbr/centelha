@@ -4,6 +4,17 @@ import StoreButtons from './StoreButtons.astro';
 import { SITE } from '../config';
 import { apoio } from '../lib/apoio';
 import { campanhasPublicadas } from '../lib/campanhas';
+import SeletorIdioma from './SeletorIdioma.astro';
+import { TEXTOS, type Alternativa, type Lingua } from '../lib/idiomas';
+
+interface Props {
+  lingua?: Lingua;
+  alternativas?: Alternativa[];
+}
+const { lingua = 'pt', alternativas = [] } = Astro.props;
+// Nos outros idiomas (#48), as páginas do projeto só existem em português: o rodapé
+// mostra as de ajuda com o aviso, no idioma da página.
+const t = lingua === 'pt' ? undefined : TEXTOS[lingua];
 
 const ano = new Date().getFullYear();
 const { ligado: apoioLigado } = await apoio();
@@ -17,33 +28,53 @@ const kids = Astro.url.pathname.startsWith('/kids');
     <div class="top">
       <div class="about">
         <Logo width={150} />
-        <p class="muted">{SITE.slogan} Obras em domínio público, narração por IA com revisão humana.</p>
-        <StoreButtons />
+        <p class="muted">{t ? t.rodape : `${SITE.slogan} Obras em domínio público, narração por IA com revisão humana.`}</p>
+        <StoreButtons lingua={lingua} />
       </div>
 
-      <nav aria-label="Projeto" class="col">
-        <h2>Projeto</h2>
+      {
+        !t && (
+          <nav aria-label="Projeto" class="col">
+            <h2>Projeto</h2>
+            <ul>
+              <li><a href="/sobre">Sobre o Centelha</a></li>
+              <li><a href="/como-fazemos">Como fazemos</a></li>
+              <li><a href="/temas">Temas</a></li>
+              <li><a href="/glossario">Glossário</a></li>
+              <li><a href="/kids">Centelha Kids</a></li>
+              <li><a href="/transparencia">Transparência</a></li>
+              {!kids && <li>{apoioLigado ? <a href="/apoie">Apoie</a> : <span class="muted">Apoie (em breve)</span>}</li>}
+              {!kids && temCampanha && <li><a href="/campanhas">Campanhas</a></li>}
+            </ul>
+          </nav>
+        )
+      }
+
+      <nav aria-label={t?.ajuda ?? 'Ajuda e documentos legais'} class="col">
+        <h2>{t?.ajuda ?? 'Ajuda'}</h2>
         <ul>
-          <li><a href="/sobre">Sobre o Centelha</a></li>
-          <li><a href="/como-fazemos">Como fazemos</a></li>
-          <li><a href="/temas">Temas</a></li>
-          <li><a href="/glossario">Glossário</a></li>
-          <li><a href="/kids">Centelha Kids</a></li>
-          <li><a href="/transparencia">Transparência</a></li>
-          {!kids && <li>{apoioLigado ? <a href="/apoie">Apoie</a> : <span class="muted">Apoie (em breve)</span>}</li>}
-          {!kids && temCampanha && <li><a href="/campanhas">Campanhas</a></li>}
+          {[
+            ['/suporte', t?.suporte ?? 'Suporte'],
+            ['/privacidade', t?.privacidade ?? 'Privacidade'],
+            ['/termos', t?.termos ?? 'Termos de uso'],
+          ].map(([href, rotulo]) => (
+            <li>
+              <a href={href} hreflang={t ? 'pt-BR' : undefined}>
+                {rotulo}
+              </a>
+              {t && <span class="muted"> {t.emPortugues}</span>}
+            </li>
+          ))}
         </ul>
       </nav>
 
-      <nav aria-label="Ajuda e documentos legais" class="col">
-        <h2>Ajuda</h2>
-        <ul>
-          <li><a href="/suporte">Suporte</a></li>
-          <li><a href="/privacidade">Privacidade</a></li>
-          <li><a href="/termos">Termos de uso</a></li>
-        </ul>
-      </nav>
+      <div class="col">
+        <h2>{t?.idioma ?? 'Idioma'}</h2>
+        <SeletorIdioma lingua={lingua} alternativas={alternativas} rotulo={t?.idioma ?? 'Idioma'} />
+      </div>
 
+      {
+        !t && (
       <div class="col">
         <h2>Redes</h2>
         {
@@ -62,9 +93,11 @@ const kids = Astro.url.pathname.startsWith('/kids');
           )
         }
       </div>
+        )
+      }
     </div>
     <p class="legal muted">
-      © {ano} Centelha. Textos de Allan Kardec em domínio público. Feito com cuidado e sem anúncios.
+      © {ano} Centelha. {t ? t.legal : 'Textos de Allan Kardec em domínio público. Feito com cuidado e sem anúncios.'}
     </p>
   </div>
 </footer>

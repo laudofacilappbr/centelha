@@ -1,0 +1,59 @@
+---
+/**
+ * Seletor de idioma (#48): só idiomas com obra publicada. Leva à mesma página no outro
+ * idioma quando ela existe (hreflang da página); senão, à lista de obras daquele idioma.
+ */
+import { obrasEmTodosOsIdiomas } from '../lib/catalogo';
+import { HREFLANG, NOMES, OUTRAS, edicoesPorLingua, urlObras, type Alternativa, type Lingua } from '../lib/idiomas';
+
+interface Props {
+  lingua: Lingua;
+  alternativas: Alternativa[];
+  rotulo: string;
+}
+const { lingua, alternativas, rotulo } = Astro.props;
+
+const obras = await obrasEmTodosOsIdiomas();
+const comObra = new Set<Lingua>(['pt']);
+for (const o of obras) for (const l of Object.keys(edicoesPorLingua(o)) as Lingua[]) comObra.add(l);
+
+const opcoes = (['pt', ...OUTRAS] as Lingua[])
+  .filter((l) => comObra.has(l))
+  .map((l) => {
+    const alt = alternativas.find((a) => a.hreflang === HREFLANG[l]);
+    const href = alt ? new URL(alt.href).pathname : l === 'pt' ? '/' : urlObras(l);
+    return { l, href };
+  });
+---
+
+{
+  opcoes.length > 1 && (
+    <nav aria-label={rotulo} class="idiomas">
+      <ul role="list">
+        {opcoes.map(({ l, href }) => (
+          <li>
+            <a href={href} lang={HREFLANG[l]} hreflang={HREFLANG[l]} aria-current={l === lingua ? 'true' : undefined}>
+              {NOMES[l]}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<style>
+  .idiomas ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  .idiomas a[aria-current='true'] {
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+</style>

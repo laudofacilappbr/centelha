@@ -28,6 +28,8 @@ const ROTAS: Record<Lingua, Rotas> = {
 
 /** Valor de lang e hreflang. */
 export const HREFLANG: Record<Lingua, string> = { pt: 'pt-BR', fr: 'fr', es: 'es', en: 'en' };
+/** Nome de cada idioma nele mesmo, para o seletor. */
+export const NOMES: Record<Lingua, string> = { pt: 'Português', fr: 'Français', es: 'Español', en: 'English' };
 export const OG_LOCALE: Record<Lingua, string> = { pt: 'pt_BR', fr: 'fr_FR', es: 'es_ES', en: 'en_US' };
 
 /** "fr-FR", "fr" → "fr"; idioma fora do site → undefined. */
@@ -110,6 +112,16 @@ export const TEXTOS = {
     lojas: 'Boutiques d’applications',
     vozSintetica: 'Voix de synthèse',
     nenhuma: 'Aucune œuvre publiée en français pour le moment.',
+    inicio: 'Centelha — accueil',
+    menu: 'Principal',
+    idioma: 'Langue',
+    ajuda: 'Aide',
+    suporte: 'Assistance',
+    privacidade: 'Confidentialité',
+    termos: 'Conditions d’utilisation',
+    emPortugues: '(en portugais)',
+    rodape: 'Les œuvres de Kardec à écouter, gratuitement. Œuvres du domaine public, narration par IA relue par des personnes.',
+    legal: 'Textes d’Allan Kardec dans le domaine public. Fait avec soin et sans publicité.',
   },
   es: {
     pular: 'Saltar al contenido',
@@ -134,6 +146,16 @@ export const TEXTOS = {
     lojas: 'Tiendas de aplicaciones',
     vozSintetica: 'Voz sintética',
     nenhuma: 'Todavía no hay obras publicadas en español.',
+    inicio: 'Centelha — inicio',
+    menu: 'Principal',
+    idioma: 'Idioma',
+    ajuda: 'Ayuda',
+    suporte: 'Soporte',
+    privacidade: 'Privacidad',
+    termos: 'Términos de uso',
+    emPortugues: '(en portugués)',
+    rodape: 'Las obras de Kardec para escuchar, gratis. Obras de dominio público, narración por IA revisada por personas.',
+    legal: 'Textos de Allan Kardec de dominio público. Hecho con cuidado y sin anuncios.',
   },
   en: {
     pular: 'Skip to content',
@@ -158,5 +180,15 @@ export const TEXTOS = {
     lojas: 'App stores',
     vozSintetica: 'Synthetic voice',
     nenhuma: 'No works published in English yet.',
+    inicio: 'Centelha — home',
+    menu: 'Main',
+    idioma: 'Language',
+    ajuda: 'Help',
+    suporte: 'Support',
+    privacidade: 'Privacy',
+    termos: 'Terms of use',
+    emPortugues: '(in Portuguese)',
+    rodape: 'The works of Kardec to listen to, for free. Public domain works, AI narration reviewed by people.',
+    legal: 'Texts by Allan Kardec in the public domain. Made with care and without ads.',
   },
 } as const;
