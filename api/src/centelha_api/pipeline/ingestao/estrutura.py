@@ -15,6 +15,7 @@ import re
 from dataclasses import dataclass, field
 
 from ...models import TipoSegmento
+from .leitores import Nota
 
 
 @dataclass
@@ -56,6 +57,11 @@ _SECOES_AVULSAS = {
     "introduction", "prolégomènes", "conclusion", "préface", "préambule", "avant-propos",
     "avertissement", "introduction à l'étude de la doctrine spirite",
 }  # fmt: skip
+# Abre capítulo só antes do primeiro capítulo numerado; depois é seção dentro dele (o
+# "Preâmbulo" do cap. XXVIII de O Evangelho).
+_SO_ANTES_DOS_CAPITULOS = {"preâmbulo", "préambule"}
+# Título espaçado da FEB: "I N T R O D U Ç Ã O".
+_LETRAS_ESPACADAS = re.compile(r"^(?:\w ){3,}\w$")
 
 _RE_PERGUNTA = re.compile(r"^(?P<n>\d{1,4})\s*[.)–-]\s*(?P<texto>.+)$")
 _RE_SUBQUESTAO = re.compile(
@@ -68,8 +74,23 @@ def _e_titulo_curto(p: str) -> bool:
     return len(p) <= 90 and not p.endswith((".", "?", "!", ":", ";", ",")) or p.isupper()
 
 
+def _e_subtitulo(ligacao: str, nome: str) -> bool:
+    return (
+        not isinstance(ligacao, Nota)
+        and len(ligacao) <= 30
+        and ligacao[:1].islower()
+        and len(nome) <= 40
+        and nome.isupper()
+    )
+
+
 def _titulo_composto(rotulo: str, resto: str, proximo: str | None) -> tuple[str, bool]:
     """Junta "CAPÍTULO I" com o nome na linha seguinte. Devolve (título, consumiu_proximo)."""
+    if rotulo.islower():
+        # Versalete do PDF vem em minúsculas: "capítulo xiv" → "Capítulo XIV".
+        palavra, _, numero = rotulo.partition(" ")
+        numero = numero.upper() if re.fullmatch(r"[ivxlcdm]+", numero) else numero
+        rotulo = f"{palavra.capitalize()} {numero}"
     if resto:
         return f"{rotulo} — {resto}", False
     if proximo and len(proximo) <= 90 and _e_titulo_curto(proximo):
@@ -85,6 +106,7 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
     divisao: str | None = None
     atual: CapituloBruto | None = None
     ultima_questao: int | None = None
+    viu_capitulo = False
     # Estado do perfil "perguntas": o que o próximo parágrafo provavelmente é.
     esperando_resposta = False
     dentro_da_resposta = False
@@ -101,8 +123,20 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
     i = 0
     while i < len(paragrafos):
         p = paragrafos[i]
+        if _LETRAS_ESPACADAS.match(p) and not isinstance(p, Nota):
+            p = p.replace(" ", "")
         proximo = paragrafos[i + 1] if i + 1 < len(paragrafos) else None
 
+        if isinstance(p, Nota):
+            # Nota de rodapé não é título nem pergunta, e não interrompe a resposta em curso.
+            if atual is None:
+                atual = novo_capitulo(divisao or "Abertura")
+            ultimo = atual.segmentos[-1]
+            atual.segmentos.append(
+                SegmentoBruto(TipoSegmento.NOTA, p, ultimo.numero_questao, ultimo.subquestao)
+            )
+            i += 1
+            continue
         if m := _RE_DIVISAO.match(p):
             titulo, consumiu = _titulo_composto(m["rotulo"], m["resto"], proximo)
             divisao = titulo
@@ -112,12 +146,18 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
         if m := _RE_CAPITULO.match(p):
             titulo, consumiu = _titulo_composto(m["rotulo"], m["resto"], proximo)
             atual = novo_capitulo(titulo)
+            viu_capitulo = True
             i += 2 if consumiu else 1
             continue
-        if p.lower().rstrip(".").replace("’", "'") in _SECOES_AVULSAS:
+        chave = p.lower().rstrip(".").replace("’", "'")
+        if chave in _SECOES_AVULSAS and not (viu_capitulo and chave in _SO_ANTES_DOS_CAPITULOS):
             divisao = None
-            atual = novo_capitulo(p)
             i += 1
+            # Subtítulo partido em linhas: "INTRODUÇÃO" / "ao estudo da" / "DOUTRINA ESPÍRITA".
+            if i + 1 < len(paragrafos) and _e_subtitulo(paragrafos[i], paragrafos[i + 1]):
+                p = f"{p} {paragrafos[i]} {paragrafos[i + 1]}"
+                i += 2
+            atual = novo_capitulo(p)
             continue
 
         if atual is None:

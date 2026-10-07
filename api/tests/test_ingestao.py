@@ -95,6 +95,42 @@ def test_perfil_generico_nao_inventa_perguntas(paragrafos_le):
     assert tipos == {TipoSegmento.TITULO, TipoSegmento.PARAGRAFO}
 
 
+def test_nota_vira_segmento_nota_sem_quebrar_a_resposta():
+    paragrafos = [
+        "CAPÍTULO I",
+        "1. Pergunta?",
+        "“Resposta.”",
+        leitores.Nota("Nota de Kardec."),
+        "“Continuação da resposta.”",
+    ]
+    caps = estruturar(paragrafos, "perguntas")
+    tipos = [(s.tipo.value, s.numero_questao) for s in caps[0].segmentos[1:]]
+    assert tipos == [("pergunta", 1), ("resposta", 1), ("nota", 1), ("resposta", 1)]
+
+
+def test_titulos_do_pdf_da_feb():
+    paragrafos = [
+        "I N T R O D U Ç Ã O",
+        "ao estudo da",
+        "DOUTRINA ESPÍRITA",
+        "Texto da introdução.",
+        "capítulo xxviii",
+        "Coletânea de preces espíritas",
+        "Preâmbulo",
+        "1. Os Espíritos hão dito sempre.",
+    ]
+    caps = estruturar(paragrafos, "generico")
+    # Versalete normalizado; "Preâmbulo" depois do primeiro capítulo é seção, não capítulo.
+    assert [c.titulo for c in caps] == [
+        "INTRODUÇÃO ao estudo da DOUTRINA ESPÍRITA",
+        "Capítulo XXVIII — Coletânea de preces espíritas",
+    ]
+    assert [s.texto for s in caps[1].segmentos[1:]] == [
+        "Preâmbulo",
+        "1. Os Espíritos hão dito sempre.",
+    ]
+
+
 def test_texto_antes_do_primeiro_capitulo_vira_abertura():
     caps = estruturar(["Folha de rosto.", "Capítulo 1", "Texto."], "generico")
     assert [c.titulo for c in caps] == ["Abertura", "Capítulo 1"]
@@ -144,9 +180,10 @@ def test_leitor_pdf_ignora_numero_de_pagina(tmp_path):
     doc = pymupdf.open()
     pagina = doc.new_page()
     y = 72
-    for p in [*_paragrafos_exemplo(), "12"]:
+    for p in _paragrafos_exemplo():
         pagina.insert_text((72, y), p, fontname="helv")
         y += 40
+    pagina.insert_text((290, 820), "12", fontname="helv")  # no pé da página
     caminho = tmp_path / "x.pdf"
     doc.save(caminho)
     # Fonte base do PDF não tem aspas curvas; o leitor só não pode perder o texto.
@@ -154,6 +191,135 @@ def test_leitor_pdf_ignora_numero_de_pagina(tmp_path):
     assert lidos[:3] == _paragrafos_exemplo()[:3]
     assert "12" not in lidos
     assert len(lidos) == 4
+
+
+def _pdf_como_o_da_feb(caminho):
+    """Três páginas com o que os PDFs da FEB (#2) trazem em volta do texto.
+
+    Cabeçalho corrido e número de página; parágrafo que vira a página; chamada de nota
+    em sobrescrito; nota da editora (N.E.) que continua no rodapé da página seguinte;
+    nota de Kardec no estilo do LE, depois de "________", com chamada "(1)"; e "(85)",
+    remissão à questão 85, que é texto.
+    """
+    import pymupdf
+
+    doc = pymupdf.open()
+    for _ in range(3):
+        doc.new_page()
+    # Página criada antes de outra new_page() perde a referência ao documento no PyMuPDF.
+    paginas = [doc[n] for n in range(3)]
+    for n, pagina in enumerate(paginas, start=1):
+        pagina.insert_text((250, 40), "O Livro de Teste", fontsize=10)
+        pagina.insert_text((290, 820), str(n), fontsize=10)
+
+    p1, p2, p3 = paginas
+    p1.insert_text((72, 120), "Primeiro parágrafo.", fontsize=12)
+    p1.insert_text((72, 160), "Este parágrafo continua na página", fontsize=12)
+    p1.insert_text((262, 156), "1", fontsize=6)
+    p1.insert_text((72, 700), "1 N.E. de 1947: texto da editora, que tem direito", fontsize=8)
+    p1.insert_text((72, 710), "próprio e não pode entrar", fontsize=8)
+
+    p2.insert_text((72, 120), "seguinte e termina aqui.", fontsize=12)
+    p2.insert_text((72, 700), "na narração nem como nota.", fontsize=8)
+
+    p3.insert_text((72, 120), "Texto de Kardec, ver a questão (85). Fim (1).", fontsize=12)
+    p3.insert_text((72, 600), "________", fontsize=12)
+    p3.insert_text((72, 620), "(1) Nota de Kardec.", fontsize=11)
+    doc.save(caminho)
+    return caminho
+
+
+def test_pdf_tira_o_que_nao_e_texto_da_obra(tmp_path):
+    lidos = leitores.ler(_pdf_como_o_da_feb(tmp_path / "feb.pdf"))
+    assert lidos == [
+        "Primeiro parágrafo.",
+        "Este parágrafo continua na página seguinte e termina aqui.",
+        "Texto de Kardec, ver a questão (85). Fim.",
+        "Nota de Kardec.",
+    ]
+    assert [isinstance(p, leitores.Nota) for p in lidos] == [False, False, False, True]
+
+
+def test_pdf_nunca_deixa_passar_nota_da_editora(tmp_path):
+    """Direitos (#2): a nota da FEB não entra nem grudada numa nota de Kardec.
+
+    Se a leitura juntar as duas (aconteceu: o número da nota sumiu junto com as chamadas
+    em sobrescrito), a nota inteira sai. Perder a de Kardec volta na revisão; vazar texto
+    da editora é publicar o que não tem direito.
+    """
+    import pymupdf
+
+    doc = pymupdf.open()
+    pagina = doc.new_page()
+    # O corpo do texto é o tamanho de letra com mais caracteres na página.
+    pagina.insert_text(
+        (72, 120), "Texto corrido, mais longo que as notas para mandar no", fontsize=12
+    )
+    pagina.insert_text((72, 135), "corpo do texto, como numa página de verdade.", fontsize=12)
+    pagina.insert_text((72, 700), "Nota de Allan Kardec: nota legítima.", fontsize=8)
+    pagina.insert_text((72, 720), "N.E.: Ver Nota Explicativa, p. 371.", fontsize=8)
+    caminho = tmp_path / "grudada.pdf"
+    doc.save(caminho)
+    lidos = leitores.ler(caminho)
+    assert lidos == [
+        "Texto corrido, mais longo que as notas para mandar no corpo do texto, como numa "
+        "página de verdade."
+    ]
+
+
+def test_pdf_faixa_de_paginas(tmp_path):
+    caminho = _pdf_como_o_da_feb(tmp_path / "feb.pdf")
+    assert leitores.ler(caminho, (2, 3))[0] == "seguinte e termina aqui."
+    with pytest.raises(ValueError, match="fora"):
+        leitores.ler(caminho, (2, 9))
+    txt = tmp_path / "x.txt"
+    txt.write_text("Texto.", encoding="utf-8")
+    with pytest.raises(ValueError, match="só vale para PDF"):
+        leitores.ler(txt, (1, 1))
+
+
+def test_pdf_titulos(tmp_path):
+    """Título em duas linhas vira um; subtítulo no mesmo bloco do texto se separa; título
+    em versalete depois de parágrafo aberto não é continuação dele."""
+    import pymupdf
+
+    doc = pymupdf.open()
+    doc.new_page()
+    doc.new_page()
+    p1, p2 = doc[0], doc[1]
+    p1.insert_text((100, 200), "Do mundo espírita ou mundo dos", fontsize=18)
+    p1.insert_text((200, 222), "Espíritos", fontsize=18)
+    p1.insert_text((150, 300), "Uma realeza terrestre", fontsize=14)
+    p1.insert_text((72, 318), "8. Quem melhor do que eu pode compreender a verdade", fontsize=12)
+    p1.insert_text((72, 333), "desta palavra, que fica aberta", fontsize=12)
+    p2.insert_text((250, 150), "capítulo ii", fontsize=11)
+    p2.insert_text(
+        (72, 200), "Texto do capítulo, longo o bastante para mandar no corpo.", fontsize=12
+    )
+    caminho = tmp_path / "titulos.pdf"
+    doc.save(caminho)
+    assert leitores.ler(caminho) == [
+        "Do mundo espírita ou mundo dos Espíritos",
+        "Uma realeza terrestre",
+        "8. Quem melhor do que eu pode compreender a verdade desta palavra, que fica aberta",
+        "capítulo ii",
+        "Texto do capítulo, longo o bastante para mandar no corpo.",
+    ]
+
+
+def test_limpar_hifen_de_pronome_e_caracteres_do_pdf():
+    # Pronome depois de vogal acentuada mantém o hífen; o resto é hifenização de linha.
+    assert leitores.limpar("avaliá-\nla e fazê-\nlo, fra-\nse") == "avaliá-la e fazê-lo, frase"
+    # \x03 é o espaço antes da referência bíblica; U+00AD, o hífen discricionário.
+    assert leitores.limpar("ponto.\x03(Mateus)") == "ponto. (Mateus)"
+    assert leitores.limpar("pre\u00ad\ncisamos \u00adisso") == "precisamos isso"
+
+
+def test_cortar_em():
+    paragrafos = ["Conclusão.", "Santo Agostinho.", "Nota Especial n°1, da editora."]
+    assert leitores.cortar_em(paragrafos, "Nota Especial") == paragrafos[:2]
+    with pytest.raises(ValueError, match="nenhum"):
+        leitores.cortar_em(paragrafos, "Nota Espacial")
 
 
 def test_formato_nao_suportado(tmp_path):
@@ -212,6 +378,19 @@ def test_cli_resumo_e_json(tmp_path, capsys):
     assert json.loads(Path(saida).read_text(encoding="utf-8"))[1]["segmentos"][1]["tipo"] == (
         "pergunta"
     )
+
+
+def test_cli_paginas_e_cortar_em(tmp_path, capsys):
+    fonte = _pdf_como_o_da_feb(tmp_path / "feb.pdf")
+    saida = tmp_path / "estrutura.json"
+    args = [str(fonte), "--paginas", "1-3", "--cortar-em", "Texto de Kardec", "--json", str(saida)]
+    assert cli(args) == 0
+    textos = [
+        s["texto"] for c in json.loads(saida.read_text(encoding="utf-8")) for s in c["segmentos"]
+    ]
+    assert textos[-1] == "Este parágrafo continua na página seguinte e termina aqui."
+    with pytest.raises(SystemExit):
+        cli([str(fonte), "--paginas", "três"])
 
 
 # Texto sintético no formato do original francês (não é citação da obra).
