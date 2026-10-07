@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     conta_codigo_janela_segundos: int = 3600
     # A sessão do app dura; sair ou excluir a conta a revoga.
     conta_sessao_dias: int = 180
+    # Capítulos baixados em formato aberto por liberação em 24 h (#134). Uma obra inteira
+    # cabe com folga; um robô varrendo o acervo, não.
+    exportacao_downloads_por_dia: int = 200
     # Vazio = Sentry desligado. Ligar é decisão do dono (terceiro recebendo dados).
     sentry_dsn: str = ""
 

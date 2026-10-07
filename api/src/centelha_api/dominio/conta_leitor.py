@@ -12,7 +12,7 @@ from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from ..config import get_settings
-from ..models import CodigoAcesso, ContaLeitor, SessaoConta
+from ..models import CodigoAcesso, ContaLeitor, DownloadAberto, ExportacaoLiberada, SessaoConta
 
 
 def _hash(*partes: str) -> str:
@@ -119,11 +119,27 @@ def exportar(session: Session, email: str) -> dict | None:
         "ultimo_acesso_em": conta.ultimo_acesso_em.isoformat() if conta.ultimo_acesso_em else None,
         "finalidade": "sincronizar progresso, marcadores e planos de estudo entre aparelhos",
         "base_legal": "execução de serviço pedido pelo titular (LGPD art. 7º, V)",
+        "exportacao_aberta": [
+            {
+                "pedido": e.pedido,
+                "liberada_em": e.liberada_em.isoformat(),
+                "revogada_em": e.revogada_em.isoformat() if e.revogada_em else None,
+                "capitulos_baixados": session.scalar(
+                    select(func.count(DownloadAberto.id)).where(DownloadAberto.liberacao_id == e.id)
+                ),
+            }
+            for e in session.scalars(
+                select(ExportacaoLiberada)
+                .where(ExportacaoLiberada.conta_id == conta.id)
+                .order_by(ExportacaoLiberada.id)
+            )
+        ],
     }
 
 
 def excluir(session: Session, email: str) -> int:
-    """Apaga a conta, as sessões (em cascata) e os códigos do e-mail. Devolve quantas
+    """Apaga a conta, as sessões e as liberações de exportação (em cascata) e os códigos
+    do e-mail. Devolve quantas
     contas saíram (0 ou 1)."""
     email = normalizar(email)
     session.execute(delete(CodigoAcesso).where(CodigoAcesso.email == email))

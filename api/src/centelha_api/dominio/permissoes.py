@@ -33,6 +33,9 @@ class Permissao(enum.StrEnum):
     GERIR_APOIO = "gerir_apoio"
     # Instituições parceiras e campanhas de caridade (#41). Só administrador.
     GERIR_CAMPANHAS = "gerir_campanhas"
+    # Libera o download em formato aberto para a conta de quem pediu por acessibilidade
+    # (#134). Só administrador: é uma cópia aberta do acervo saindo.
+    LIBERAR_EXPORTACAO = "liberar_exportacao"
 
 
 # Tabela "Papéis" da especificação. Lista explícita, sem herança entre papéis: um

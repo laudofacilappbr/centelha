@@ -707,3 +707,52 @@ class SessaoConta(Base):
     revogada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     conta: Mapped[ContaLeitor] = relationship()
+
+
+class ExportacaoLiberada(Base):
+    """Download em formato aberto liberado para uma conta, por acessibilidade (#134, 1A e
+    2D). A pessoa se autodeclara ao suporte; o suporte libera aqui, e só nessa conta o app
+    mostra "Baixar em formato aberto". Revogar é preencher revogada_em: a linha fica, para
+    saber quem liberou, quando e por qual pedido."""
+
+    __tablename__ = "exportacao_liberada"
+    __table_args__ = (
+        # No máximo uma liberação vigente por conta.
+        Index(
+            "uq_exportacao_liberada_vigente",
+            "conta_id",
+            unique=True,
+            postgresql_where="revogada_em IS NULL",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conta_id: Mapped[int] = mapped_column(
+        ForeignKey("conta_leitor.id", ondelete="CASCADE"), index=True
+    )
+    # Número do pedido no suporte; vai no LEIAME que acompanha os arquivos.
+    pedido: Mapped[str] = mapped_column(String(40))
+    liberada_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+    liberada_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    revogada_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+    revogada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    conta: Mapped[ContaLeitor] = relationship()
+    liberada_por: Mapped[Usuario | None] = relationship(foreign_keys=[liberada_por_id])
+
+
+class DownloadAberto(Base):
+    """Cada capítulo baixado em formato aberto. Serve ao limite diário e responde "o que
+    saiu por esta liberação"; some com a conta, como o resto dela."""
+
+    __tablename__ = "download_aberto"
+    __table_args__ = (Index("ix_download_aberto_liberacao_criado", "liberacao_id", "criado_em"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    liberacao_id: Mapped[int] = mapped_column(
+        ForeignKey("exportacao_liberada.id", ondelete="CASCADE")
+    )
+    faixa_id: Mapped[int] = mapped_column(ForeignKey("faixa_audio.id"))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

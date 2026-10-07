@@ -38,7 +38,10 @@ def _entrar(client, email="leitora@exemplo.org"):
 
 def test_entrar_com_o_codigo_do_email_cria_a_conta(client, session):
     h = _entrar(client, "Leitora@Exemplo.org ")
-    assert client.get("/v1/conta", headers=h).json() == {"email": "leitora@exemplo.org"}
+    assert client.get("/v1/conta", headers=h).json() == {
+        "email": "leitora@exemplo.org",
+        "exportacao_aberta": False,
+    }
     assert session.scalar(select(ContaLeitor.email)) == "leitora@exemplo.org"
     # Só hashes no banco: nem o código nem o token aparecem.
     linha = session.execute(text("select codigo_hash, sal from codigo_acesso")).one()
