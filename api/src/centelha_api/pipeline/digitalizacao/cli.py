@@ -2,7 +2,8 @@
 
     centelha-digitalizar ocr exemplar.pdf -o le-1944.paginas.txt
     centelha-digitalizar processar le-1944.paginas.txt --saida acervo/le-1944 \\
-        [--perfil perguntas] [--referencia texto-digital.txt] [--sem-ortografia]
+        [--perfil perguntas] [--referencia texto-digital.txt] [--sem-ortografia] \\
+        [--correcoes docs/digitalizacao/correcoes/le-1944.txt]
     centelha-digitalizar tudo exemplar.pdf --saida acervo/le-1944 --perfil perguntas
 
 "processar" grava, na pasta de saída:
@@ -17,6 +18,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .correcoes import ErroCorrecao, aplicar, ler
 from .limpeza import Paragrafo, como_texto, limpar_paginas
 from .ocr import ErroOCR, ocr
 from .ortografia import atualizar
@@ -38,6 +40,7 @@ def processar(
     referencia: str | None = None,
     ortografia: bool = True,
     idioma: str = "por",
+    correcoes: str | None = None,
 ) -> Path:
     paragrafos = limpar_paginas(paginas)
     trocas = []
@@ -49,13 +52,16 @@ def processar(
             novos.append(Paragrafo(p.pagina, texto))
             trocas += t
         paragrafos = novos
+    # Depois da grafia: quem revisa escreve as correções olhando o texto.txt final.
+    lista = ler(correcoes) if correcoes else []
+    paragrafos = aplicar(paragrafos, lista)
     saida.mkdir(parents=True, exist_ok=True)
     (saida / "texto.txt").write_text(como_texto(paragrafos), encoding="utf-8")
     relatorio = revisar(paragrafos, trocas, referencia, perfil, idioma)
     (saida / "revisao.md").write_text(como_markdown(relatorio, titulo), encoding="utf-8")
     print(
         f"{len(paragrafos)} parágrafos, {len(relatorio.achados)} achados, "
-        f"{len(trocas)} trocas de grafia → {saida}",
+        f"{len(trocas)} trocas de grafia, {len(lista)} correções → {saida}",
         file=sys.stderr,
     )
     return saida
@@ -80,6 +86,11 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--perfil", choices=["generico", "perguntas"])
         p.add_argument("--referencia", type=Path, help="texto digital para comparar (só apoio)")
         p.add_argument("--sem-ortografia", action="store_true")
+        p.add_argument(
+            "--correcoes",
+            type=Path,
+            help="correções da revisão (p. N: lido => certo), versionadas; ver correcoes.py",
+        )
         p.add_argument(
             "--idioma",
             choices=IDIOMAS,
@@ -114,7 +125,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"erro: {e}", file=sys.stderr)
         return 1
     referencia = a.referencia.read_text(encoding="utf-8") if a.referencia else None
-    processar(paginas, a.saida, titulo, a.perfil, referencia, not a.sem_ortografia, a.idioma)
+    correcoes = a.correcoes.read_text(encoding="utf-8") if a.correcoes else None
+    try:
+        processar(
+            paginas,
+            a.saida,
+            titulo,
+            a.perfil,
+            referencia,
+            not a.sem_ortografia,
+            a.idioma,
+            correcoes,
+        )
+    except ErroCorrecao as e:
+        # Nada é gravado: um texto.txt sem parte da revisão pareceria revisado.
+        print(f"correções que não se aplicam:\n{e}", file=sys.stderr)
+        return 1
     return 0
 
 

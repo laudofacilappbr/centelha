@@ -45,7 +45,17 @@ No Windows (Git Bash), prefixe o comando com `MSYS_NO_PATHCONV=1`.
 
 ## Passo 3 — Revisar com o exemplar ao lado
 
-Percorra `revisao.md` de cima para baixo, abrindo a página indicada no exemplar, e corrija em `texto.txt`.
+Percorra `revisao.md` de cima para baixo, abrindo a página indicada no exemplar. Não corrija em `texto.txt`: ele é regravado a cada `processar`. Escreva cada correção num arquivo de correções e passe `--correcoes`:
+
+```
+p. 133: vous le connaïîtrez => vous le connaîtrez
+p. 134: juntar: suite du paragraphe
+```
+
+- A página é a do começo do parágrafo, a mesma do `revisao.md`.
+- O trecho lido tem de aparecer uma vez só naquela página. Correção que não se aplica mais faz o `processar` falhar sem gravar nada, para a revisão não se perder calada.
+- Onde fica: edição em domínio público vai versionada em `docs/digitalizacao/correcoes/<exemplar>.txt` (ex.: `ese-fr-1866.txt`). Edição com direito vai em `acervo/<exemplar>/correcoes.txt`, fora do git, como o resto do acervo: o repositório é público.
+- Formato e regras: `api/src/centelha_api/pipeline/digitalizacao/correcoes.py`.
 
 | Achado | O que fazer |
 | --- | --- |
