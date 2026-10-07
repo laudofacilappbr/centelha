@@ -102,7 +102,11 @@ def pegar(session: Session, agora: datetime | None = None) -> JobAudio | None:
         select(JobAudio)
         .where(
             or_(
-                (JobAudio.estado == EstadoJob.PENDENTE) & (JobAudio.disponivel_em <= agora),
+                # Job novo vale já, sem comparar relógio: disponivel_em é o now() do INSERT,
+                # e o relógio do banco pode voltar (no Docker do Windows voltou 5 min, #150);
+                # o job ficaria "no futuro" e parado. Só a espera depois de falha usa a data.
+                (JobAudio.estado == EstadoJob.PENDENTE)
+                & ((JobAudio.tentativas == 0) | (JobAudio.disponivel_em <= agora)),
                 # Worker que morreu: lease vencido volta a ser pegável.
                 (JobAudio.estado == EstadoJob.EXECUTANDO) & (JobAudio.lease_ate < agora),
             )
@@ -232,9 +236,13 @@ def falhar(session: Session, job: JobAudio, erro: str, agora: datetime | None = 
         job.estado = EstadoJob.FALHOU
         job.concluido_em = agora
     else:
-        # 1, 4, 9 minutos: dá tempo de um provedor instável voltar.
+        # 1, 4, 9 minutos: dá tempo de um provedor instável voltar. Contados do mais
+        # tarde entre agora e o início da tentativa: se o relógio do banco voltou (#150),
+        # a espera não cai para antes de a tentativa ter começado.
         job.estado = EstadoJob.PENDENTE
-        job.disponivel_em = agora + timedelta(minutes=job.tentativas**2)
+        job.disponivel_em = func.greatest(agora, JobAudio.iniciado_em) + timedelta(
+            minutes=job.tentativas**2
+        )
     registrar(
         session, "audio.falhou", None, "capitulo", job.capitulo_id, job=job.id, erro=erro[:200]
     )

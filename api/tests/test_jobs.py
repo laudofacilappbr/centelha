@@ -206,6 +206,37 @@ def test_falha_volta_a_fila_com_espera_e_desiste_no_limite(session, base, armaze
     assert session.get(Capitulo, base["cap"].id).estado == EstadoCapitulo.TEXTO_REVISADO
 
 
+def test_job_novo_e_pego_mesmo_com_o_relogio_do_banco_atrasado(session, base):
+    """#150: no Docker do Windows o relógio do banco voltou 5 min entre o INSERT do job
+    (disponivel_em = now()) e o pegar. O job novo ficava "no futuro" e o worker não o
+    via. Job sem tentativa vale já; a data só segura a espera depois de uma falha."""
+    job = _enfileirar(session, base)
+    job.disponivel_em = session.scalar(select(func.now())) + timedelta(minutes=5)
+    session.commit()
+    with SessionLocal() as s:
+        assert jobs.pegar(s).id == job.id
+
+    # O reagendado depois de falha continua esperando a data.
+    session.expire_all()
+    job = session.get(JobAudio, job.id)
+    job.estado = EstadoJob.PENDENTE
+    job.disponivel_em = session.scalar(select(func.now())) + timedelta(minutes=5)
+    session.commit()
+    with SessionLocal() as s:
+        assert jobs.pegar(s) is None
+
+
+def test_espera_depois_de_falha_conta_do_inicio_se_o_relogio_voltou(session, base):
+    job = _enfileirar(session, base)
+    with SessionLocal() as s:
+        pego = jobs.pegar(s)
+        inicio = pego.iniciado_em
+        jobs.falhar(s, pego, "provedor fora do ar", agora=inicio - timedelta(minutes=5))
+    session.expire_all()
+    job = session.get(JobAudio, job.id)
+    assert job.disponivel_em == inicio + timedelta(minutes=1)
+
+
 def test_lease_vencido_e_retomado(session, base):
     job = _enfileirar(session, base)
     with SessionLocal() as s:
