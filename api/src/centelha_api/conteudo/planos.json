@@ -1,0 +1,1486 @@
+{
+  "versao": 1,
+  "idioma": "pt-BR",
+  "autoria": "Roteiros escritos pela IA (Claude) a pedido do dono (#43, opção 2A); revisar antes de publicar.",
+  "planos": [
+    {
+      "slug": "primeiros-passos",
+      "titulo": "Primeiros passos",
+      "descricao": "Quinze dias com as ideias centrais do Espiritismo: Deus, os Espíritos, a reencarnação e a lei moral, pelas perguntas de O Livro dos Espíritos.",
+      "dias": [
+        {
+          "dia": 1,
+          "titulo": "Deus",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 1,
+              "ate": 16
+            }
+          ]
+        },
+        {
+          "dia": 2,
+          "titulo": "O que são os Espíritos",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 76,
+              "ate": 95
+            }
+          ]
+        },
+        {
+          "dia": 3,
+          "titulo": "A escala espírita",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 96,
+              "ate": 113
+            }
+          ]
+        },
+        {
+          "dia": 4,
+          "titulo": "Progresso dos Espíritos; anjos e demônios",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 114,
+              "ate": 131
+            }
+          ]
+        },
+        {
+          "dia": 5,
+          "titulo": "A alma e a encarnação",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 132,
+              "ate": 148
+            }
+          ]
+        },
+        {
+          "dia": 6,
+          "titulo": "A volta à vida espiritual",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 149,
+              "ate": 165
+            }
+          ]
+        },
+        {
+          "dia": 7,
+          "titulo": "A reencarnação",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 166,
+              "ate": 186
+            }
+          ]
+        },
+        {
+          "dia": 8,
+          "titulo": "Justiça da reencarnação",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 187,
+              "ate": 199
+            }
+          ]
+        },
+        {
+          "dia": 9,
+          "titulo": "O esquecimento do passado",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 392,
+              "ate": 399
+            }
+          ]
+        },
+        {
+          "dia": 10,
+          "titulo": "A influência dos Espíritos",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 459,
+              "ate": 472
+            }
+          ]
+        },
+        {
+          "dia": 11,
+          "titulo": "Anjos guardiães",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 489,
+              "ate": 521
+            }
+          ]
+        },
+        {
+          "dia": 12,
+          "titulo": "A lei divina",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 614,
+              "ate": 648
+            }
+          ]
+        },
+        {
+          "dia": 13,
+          "titulo": "Justiça, amor e caridade",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 873,
+              "ate": 892
+            },
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C017"
+            }
+          ]
+        },
+        {
+          "dia": 14,
+          "titulo": "A perfeição moral",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 893,
+              "ate": 912
+            }
+          ]
+        },
+        {
+          "dia": 15,
+          "titulo": "O futuro: penas e gozos",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 958,
+              "ate": 980
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "o-evangelho-em-30-dias",
+      "titulo": "O Evangelho em 30 dias",
+      "descricao": "Um capítulo de O Evangelho segundo o Espiritismo por dia, do Prefácio às preces.",
+      "dias": [
+        {
+          "dia": 1,
+          "titulo": "Prefácio e Introdução",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C001"
+            },
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C002"
+            }
+          ]
+        },
+        {
+          "dia": 2,
+          "titulo": "Capítulo I — Não vim destruir a lei",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C003"
+            }
+          ]
+        },
+        {
+          "dia": 3,
+          "titulo": "Capítulo II — Meu Reino não é deste mundo",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C004"
+            }
+          ]
+        },
+        {
+          "dia": 4,
+          "titulo": "Capítulo III — Há muitas moradas na casa de meu Pai",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C005"
+            }
+          ]
+        },
+        {
+          "dia": 5,
+          "titulo": "Capítulo IV — Ninguém poderá ver o Reino de Deus se não nascer de novo",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C006"
+            }
+          ]
+        },
+        {
+          "dia": 6,
+          "titulo": "Capítulo V — Bem-aventurados os aflitos",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C007"
+            }
+          ]
+        },
+        {
+          "dia": 7,
+          "titulo": "Capítulo VI — O Cristo Consolador",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C008"
+            }
+          ]
+        },
+        {
+          "dia": 8,
+          "titulo": "Capítulo VII — Bem-aventurados os pobres de espírito",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C009"
+            }
+          ]
+        },
+        {
+          "dia": 9,
+          "titulo": "Capítulo VIII — Bem-aventurados os que têm puro o coração",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C010"
+            }
+          ]
+        },
+        {
+          "dia": 10,
+          "titulo": "Capítulo IX — Bem-aventurados os que são brandos e pacíficos",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C011"
+            }
+          ]
+        },
+        {
+          "dia": 11,
+          "titulo": "Capítulo X — Bem-aventurados os que são misericordiosos",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C012"
+            }
+          ]
+        },
+        {
+          "dia": 12,
+          "titulo": "Capítulo XI — Amar o próximo como a si mesmo",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C013"
+            }
+          ]
+        },
+        {
+          "dia": 13,
+          "titulo": "Capítulo XII — Amai os vossos inimigos",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C014"
+            }
+          ]
+        },
+        {
+          "dia": 14,
+          "titulo": "Capítulo XIII — Não saiba a vossa mão esquerda o que dê a vossa mão direita",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C015"
+            }
+          ]
+        },
+        {
+          "dia": 15,
+          "titulo": "Capítulo XIV — Honrai a vosso pai e a vossa mãe",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C016"
+            }
+          ]
+        },
+        {
+          "dia": 16,
+          "titulo": "Capítulo XV — Fora da caridade não há salvação",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C017"
+            }
+          ]
+        },
+        {
+          "dia": 17,
+          "titulo": "Capítulo XVI — Não se pode servir a Deus e a Mamon",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C018"
+            }
+          ]
+        },
+        {
+          "dia": 18,
+          "titulo": "Capítulo XVII — Sede perfeitos",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C019"
+            }
+          ]
+        },
+        {
+          "dia": 19,
+          "titulo": "Capítulo XVIII — Muitos os chamados, poucos os escolhidos",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C020"
+            }
+          ]
+        },
+        {
+          "dia": 20,
+          "titulo": "Capítulo XIX — A fé transporta montanhas",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C021"
+            }
+          ]
+        },
+        {
+          "dia": 21,
+          "titulo": "Capítulo XX — Os trabalhadores da última hora",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C022"
+            }
+          ]
+        },
+        {
+          "dia": 22,
+          "titulo": "Capítulo XXI — Haverá falsos cristos e falsos profetas",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C023"
+            }
+          ]
+        },
+        {
+          "dia": 23,
+          "titulo": "Capítulo XXII — Não separeis o que Deus juntou",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C024"
+            }
+          ]
+        },
+        {
+          "dia": 24,
+          "titulo": "Capítulo XXIII — Estranha moral",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C025"
+            }
+          ]
+        },
+        {
+          "dia": 25,
+          "titulo": "Capítulo XXIV — Não ponhais a candeia debaixo do alqueire",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C026"
+            }
+          ]
+        },
+        {
+          "dia": 26,
+          "titulo": "Capítulo XXV — Buscai e achareis",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C027"
+            }
+          ]
+        },
+        {
+          "dia": 27,
+          "titulo": "Capítulo XXVI — Dai gratuitamente o que gratuitamente recebestes",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C028"
+            }
+          ]
+        },
+        {
+          "dia": 28,
+          "titulo": "Capítulo XXVII — Pedi e obtereis",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C029"
+            }
+          ]
+        },
+        {
+          "dia": 29,
+          "titulo": "Capítulo XXVIII — Coletânea de preces espíritas (1/2)",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C030"
+            }
+          ]
+        },
+        {
+          "dia": 30,
+          "titulo": "Capítulo XXVIII — Coletânea de preces espíritas (2/2)",
+          "leituras": [
+            {
+              "sigla": "ESE",
+              "capitulo": "ESE-C030"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "o-livro-dos-espiritos-em-90-dias",
+      "titulo": "O Livro dos Espíritos em 90 dias",
+      "descricao": "A obra inteira em três meses: a Introdução e os Prolegômenos, as 1.019 questões em blocos que respeitam os capítulos, e a Conclusão.",
+      "dias": [
+        {
+          "dia": 1,
+          "titulo": "Introdução, itens I a VI",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "capitulo": "LE-C001"
+            }
+          ]
+        },
+        {
+          "dia": 2,
+          "titulo": "Introdução, itens VII a XII",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "capitulo": "LE-C001"
+            }
+          ]
+        },
+        {
+          "dia": 3,
+          "titulo": "Introdução, itens XIII a XVII",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "capitulo": "LE-C001"
+            }
+          ]
+        },
+        {
+          "dia": 4,
+          "titulo": "Prolegômenos",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "capitulo": "LE-C002"
+            }
+          ]
+        },
+        {
+          "dia": 5,
+          "titulo": "De Deus: questões 1 a 16",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 1,
+              "ate": 16
+            }
+          ]
+        },
+        {
+          "dia": 6,
+          "titulo": "Dos elementos gerais do Universo (1/2): questões 17 a 26",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 17,
+              "ate": 26
+            }
+          ]
+        },
+        {
+          "dia": 7,
+          "titulo": "Dos elementos gerais do Universo (2/2): questões 27 a 36",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 27,
+              "ate": 36
+            }
+          ]
+        },
+        {
+          "dia": 8,
+          "titulo": "Da criação (1/2): questões 37 a 47",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 37,
+              "ate": 47
+            }
+          ]
+        },
+        {
+          "dia": 9,
+          "titulo": "Da criação (2/2): questões 48 a 59",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 48,
+              "ate": 59
+            }
+          ]
+        },
+        {
+          "dia": 10,
+          "titulo": "Do princípio vital: questões 60 a 75",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 60,
+              "ate": 75
+            }
+          ]
+        },
+        {
+          "dia": 11,
+          "titulo": "Dos Espíritos (1/5): questões 76 a 86",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 76,
+              "ate": 86
+            }
+          ]
+        },
+        {
+          "dia": 12,
+          "titulo": "Dos Espíritos (2/5): questões 87 a 97",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 87,
+              "ate": 97
+            }
+          ]
+        },
+        {
+          "dia": 13,
+          "titulo": "Dos Espíritos (3/5): questões 98 a 108",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 98,
+              "ate": 108
+            }
+          ]
+        },
+        {
+          "dia": 14,
+          "titulo": "Dos Espíritos (4/5): questões 109 a 119",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 109,
+              "ate": 119
+            }
+          ]
+        },
+        {
+          "dia": 15,
+          "titulo": "Dos Espíritos (5/5): questões 120 a 131",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 120,
+              "ate": 131
+            }
+          ]
+        },
+        {
+          "dia": 16,
+          "titulo": "Da encarnação dos Espíritos: questões 132 a 148",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 132,
+              "ate": 148
+            }
+          ]
+        },
+        {
+          "dia": 17,
+          "titulo": "Da volta do Espírito à vida espiritual: questões 149 a 165",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 149,
+              "ate": 165
+            }
+          ]
+        },
+        {
+          "dia": 18,
+          "titulo": "Da pluralidade das existências (1/5): questões 166 a 176",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 166,
+              "ate": 176
+            }
+          ]
+        },
+        {
+          "dia": 19,
+          "titulo": "Da pluralidade das existências (2/5): questões 177 a 187",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 177,
+              "ate": 187
+            }
+          ]
+        },
+        {
+          "dia": 20,
+          "titulo": "Da pluralidade das existências (3/5): questões 188 a 198",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 188,
+              "ate": 198
+            }
+          ]
+        },
+        {
+          "dia": 21,
+          "titulo": "Da pluralidade das existências (4/5): questões 199 a 209",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 199,
+              "ate": 209
+            }
+          ]
+        },
+        {
+          "dia": 22,
+          "titulo": "Da pluralidade das existências (5/5): questões 210 a 221",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 210,
+              "ate": 221
+            }
+          ]
+        },
+        {
+          "dia": 23,
+          "titulo": "Considerações sobre a pluralidade das existências: questão 222",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 222,
+              "ate": 222
+            }
+          ]
+        },
+        {
+          "dia": 24,
+          "titulo": "Da vida espírita (1/9): questões 223 a 233",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 223,
+              "ate": 233
+            }
+          ]
+        },
+        {
+          "dia": 25,
+          "titulo": "Da vida espírita (2/9): questões 234 a 245",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 234,
+              "ate": 245
+            }
+          ]
+        },
+        {
+          "dia": 26,
+          "titulo": "Da vida espírita (3/9): questões 246 a 257",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 246,
+              "ate": 257
+            }
+          ]
+        },
+        {
+          "dia": 27,
+          "titulo": "Da vida espírita (4/9): questões 258 a 269",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 258,
+              "ate": 269
+            }
+          ]
+        },
+        {
+          "dia": 28,
+          "titulo": "Da vida espírita (5/9): questões 270 a 281",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 270,
+              "ate": 281
+            }
+          ]
+        },
+        {
+          "dia": 29,
+          "titulo": "Da vida espírita (6/9): questões 282 a 293",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 282,
+              "ate": 293
+            }
+          ]
+        },
+        {
+          "dia": 30,
+          "titulo": "Da vida espírita (7/9): questões 294 a 305",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 294,
+              "ate": 305
+            }
+          ]
+        },
+        {
+          "dia": 31,
+          "titulo": "Da vida espírita (8/9): questões 306 a 317",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 306,
+              "ate": 317
+            }
+          ]
+        },
+        {
+          "dia": 32,
+          "titulo": "Da vida espírita (9/9): questões 318 a 329",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 318,
+              "ate": 329
+            }
+          ]
+        },
+        {
+          "dia": 33,
+          "titulo": "Da volta do Espírito à vida corporal (1/6): questões 330 a 340",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 330,
+              "ate": 340
+            }
+          ]
+        },
+        {
+          "dia": 34,
+          "titulo": "Da volta do Espírito à vida corporal (2/6): questões 341 a 352",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 341,
+              "ate": 352
+            }
+          ]
+        },
+        {
+          "dia": 35,
+          "titulo": "Da volta do Espírito à vida corporal (3/6): questões 353 a 364",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 353,
+              "ate": 364
+            }
+          ]
+        },
+        {
+          "dia": 36,
+          "titulo": "Da volta do Espírito à vida corporal (4/6): questões 365 a 375",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 365,
+              "ate": 375
+            }
+          ]
+        },
+        {
+          "dia": 37,
+          "titulo": "Da volta do Espírito à vida corporal (5/6): questões 376 a 387",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 376,
+              "ate": 387
+            }
+          ]
+        },
+        {
+          "dia": 38,
+          "titulo": "Da volta do Espírito à vida corporal (6/6): questões 388 a 399",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 388,
+              "ate": 399
+            }
+          ]
+        },
+        {
+          "dia": 39,
+          "titulo": "Da emancipação da alma (1/5): questões 400 a 410",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 400,
+              "ate": 410
+            }
+          ]
+        },
+        {
+          "dia": 40,
+          "titulo": "Da emancipação da alma (2/5): questões 411 a 421",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 411,
+              "ate": 421
+            }
+          ]
+        },
+        {
+          "dia": 41,
+          "titulo": "Da emancipação da alma (3/5): questões 422 a 432",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 422,
+              "ate": 432
+            }
+          ]
+        },
+        {
+          "dia": 42,
+          "titulo": "Da emancipação da alma (4/5): questões 433 a 443",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 433,
+              "ate": 443
+            }
+          ]
+        },
+        {
+          "dia": 43,
+          "titulo": "Da emancipação da alma (5/5): questões 444 a 455",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 444,
+              "ate": 455
+            }
+          ]
+        },
+        {
+          "dia": 44,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (1/9): questões 456 a 466",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 456,
+              "ate": 466
+            }
+          ]
+        },
+        {
+          "dia": 45,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (2/9): questões 467 a 477",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 467,
+              "ate": 477
+            }
+          ]
+        },
+        {
+          "dia": 46,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (3/9): questões 478 a 489",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 478,
+              "ate": 489
+            }
+          ]
+        },
+        {
+          "dia": 47,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (4/9): questões 490 a 500",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 490,
+              "ate": 500
+            }
+          ]
+        },
+        {
+          "dia": 48,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (5/9): questões 501 a 511",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 501,
+              "ate": 511
+            }
+          ]
+        },
+        {
+          "dia": 49,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (6/9): questões 512 a 523",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 512,
+              "ate": 523
+            }
+          ]
+        },
+        {
+          "dia": 50,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (7/9): questões 524 a 534",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 524,
+              "ate": 534
+            }
+          ]
+        },
+        {
+          "dia": 51,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (8/9): questões 535 a 545",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 535,
+              "ate": 545
+            }
+          ]
+        },
+        {
+          "dia": 52,
+          "titulo": "Da intervenção dos Espíritos no mundo corporal (9/9): questões 546 a 557",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 546,
+              "ate": 557
+            }
+          ]
+        },
+        {
+          "dia": 53,
+          "titulo": "Das ocupações e missões dos Espíritos (1/2): questões 558 a 570",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 558,
+              "ate": 570
+            }
+          ]
+        },
+        {
+          "dia": 54,
+          "titulo": "Das ocupações e missões dos Espíritos (2/2): questões 571 a 584",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 571,
+              "ate": 584
+            }
+          ]
+        },
+        {
+          "dia": 55,
+          "titulo": "Dos três reinos (1/2): questões 585 a 598",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 585,
+              "ate": 598
+            }
+          ]
+        },
+        {
+          "dia": 56,
+          "titulo": "Dos três reinos (2/2): questões 599 a 613",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 599,
+              "ate": 613
+            }
+          ]
+        },
+        {
+          "dia": 57,
+          "titulo": "Da lei divina ou natural (1/3): questões 614 a 624",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 614,
+              "ate": 624
+            }
+          ]
+        },
+        {
+          "dia": 58,
+          "titulo": "Da lei divina ou natural (2/3): questões 625 a 636",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 625,
+              "ate": 636
+            }
+          ]
+        },
+        {
+          "dia": 59,
+          "titulo": "Da lei divina ou natural (3/3): questões 637 a 648",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 637,
+              "ate": 648
+            }
+          ]
+        },
+        {
+          "dia": 60,
+          "titulo": "Da lei de adoração (1/2): questões 649 a 660",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 649,
+              "ate": 660
+            }
+          ]
+        },
+        {
+          "dia": 61,
+          "titulo": "Da lei de adoração (2/2): questões 661 a 673",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 661,
+              "ate": 673
+            }
+          ]
+        },
+        {
+          "dia": 62,
+          "titulo": "Da lei do trabalho: questões 674 a 685",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 674,
+              "ate": 685
+            }
+          ]
+        },
+        {
+          "dia": 63,
+          "titulo": "Da lei de reprodução: questões 686 a 701",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 686,
+              "ate": 701
+            }
+          ]
+        },
+        {
+          "dia": 64,
+          "titulo": "Da lei de conservação (1/2): questões 702 a 714",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 702,
+              "ate": 714
+            }
+          ]
+        },
+        {
+          "dia": 65,
+          "titulo": "Da lei de conservação (2/2): questões 715 a 727",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 715,
+              "ate": 727
+            }
+          ]
+        },
+        {
+          "dia": 66,
+          "titulo": "Da lei de destruição (1/3): questões 728 a 739",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 728,
+              "ate": 739
+            }
+          ]
+        },
+        {
+          "dia": 67,
+          "titulo": "Da lei de destruição (2/3): questões 740 a 752",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 740,
+              "ate": 752
+            }
+          ]
+        },
+        {
+          "dia": 68,
+          "titulo": "Da lei de destruição (3/3): questões 753 a 765",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 753,
+              "ate": 765
+            }
+          ]
+        },
+        {
+          "dia": 69,
+          "titulo": "Da lei de sociedade: questões 766 a 775",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 766,
+              "ate": 775
+            }
+          ]
+        },
+        {
+          "dia": 70,
+          "titulo": "Da lei do progresso (1/2): questões 776 a 788",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 776,
+              "ate": 788
+            }
+          ]
+        },
+        {
+          "dia": 71,
+          "titulo": "Da lei do progresso (2/2): questões 789 a 802",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 789,
+              "ate": 802
+            }
+          ]
+        },
+        {
+          "dia": 72,
+          "titulo": "Da lei de igualdade (1/2): questões 803 a 813",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 803,
+              "ate": 813
+            }
+          ]
+        },
+        {
+          "dia": 73,
+          "titulo": "Da lei de igualdade (2/2): questões 814 a 824",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 814,
+              "ate": 824
+            }
+          ]
+        },
+        {
+          "dia": 74,
+          "titulo": "Da lei de liberdade (1/4): questões 825 a 836",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 825,
+              "ate": 836
+            }
+          ]
+        },
+        {
+          "dia": 75,
+          "titulo": "Da lei de liberdade (2/4): questões 837 a 848",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 837,
+              "ate": 848
+            }
+          ]
+        },
+        {
+          "dia": 76,
+          "titulo": "Da lei de liberdade (3/4): questões 849 a 860",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 849,
+              "ate": 860
+            }
+          ]
+        },
+        {
+          "dia": 77,
+          "titulo": "Da lei de liberdade (4/4): questões 861 a 872",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 861,
+              "ate": 872
+            }
+          ]
+        },
+        {
+          "dia": 78,
+          "titulo": "Da lei de justiça, de amor e de caridade (1/2): questões 873 a 882",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 873,
+              "ate": 882
+            }
+          ]
+        },
+        {
+          "dia": 79,
+          "titulo": "Da lei de justiça, de amor e de caridade (2/2): questões 883 a 892",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 883,
+              "ate": 892
+            }
+          ]
+        },
+        {
+          "dia": 80,
+          "titulo": "Da perfeição moral (1/2): questões 893 a 905",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 893,
+              "ate": 905
+            }
+          ]
+        },
+        {
+          "dia": 81,
+          "titulo": "Da perfeição moral (2/2): questões 906 a 919",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 906,
+              "ate": 919
+            }
+          ]
+        },
+        {
+          "dia": 82,
+          "titulo": "Das penas e gozos terrestres (1/3): questões 920 a 931",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 920,
+              "ate": 931
+            }
+          ]
+        },
+        {
+          "dia": 83,
+          "titulo": "Das penas e gozos terrestres (2/3): questões 932 a 944",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 932,
+              "ate": 944
+            }
+          ]
+        },
+        {
+          "dia": 84,
+          "titulo": "Das penas e gozos terrestres (3/3): questões 945 a 957",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 945,
+              "ate": 957
+            }
+          ]
+        },
+        {
+          "dia": 85,
+          "titulo": "Das penas e gozos futuros (1/5): questões 958 a 969",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 958,
+              "ate": 969
+            }
+          ]
+        },
+        {
+          "dia": 86,
+          "titulo": "Das penas e gozos futuros (2/5): questões 970 a 981",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 970,
+              "ate": 981
+            }
+          ]
+        },
+        {
+          "dia": 87,
+          "titulo": "Das penas e gozos futuros (3/5): questões 982 a 994",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 982,
+              "ate": 994
+            }
+          ]
+        },
+        {
+          "dia": 88,
+          "titulo": "Das penas e gozos futuros (4/5): questões 995 a 1006",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 995,
+              "ate": 1006
+            }
+          ]
+        },
+        {
+          "dia": 89,
+          "titulo": "Das penas e gozos futuros (5/5): questões 1007 a 1019",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "de": 1007,
+              "ate": 1019
+            }
+          ]
+        },
+        {
+          "dia": 90,
+          "titulo": "Conclusão",
+          "leituras": [
+            {
+              "sigla": "LE",
+              "capitulo": "LE-C032"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
