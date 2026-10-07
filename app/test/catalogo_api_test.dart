@@ -29,6 +29,7 @@ final obrasJson = [
         'titulo': 'Le Livre des Esprits',
         'tradutor': null,
         'publicada_em': '2026-10-02T12:00:00Z',
+        'slug': 'le-livre-des-esprits',
       },
     ],
   },
@@ -56,6 +57,8 @@ void main() {
     expect(pedida.toString(), 'https://api.exemplo.org/v1/obras');
     expect(obras.single.edicaoPara('pt-BR').titulo, 'O Livro dos Espíritos');
     expect(obras.single.edicaoPara('fr-FR').tradutor, isNull);
+    expect(obras.single.edicaoPara('fr-FR').slug, 'le-livre-des-esprits');
+    expect(obras.single.edicaoPara('pt-BR').slug, isNull);
     // Sem edição no idioma pedido, mostra a primeira.
     expect(obras.single.edicaoPara('en').id, 1);
   });

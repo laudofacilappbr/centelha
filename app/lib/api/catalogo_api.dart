@@ -29,6 +29,7 @@ class EdicaoResumo {
     required this.publico,
     required this.titulo,
     required this.tradutor,
+    this.slug,
   });
 
   factory EdicaoResumo.deJson(Map<String, dynamic> j) => EdicaoResumo(
@@ -37,6 +38,7 @@ class EdicaoResumo {
     publico: j['publico'] as String,
     titulo: j['titulo'] as String,
     tradutor: j['tradutor'] as String?,
+    slug: j['slug'] as String?,
   );
 
   final int id;
@@ -44,6 +46,10 @@ class EdicaoResumo {
   final String publico;
   final String titulo;
   final String? tradutor;
+
+  /// Endereço da edição no site em /fr, /es e /en (#48). Vazio na API anterior a ela e
+  /// em edição ainda sem slug.
+  final String? slug;
 }
 
 class Obra {
