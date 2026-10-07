@@ -120,8 +120,8 @@ class Downloads extends ChangeNotifier {
         await saida.close();
       }
       await _conferir(parcial);
-      await parcial.rename(destino.path);
-      await _apagarVersoesAntigas(f);
+      // A ficha antes do .cent: o .cent no lugar é o que faz o capítulo contar como
+      // baixado, e baixado sem ficha não aparece na lista de baixados (#163).
       if (capitulo != null && info != null) {
         await _ficha(f).writeAsString(
           jsonEncode({
@@ -134,6 +134,8 @@ class Downloads extends ChangeNotifier {
           }),
         );
       }
+      await parcial.rename(destino.path);
+      await _apagarVersoesAntigas(f);
     } on ErroChave catch (e) {
       throw ErroDownload(e.mensagem);
     } on http.ClientException catch (e) {
