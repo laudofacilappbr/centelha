@@ -17,6 +17,7 @@ from .routers import (
     dispositivos,
     glossario,
     health,
+    planos,
     posts,
     site,
     temas,
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
     app.include_router(campanhas.publico)
     app.include_router(campanhas.admin)
     app.include_router(site.router)
+    app.include_router(planos.router)
     return app
 
 
