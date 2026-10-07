@@ -4,6 +4,11 @@ centelha-ingestao arquivo.epub --perfil perguntas            # só mostra o resu
 centelha-ingestao arquivo.epub --perfil perguntas --json saida.json
 centelha-ingestao arquivo.epub --perfil perguntas --edicao-id 1 [--substituir]
 centelha-ingestao arquivo.pdf --paginas 13-494 --cortar-em "Nota Especial" ...
+
+EPUB do Wikisource (#45) é reconhecido sozinho. Para baixar:
+https://ws-export.wmcloud.org/?lang=fr&page=Le_Livre_des_Esprits&format=epub-3
+Na edição, a fonte credita a transcrição: "Didier, 1860 (2e édition). Transcription :
+Wikisource." (docs/juridico/fichas/le-livre-des-esprits-fr.md).
 """
 
 import argparse

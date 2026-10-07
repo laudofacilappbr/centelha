@@ -61,6 +61,8 @@ def ler_epub(caminho: Path) -> list[str]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         livro = epub.read_epub(str(caminho), options={"ignore_ncx": True})
+    if _e_wikisource(livro):
+        return _ler_wikisource(livro)
     paragrafos: list[str] = []
     for id_item, _ in livro.spine:
         item = livro.get_item_with_id(id_item)
@@ -74,6 +76,93 @@ def ler_epub(caminho: Path) -> list[str]:
             texto = limpar(no.get_text(" "))
             if texto:
                 paragrafos.append(texto)
+    return paragrafos
+
+
+# --- EPUB do Wikisource (WS Export, #45) -------------------------------------------
+#
+# https://ws-export.wmcloud.org/?lang=fr&page=Le_Livre_des_Esprits&format=epub-3
+# Um arquivo por subpágina do Wikisource. Fora do texto da obra: folha de rosto da
+# exportação ("Exporté de Wikisource le..."), créditos, página principal e sumário.
+
+_WS_FORA = ("title.xhtml", "about.xhtml", "nav.xhtml")
+_WS_SUMARIO = re.compile(r"table[ _]des[ _]mati|sum[áa]rio|[íi]ndice", re.IGNORECASE)
+# Subpáginas com o próprio título no corpo (h2/h3): "LIVRE PREMIER", "CHAPITRE PREMIER".
+_WS_TITULO_NO_CORPO = re.compile(r"^(?:livre|chapitre|livro|cap[íi]tulo|partie|parte)b", re.I)
+
+
+def _e_wikisource(livro) -> bool:
+    return any(
+        "wikisource" in str(valor).lower()
+        for campo in ("contributor", "source", "identifier")
+        for valor, _ in livro.get_metadata("DC", campo)
+    )
+
+
+def _titulos_do_sumario(livro) -> dict[str, str]:
+    """Arquivo → título da subpágina, pelo nav.xhtml."""
+    from bs4 import BeautifulSoup
+
+    titulos: dict[str, str] = {}
+    for item in livro.get_items():
+        if item.get_name().endswith("nav.xhtml"):
+            sopa = BeautifulSoup(item.get_content(), "html.parser")
+            for a in sopa.find_all("a", href=True):
+                titulos[a["href"].split("#")[0].rsplit("/", 1)[-1]] = limpar(a.get_text(" "))
+    return titulos
+
+
+def _ler_wikisource(livro) -> list[str]:
+    import ebooklib
+    from bs4 import BeautifulSoup
+
+    titulos = _titulos_do_sumario(livro)
+    paragrafos: list[str] = []
+    primeiro = True
+    for id_item, _ in livro.spine:
+        item = livro.get_item_with_id(id_item)
+        if item is None or item.get_type() != ebooklib.ITEM_DOCUMENT:
+            continue
+        nome = item.get_name().rsplit("/", 1)[-1]
+        if nome in _WS_FORA:
+            continue
+        if primeiro:
+            # A página principal da obra: folha de rosto e sumário geral.
+            primeiro = False
+            continue
+        titulo = titulos.get(nome, "")
+        if _WS_SUMARIO.search(titulo) or _WS_SUMARIO.search(nome):
+            continue
+        sopa = BeautifulSoup(item.get_content(), "html.parser")
+        # Notas de rodapé: o texto sai da lista do fim e entra logo depois do parágrafo
+        # que a chama; a chamada ("[1]") sai do texto.
+        notas: dict[str, str] = {}
+        for li in sopa.select("ol.references li[id]"):
+            for volta in li.select(".mw-cite-backlink"):
+                volta.decompose()
+            notas[li["id"]] = limpar(li.get_text(" "))
+        for ol in sopa.select("ol.references"):
+            ol.decompose()
+        # Título da subpágina que no corpo vem em <div> centralizada (Avis, Introduction).
+        if titulo and not _WS_TITULO_NO_CORPO.match(titulo):
+            paragrafos.append(titulo)
+        for no in sopa.find_all(["h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "blockquote"]):
+            if no.name == "blockquote" and no.find("p"):
+                continue
+            chamadas = []
+            for sup in no.select("sup.reference"):
+                if (a := sup.find("a", href=True)) and a["href"].lstrip("#") in notas:
+                    chamadas.append(a["href"].lstrip("#"))
+                sup.decompose()
+            # Sem separador: itálico no meio da frase não pode virar "médiums , ainsi".
+            for br in no.find_all("br"):
+                br.replace_with("\n")
+            texto = limpar(no.get_text(""))
+            if texto:
+                # h4/h5 dentro do capítulo: subtítulo de seção ("Paradis, enfer et
+                # purgatoire."), que fecha a resposta anterior.
+                paragrafos.append(Subtitulo(texto) if no.name in ("h4", "h5", "h6") else texto)
+            paragrafos.extend(Nota(notas[c]) for c in chamadas if notas.get(c))
     return paragrafos
 
 
@@ -109,6 +198,11 @@ _FONTES_DE_ORNAMENTO = ("ornament", "dingbat")
 
 class Nota(str):
     """Nota de rodapé. É `str` para quem só quer o texto; `estruturar` a vira segmento "nota"."""
+
+
+class Subtitulo(str):
+    """Subtítulo de seção dentro do capítulo, quando o arquivo o marca (h4 do Wikisource).
+    `estruturar` o vira parágrafo e encerra a resposta em curso."""
 
 
 @dataclass
