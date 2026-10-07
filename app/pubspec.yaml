@@ -31,6 +31,8 @@ dev_dependencies:
   fake_async: ^1.3.3
 
 flutter:
+  # Sem --flavor, o build é o do app principal (#50).
+  default-flavor: principal
   uses-material-design: true
   # Gera lib/l10n/app_localizations.dart a partir dos .arb (l10n.yaml).
   generate: true

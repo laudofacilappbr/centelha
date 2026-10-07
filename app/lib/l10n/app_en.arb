@@ -96,5 +96,7 @@
   "planoLer": "Read",
   "planoProgresso": "{lidos} of {total} days read",
   "leituraIndisponivel": "This reading is not published in this language yet.",
-  "questoesDeAte": "questions {de} to {ate}"
+  "questoesDeAte": "questions {de} to {ate}",
+  "kidsTitulo": "Centelhar Kids",
+  "kidsVazio": "Clara's stories are on their way. Come back soon!"
 }

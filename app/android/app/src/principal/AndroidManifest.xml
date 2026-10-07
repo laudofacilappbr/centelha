@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android Auto (#43), só no app principal: o serviço de áudio já é um
+         MediaBrowserService; isto o declara ao carro. A navegação (continuar ouvindo,
+         baixados) vem do main.dart. O Kids não liga essa navegação e ficaria vazio no carro. -->
+    <application>
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc"/>
+    </application>
+</manifest>

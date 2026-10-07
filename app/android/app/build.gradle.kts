@@ -29,6 +29,22 @@ android {
         versionName = flutter.versionName
     }
 
+    // Dois apps do mesmo código (#50, ADR 0006): o principal e o Centelhar Kids, com
+    // id próprio nas lojas. Kids: flutter build apk --flavor kids -t lib/main_kids.dart
+    buildFeatures { resValues = true }
+    flavorDimensions += "app"
+    productFlavors {
+        create("principal") {
+            dimension = "app"
+            resValue("string", "app_name", "Centelhar")
+        }
+        create("kids") {
+            dimension = "app"
+            applicationIdSuffix = ".kids"
+            resValue("string", "app_name", "Centelhar Kids")
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

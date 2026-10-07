@@ -96,5 +96,7 @@
   "planoLer": "Leer",
   "planoProgresso": "{lidos} de {total} días leídos",
   "leituraIndisponivel": "Esta lectura aún no está publicada en este idioma.",
-  "questoesDeAte": "preguntas {de} a {ate}"
+  "questoesDeAte": "preguntas {de} a {ate}",
+  "kidsTitulo": "Centelhar Kids",
+  "kidsVazio": "Las historias de Clara están llegando. ¡Vuelve pronto!"
 }

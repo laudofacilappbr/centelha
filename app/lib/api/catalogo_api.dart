@@ -81,6 +81,24 @@ class Obra {
   final int? ano;
   final List<EdicaoResumo> edicoes;
 
+  /// Sem as edições infantis, que vivem só no Centelhar Kids (#50, ADR 0006); null se
+  /// não sobra nenhuma.
+  Obra? semInfantil() {
+    final restantes = [
+      for (final e in edicoes)
+        if (e.publico != 'infantil') e,
+    ];
+    if (restantes.isEmpty) return null;
+    return Obra(
+      slug: slug,
+      sigla: sigla,
+      autor: autor,
+      tituloOriginal: tituloOriginal,
+      ano: ano,
+      edicoes: restantes,
+    );
+  }
+
   /// Edição para mostrar: a do idioma pedido; senão a do mesmo idioma base ("fr" acha
   /// "fr-FR"); senão a primeira.
   EdicaoResumo edicaoPara(String idioma) {

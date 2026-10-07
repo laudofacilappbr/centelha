@@ -1,6 +1,7 @@
 """Atendimento a pedidos do titular (LGPD art. 18) sobre os dados que o Centelhar coleta.
 
-Hoje o único dado pessoal é o e-mail da lista de espera. Ferramenta de administrador,
+Dados pessoais: o e-mail da lista de espera e a conta opcional de quem lê (#43). A conta
+também se exporta e se exclui pelo próprio app. Ferramenta de administrador,
 não endpoint público: pedido chega por privacidade@ e a identidade é confirmada por
 resposta ao próprio e-mail antes de rodar o comando.
 
@@ -17,6 +18,7 @@ from datetime import UTC, datetime
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from .dominio import conta_leitor
 from .models import InscricaoListaEspera
 
 
@@ -38,6 +40,7 @@ def exportar(session: Session, email: str) -> dict:
             }
             for i in inscricoes
         ],
+        "conta": conta_leitor.exportar(session, email),
     }
 
 
@@ -46,8 +49,9 @@ def excluir(session: Session, email: str) -> int:
     resultado = session.execute(
         delete(InscricaoListaEspera).where(InscricaoListaEspera.email == email)
     )
+    contas = conta_leitor.excluir(session, email)
     session.commit()
-    return resultado.rowcount
+    return resultado.rowcount + contas
 
 
 def _registro(email: str) -> str:

@@ -282,5 +282,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "kidsTitulo": "Centelhar Kids",
+  "kidsVazio": "As histórias da Clara estão chegando. Volte em breve!"
 }

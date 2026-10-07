@@ -65,8 +65,22 @@ AudioSource fonteDe(Faixa faixa, {Uint8List? chave, File? arquivo}) =>
       )
     : AudioSource.uri(Uri.parse(faixa.url));
 
+/// Android Auto (#43): o que o carro navega e o toque num item (player/carro.dart).
+typedef FilhosCarro = Future<List<MediaItem>> Function(String pai);
+typedef TocarNoCarro = Future<void> Function(String id);
+
 class ReprodutorAudioService implements Reprodutor {
   ReprodutorAudioService._(this._manipulador);
+
+  /// Liga a navegação do Android Auto; sem isso o carro vê uma lista vazia.
+  void conectarCarro({
+    required FilhosCarro filhos,
+    required TocarNoCarro tocar,
+  }) {
+    _manipulador
+      ..filhos = filhos
+      ..tocarId = tocar;
+  }
 
   final _Manipulador _manipulador;
   AudioPlayer get _player => _manipulador.player;
@@ -139,6 +153,20 @@ class _Manipulador extends BaseAudioHandler with SeekHandler {
   }
 
   final player = AudioPlayer();
+  FilhosCarro? filhos;
+  TocarNoCarro? tocarId;
+
+  @override
+  Future<List<MediaItem>> getChildren(
+    String parentMediaId, [
+    Map<String, dynamic>? options,
+  ]) async => await filhos?.call(parentMediaId) ?? const [];
+
+  @override
+  Future<void> playFromMediaId(
+    String mediaId, [
+    Map<String, dynamic>? extras,
+  ]) async => tocarId?.call(mediaId);
 
   Future<void> carregar(
     Faixa faixa,
