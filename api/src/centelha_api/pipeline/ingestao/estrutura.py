@@ -15,7 +15,7 @@ import re
 from dataclasses import dataclass, field
 
 from ...models import TipoSegmento
-from .leitores import Nota
+from .leitores import Nota, Subtitulo
 
 
 @dataclass
@@ -56,6 +56,7 @@ _SECOES_AVULSAS = {
     "introdução ao estudo da doutrina espírita",
     "introduction", "prolégomènes", "conclusion", "préface", "préambule", "avant-propos",
     "avertissement", "introduction à l'étude de la doctrine spirite",
+    "avis sur cette nouvelle édition",
 }  # fmt: skip
 # Abre capítulo só antes do primeiro capítulo numerado; depois é seção dentro dele (o
 # "Preâmbulo" do cap. XXVIII de O Evangelho).
@@ -68,6 +69,9 @@ _RE_SUBQUESTAO = re.compile(
     r"^(?:(?P<n>\d{1,4})\s*[.\-–]?\s*)?(?P<letra>[a-z])\)\s*[—–-]?\s*(?P<texto>.+)$"
 )
 _ABRE_CITACAO = ("“", '"', "«", "—", "–")
+# Original francês de 1860: a pergunta que continua a anterior abre com "―" (U+2015), sem
+# letra; a FEB numerou essas perguntas com a), b)... Aqui ganham letra na ordem.
+_RE_SEGUIMENTO = re.compile(r"^―\s*(?P<texto>.+)$")
 
 
 def _e_titulo_curto(p: str) -> bool:
@@ -164,6 +168,12 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
             # Texto antes do primeiro capítulo (folha de rosto, abertura da parte).
             atual = novo_capitulo(divisao or "Abertura")
 
+        if isinstance(p, Subtitulo):
+            atual.segmentos.append(SegmentoBruto(TipoSegmento.PARAGRAFO, p))
+            esperando_resposta = dentro_da_resposta = False
+            i += 1
+            continue
+
         if perfil == "perguntas":
             if m := _RE_SUBQUESTAO.match(p):
                 if m["n"]:
@@ -174,7 +184,24 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
                 esperando_resposta, dentro_da_resposta = True, False
                 i += 1
                 continue
-            if m := _RE_PERGUNTA.match(p):
+            if (m := _RE_SEGUIMENTO.match(p)) and ultima_questao is not None:
+                letras = [
+                    s.subquestao
+                    for s in atual.segmentos
+                    if s.numero_questao == ultima_questao and s.subquestao
+                ]
+                letra = chr(ord(max(letras)) + 1) if letras else "a"
+                atual.segmentos.append(
+                    SegmentoBruto(TipoSegmento.PERGUNTA, m["texto"], ultima_questao, letra)
+                )
+                esperando_resposta, dentro_da_resposta = True, False
+                i += 1
+                continue
+            # A numeração das questões só cresce: "1. D'où vient..." dentro de um
+            # comentário de Kardec é lista, não a questão 1 de novo.
+            if (m := _RE_PERGUNTA.match(p)) and (
+                ultima_questao is None or int(m["n"]) > ultima_questao
+            ):
                 ultima_questao = int(m["n"])
                 atual.segmentos.append(
                     SegmentoBruto(TipoSegmento.PERGUNTA, m["texto"], ultima_questao)
