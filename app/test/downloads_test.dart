@@ -365,7 +365,9 @@ void main() {
     );
     await tester.runAsync(() async {
       await tester.tap(find.byTooltip('Baixar para ouvir sem internet'));
-      for (var i = 0; i < 50 && !downloads.baixado(_faixa()); i++) {
+      // Disco e cifra de verdade: 1 s não bastava com a máquina carregada (falhou na
+      // validação da #43 e passou ao repetir). 5 s de folga; sai assim que termina.
+      for (var i = 0; i < 250 && !downloads.baixado(_faixa()); i++) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
     });
