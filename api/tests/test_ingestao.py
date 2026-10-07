@@ -322,6 +322,14 @@ def test_cortar_em():
         leitores.cortar_em(paragrafos, "Nota Espacial")
 
 
+def test_comecar_em():
+    # A frente do Évangile (folha de rosto, lista de obras) não é texto da obra (#45).
+    paragrafos = ["L'ÉVANGILE", "OUVRAGES DU MÊME AUTEUR", "PRÉFACE", "Texte."]
+    assert leitores.comecar_em(paragrafos, "PRÉFACE") == paragrafos[2:]
+    with pytest.raises(ValueError, match="nenhum"):
+        leitores.comecar_em(paragrafos, "PREFACE")
+
+
 def test_formato_nao_suportado(tmp_path):
     with pytest.raises(ValueError, match="formato"):
         leitores.ler(tmp_path / "x.odt")

@@ -11,6 +11,7 @@ Ferramenta: `centelha-digitalizar` (`api/src/centelha_api/pipeline/digitalizacao
 
 - **O exemplar manda.** O texto correto é o que está impresso na edição-fonte escolhida (#2, opção A: FEB antiga). Texto digital de portal (KardecPedia, IPEAK…) é só referência para achar erro de OCR, nunca fonte: o que vem dele pode ter revisão com direito próprio.
 - **Só grafia e erro de leitura.** Nenhuma palavra de Guillon Ribeiro é trocada por outra. Mudar redação cria texto novo, com direito próprio, e pede revisão doutrinária. Isso é decisão do dono, não do agente.
+- **Erro tipográfico que o próprio exemplar prova se corrige.** Quando cabeçalhos, sumário ou numeração do exemplar mostram o erro de impressão (ex.: "CHAPITRE XVI" onde o capítulo é o XVII), a correção entra no arquivo de correções com o motivo num comentário (dono, #45: "sempre corrigir"). Sem prova no exemplar, fica como impresso e vira pergunta ao dono.
 - **Acervo fora do git.** Escaneados e saídas ficam em `acervo/` (no `.gitignore`); o repositório é público.
 - **Origem registrada.** Antes de digitalizar, a issue da edição registra editora, ano, número da edição, de onde veio o arquivo e quem digitalizou (#2).
 

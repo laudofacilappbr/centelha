@@ -4,6 +4,7 @@ centelha-ingestao arquivo.epub --perfil perguntas            # só mostra o resu
 centelha-ingestao arquivo.epub --perfil perguntas --json saida.json
 centelha-ingestao arquivo.epub --perfil perguntas --edicao-id 1 [--substituir]
 centelha-ingestao arquivo.pdf --paginas 13-494 --cortar-em "Nota Especial" ...
+centelha-ingestao texto.txt --comecar-em "PRÉFACE" --cortar-em "TABLE DES MATIÈRES" ...
 
 EPUB do Wikisource (#45) é reconhecido sozinho. Para baixar:
 https://ws-export.wmcloud.org/?lang=fr&page=Le_Livre_des_Esprits&format=epub-3
@@ -18,7 +19,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .estrutura import estruturar, resumo
-from .leitores import cortar_em, ler
+from .leitores import comecar_em, cortar_em, ler
 
 
 def _faixa(valor: str) -> tuple[int, int]:
@@ -43,6 +44,11 @@ def main(argv: list[str] | None = None) -> int:
         "editora, sumário e índice)",
     )
     parser.add_argument(
+        "--comecar-em",
+        metavar="TEXTO",
+        help="descarta o que vem antes do parágrafo que começa com TEXTO (folha de rosto)",
+    )
+    parser.add_argument(
         "--cortar-em",
         metavar="TEXTO",
         help="descarta do parágrafo que começa com TEXTO em diante (nota da editora no fim)",
@@ -50,6 +56,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     paragrafos = ler(args.arquivo, args.paginas)
+    if args.comecar_em:
+        paragrafos = comecar_em(paragrafos, args.comecar_em)
     if args.cortar_em:
         paragrafos = cortar_em(paragrafos, args.cortar_em)
     capitulos = estruturar(paragrafos, args.perfil)
