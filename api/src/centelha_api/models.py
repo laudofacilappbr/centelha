@@ -655,3 +655,55 @@ class EntregaChave(Base):
     dispositivo_id: Mapped[int] = mapped_column(ForeignKey("dispositivo.id"))
     faixa_id: Mapped[int] = mapped_column(ForeignKey("faixa_audio.id"))
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ContaLeitor(Base):
+    """Conta opcional de quem lê (#43, decisão 1A): só para sincronizar entre aparelhos.
+
+    Guarda o e-mail e mais nada da pessoa. O app funciona inteiro sem conta; quem cria
+    pode excluí-la pelo próprio app (DELETE /v1/conta), e o centelha-lgpd também a cobre.
+    """
+
+    __tablename__ = "conta_leitor"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # Sempre minúsculo; a unicidade depende disso.
+    email: Mapped[str] = mapped_column(String(320), unique=True)
+    criada_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ultimo_acesso_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CodigoAcesso(Base):
+    """Código de 6 dígitos mandado por e-mail para entrar. Vale 15 minutos, uma vez, e
+    cai depois de 5 tentativas erradas: 10⁶ combinações não aguentam força bruta sem isso.
+
+    Pertence ao e-mail, não à conta: a conta só nasce quando o código é confirmado, e um
+    pedido não revela se o e-mail já tem conta."""
+
+    __tablename__ = "codigo_acesso"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(320), index=True)
+    # SHA-256 de (sal + código). Só o e-mail enviado tem o código.
+    codigo_hash: Mapped[str] = mapped_column(String(64))
+    sal: Mapped[str] = mapped_column(String(32))
+    tentativas: Mapped[int] = mapped_column(default=0, server_default="0")
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    usado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class SessaoConta(Base):
+    __tablename__ = "sessao_conta"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conta_id: Mapped[int] = mapped_column(
+        ForeignKey("conta_leitor.id", ondelete="CASCADE"), index=True
+    )
+    # SHA-256 do token; o token só existe na resposta e no aparelho.
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    criada_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    revogada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    conta: Mapped[ContaLeitor] = relationship()

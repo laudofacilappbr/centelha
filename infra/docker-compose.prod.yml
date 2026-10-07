@@ -75,6 +75,10 @@ services:
       # Escuta do revisor no admin: lê a faixa do volume (só leitura), e não pela
       # Cloudflare. Mesma base do worker, para reconhecer a URL guardada no banco.
       CENTELHA_AUDIO_URL_BASE: https://audio.${DOMINIO}
+      # Código de acesso da conta opcional (#43). Sem provedor, o pedido responde 503.
+      CENTELHA_EMAIL_PROVEDOR: ${CENTELHA_EMAIL_PROVEDOR:-}
+      CENTELHA_EMAIL_REMETENTE: ${CENTELHA_EMAIL_REMETENTE:-}
+      CENTELHA_EMAIL_RESEND_CHAVE: ${CENTELHA_EMAIL_RESEND_CHAVE:-}
     volumes: ["audio:/data/audio:ro"]
     depends_on:
       postgres: { condition: service_healthy }
