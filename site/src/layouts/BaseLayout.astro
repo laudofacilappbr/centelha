@@ -10,6 +10,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../config';
 import { organizationLd } from '../lib/jsonld';
+import { HREFLANG, OG_LOCALE, TEXTOS, type Alternativa, type Lingua } from '../lib/idiomas';
 
 interface Props {
   /** Título da página (sem o sufixo "| Centelha"). Na home, use o título completo. */
@@ -25,6 +26,10 @@ interface Props {
   /** Título já completo (não acrescenta " | Centelha"). */
   tituloCompleto?: boolean;
   noindex?: boolean;
+  /** Idioma da página (#48); o português fica na raiz. */
+  lingua?: Lingua;
+  /** Versões da mesma página em outros idiomas (hreflang), incluindo esta. */
+  alternativas?: Alternativa[];
 }
 
 const {
@@ -36,6 +41,8 @@ const {
   semAnalitica = false,
   tituloCompleto = false,
   noindex = false,
+  lingua = 'pt',
+  alternativas = [],
 } = Astro.props;
 
 const fullTitle = tituloCompleto ? title : `${title} | ${SITE.nome}`;
@@ -45,10 +52,13 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
 const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
 const comAnalitica = Boolean(plausibleDomain) && !semAnalitica;
 const ld = [organizationLd(Astro.site!), ...jsonLd];
+// x-default: a versão em português, que é a do site sem prefixo.
+const xDefault = alternativas.find((a) => a.hreflang === HREFLANG.pt);
+const pular = lingua === 'pt' ? 'Pular para o conteúdo' : TEXTOS[lingua].pular;
 ---
 
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang={HREFLANG[lingua]} data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -56,6 +66,8 @@ const ld = [organizationLd(Astro.site!), ...jsonLd];
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternativas.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault.href} />}
     {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#000F3B" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -65,7 +77,7 @@ const ld = [organizationLd(Astro.site!), ...jsonLd];
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.nome} />
-    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:locale" content={lingua === 'pt' ? SITE.locale : OG_LOCALE[lingua]} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -91,7 +103,7 @@ const ld = [organizationLd(Astro.site!), ...jsonLd];
     }
   </head>
   <body>
-    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <a class="skip-link" href="#conteudo">{pular}</a>
     <Header />
     <main id="conteudo" tabindex="-1">
       <slot />

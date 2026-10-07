@@ -97,12 +97,19 @@ class Obra(Timestamps, Base):
 
 class Edicao(Timestamps, Base):
     __tablename__ = "edicao"
+    __table_args__ = (
+        UniqueConstraint("idioma", "publico", "slug", name="edicao_idioma_publico_slug_key"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     obra_id: Mapped[int] = mapped_column(ForeignKey("obra.id"))
     idioma: Mapped[str] = mapped_column(String(35))  # BCP 47, ex.: pt-BR
     publico: Mapped[Publico] = mapped_column(_enum(Publico), default=Publico.ADULTO)
     titulo: Mapped[str] = mapped_column(String(300))
+    # URL da edição nos outros idiomas do site (#48, decisão 2A): /fr/oeuvres/<slug>.
+    # Preenchido na publicação a partir do título e fixo depois, para a URL não mudar.
+    # O português continua no slug da obra.
+    slug: Mapped[str | None] = mapped_column(String(120))
     # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
     # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
     seo_titulo: Mapped[str | None] = mapped_column(String(60))

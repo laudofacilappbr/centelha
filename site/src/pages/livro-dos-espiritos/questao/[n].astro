@@ -7,6 +7,7 @@ import { slugCapitulo, nomeCapitulo, resumir, type Obra, type Edicao } from '../
 import { questoesDoLivroDosEspiritos, urlQuestao, type Questao } from '../../../lib/questoes';
 import { temasDaQuestao, urlTema } from '../../../lib/temas';
 import { termosDaQuestao, urlTermo } from '../../../lib/glossario';
+import { alternativas } from '../../../lib/alternativas';
 
 export async function getStaticPaths() {
   const dados = await questoesDoLivroDosEspiritos();
@@ -32,6 +33,7 @@ const capUrl = `/obras/${obra.slug}/${slugCapitulo(q.capitulo)}`;
 const url = new URL(urlQuestao(q.numero), Astro.site).href;
 const relacionados = await temasDaQuestao(q.numero);
 const termos = await termosDaQuestao(q.numero);
+const alt = await alternativas(obra.slug, { tipo: 'questao', numero: q.numero }, Astro.site!);
 
 const ld = [
   {
@@ -58,6 +60,7 @@ const ld = [
   title={`Questão ${q.numero} — ${ed.titulo}`}
   description={resumir(`Questão ${q.numero} de ${ed.titulo}: ${pergunta?.texto ?? ''} ${resposta?.texto ?? ''}`)}
   jsonLd={ld}
+  alternativas={alt}
 >
   <PageHeader eyebrow={ed.titulo} title={`Questão ${q.numero}`} />
   <div class="container section">

@@ -1,0 +1,339 @@
+---
+/**
+ * Acervo em /fr, /es e /en (#48): lista de obras, obra, capítulo e, no Livro dos
+ * Espíritos, questão. O português tem as próprias páginas na raiz (decisão 1A).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Segmentos from '../../components/Segmentos.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import {
+  obrasEmTodosOsIdiomas,
+  edicao,
+  capitulo,
+  nomeCapitulo,
+  resumir,
+  audioAberto,
+  type Obra,
+  type Edicao,
+  type CapituloResumo,
+} from '../../lib/catalogo';
+import { OBRA_COM_QUESTOES, questoesDaEdicao, type Questao } from '../../lib/questoes';
+import { alternativas } from '../../lib/alternativas';
+import {
+  OUTRAS,
+  TEXTOS,
+  edicoesPorLingua,
+  rotas,
+  slugCapituloEm,
+  urlCapitulo,
+  urlObra,
+  urlObras,
+  urlQuestaoEm,
+  type Alternativa,
+  type Lingua,
+} from '../../lib/idiomas';
+
+type L = Exclude<Lingua, 'pt'>;
+interface Base {
+  obra: Obra;
+  ed: Edicao;
+  slug: string;
+}
+type Pagina =
+  | { tipo: 'lista'; obras: Base[] }
+  | ({ tipo: 'obra' } & Base)
+  | ({ tipo: 'capitulo'; resumoCap: CapituloResumo; anterior?: CapituloResumo; proximo?: CapituloResumo } & Base)
+  | ({ tipo: 'questao'; q: Questao; anterior?: number; proxima?: number } & Base);
+
+export async function getStaticPaths() {
+  const obras = await obrasEmTodosOsIdiomas();
+  const paths: { params: { lingua: L; rota: string }; props: { lingua: L; pagina: Pagina } }[] = [];
+  for (const lingua of OUTRAS) {
+    const r = rotas(lingua);
+    const daLingua: Base[] = [];
+    for (const obra of obras) {
+      const resumo = edicoesPorLingua(obra)[lingua];
+      if (!resumo) continue;
+      const ed = await edicao(resumo.id);
+      const slug = resumo.slug ?? obra.slug;
+      const base = { obra, ed, slug };
+      daLingua.push(base);
+      paths.push({ params: { lingua, rota: `${r.obras}/${slug}` }, props: { lingua, pagina: { tipo: 'obra', ...base } } });
+      for (const [i, c] of ed.capitulos.entries()) {
+        paths.push({
+          params: { lingua, rota: `${r.obras}/${slug}/${slugCapituloEm(lingua, c)}` },
+          props: {
+            lingua,
+            pagina: { tipo: 'capitulo', ...base, resumoCap: c, anterior: ed.capitulos[i - 1], proximo: ed.capitulos[i + 1] },
+          },
+        });
+      }
+      if (obra.slug === OBRA_COM_QUESTOES) {
+        const questoes = await questoesDaEdicao(ed);
+        for (const [i, q] of questoes.entries()) {
+          paths.push({
+            params: { lingua, rota: `${slug}/${r.questao}/${q.numero}` },
+            props: {
+              lingua,
+              pagina: { tipo: 'questao', ...base, q, anterior: questoes[i - 1]?.numero, proxima: questoes[i + 1]?.numero },
+            },
+          });
+        }
+      }
+    }
+    paths.push({ params: { lingua, rota: r.obras }, props: { lingua, pagina: { tipo: 'lista', obras: daLingua } } });
+  }
+  return paths;
+}
+
+const { lingua, pagina } = Astro.props as { lingua: L; pagina: Pagina };
+const t = TEXTOS[lingua];
+const site = Astro.site!;
+const abs = (p: string) => new URL(p, site).href;
+
+let titulo: string = t.obrasTitulo;
+let descricao: string = t.obrasLede;
+let alt: Alternativa[] = [];
+let ld: Record<string, unknown>[] = [];
+let cap: Awaited<ReturnType<typeof capitulo>> | undefined;
+
+if (pagina.tipo === 'obra') {
+  const { obra, ed, slug } = pagina;
+  titulo = ed.seo_titulo || `${ed.titulo} — ${t.audiolivro}`;
+  descricao = ed.seo_descricao || t.descricaoObra(ed.titulo, obra.autor);
+  alt = await alternativas(obra.slug, { tipo: 'obra' }, site);
+  ld = [
+    {
+      '@context': 'https://schema.org',
+      '@type': ['Book', 'Audiobook'],
+      name: ed.titulo,
+      url: abs(urlObra(lingua, slug)),
+      author: { '@type': 'Person', name: obra.autor },
+      ...(ed.tradutor ? { translator: { '@type': 'Person', name: ed.tradutor } } : {}),
+      inLanguage: ed.idioma,
+      isAccessibleForFree: true,
+      readBy: { '@type': 'Person', name: t.vozSintetica },
+      hasPart: ed.capitulos.map((c) => ({
+        '@type': 'Chapter',
+        name: c.titulo,
+        position: c.ordem,
+        url: abs(urlCapitulo(lingua, slug, c)),
+      })),
+    },
+  ];
+} else if (pagina.tipo === 'capitulo') {
+  const { obra, ed, slug, resumoCap } = pagina;
+  cap = await capitulo(resumoCap.id);
+  const primeiro = cap.segmentos.find((s) => s.tipo !== 'titulo')?.texto ?? cap.titulo;
+  titulo = cap.seo_titulo || `${nomeCapitulo(cap.titulo)} — ${ed.titulo}`;
+  descricao = cap.seo_descricao || resumir(`${ed.titulo}, ${cap.titulo}: ${primeiro}`);
+  alt = await alternativas(obra.slug, { tipo: 'capitulo', referencia: cap.referencia_canonica }, site);
+  ld = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Chapter',
+      name: cap.titulo,
+      position: cap.ordem,
+      url: abs(urlCapitulo(lingua, slug, cap)),
+      inLanguage: ed.idioma,
+      isPartOf: { '@type': 'Book', name: ed.titulo, url: abs(urlObra(lingua, slug)) },
+    },
+  ];
+} else if (pagina.tipo === 'questao') {
+  const { obra, ed, slug, q } = pagina;
+  const pergunta = q.segmentos.find((s) => s.tipo === 'pergunta' && !s.subquestao);
+  const resposta = q.segmentos.find((s) => s.tipo === 'resposta' && !s.subquestao);
+  titulo = `${t.questao(q.numero)} — ${ed.titulo}`;
+  descricao = resumir(`${titulo}: ${pergunta?.texto ?? ''} ${resposta?.texto ?? ''}`);
+  alt = await alternativas(obra.slug, { tipo: 'questao', numero: q.numero }, site);
+  ld = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Quotation',
+      name: titulo,
+      url: abs(urlQuestaoEm(lingua, slug, q.numero)),
+      inLanguage: ed.idioma,
+      text: [pergunta?.texto, resposta?.texto].filter(Boolean).join(' '),
+      isPartOf: { '@type': 'Book', name: ed.titulo, author: { '@type': 'Person', name: obra.autor } },
+    },
+  ];
+}
+// Faixa cifrada (ADR 0004) só toca no app.
+const faixa = cap && audioAberto(cap.faixa) ? cap.faixa : null;
+const linkQuestao =
+  pagina.tipo === 'capitulo' && pagina.obra.slug === OBRA_COM_QUESTOES
+    ? (n: number) => urlQuestaoEm(lingua, pagina.slug, n)
+    : undefined;
+---
+
+<BaseLayout
+  title={titulo}
+  description={descricao}
+  jsonLd={ld}
+  lingua={lingua}
+  alternativas={alt}
+  noindex={pagina.tipo === 'lista' && pagina.obras.length === 0}
+>
+  {
+    pagina.tipo === 'lista' && (
+      <>
+        <PageHeader title={t.obrasTitulo} lede={t.obrasLede} />
+        <div class="container section">
+          {pagina.obras.length === 0 ? (
+            <p class="muted">{t.nenhuma}</p>
+          ) : (
+            <ul class="capitulos" role="list">
+              {pagina.obras.map(({ obra, ed, slug }) => (
+                <li>
+                  <a href={urlObra(lingua, slug)}>{ed.titulo}</a> <span class="muted">— {obra.autor}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </>
+    )
+  }
+  {
+    pagina.tipo === 'obra' && (
+      <>
+        <PageHeader eyebrow={pagina.obra.autor} title={pagina.ed.titulo} lede={descricao} />
+        <div class="container section">
+          <p class="muted creditos">
+            {pagina.ed.tradutor && t.traducao(pagina.ed.tradutor)}
+            {t.fonte(pagina.ed.fonte)}
+          </p>
+          <h2>{t.capitulos}</h2>
+          <ol class="capitulos" role="list">
+            {pagina.ed.capitulos.map((c) => (
+              <li>
+                <a href={urlCapitulo(lingua, pagina.slug, c)}>{c.titulo}</a>
+              </li>
+            ))}
+          </ol>
+          <aside class="card cta">
+            <h2>{t.ctaObra}</h2>
+            <p>{t.ctaObraTexto}</p>
+            <StoreButtons lingua={lingua} />
+          </aside>
+        </div>
+      </>
+    )
+  }
+  {
+    pagina.tipo === 'capitulo' && cap && (
+      <>
+        <PageHeader eyebrow={pagina.ed.titulo} title={cap.titulo} />
+        <div class="container section">
+          <nav aria-label={t.trilha} class="muted trilha">
+            <a href={urlObras(lingua)}>{t.obras}</a>
+            {' › '}
+            <a href={urlObra(lingua, pagina.slug)}>{pagina.ed.titulo}</a>
+          </nav>
+          {faixa && (
+            <figure class="card audio">
+              <figcaption>{t.ouvirCapitulo}</figcaption>
+              <audio controls preload="none" src={faixa.url}>
+                <a href={faixa.url}>{t.baixar}</a>
+              </audio>
+            </figure>
+          )}
+          <Segmentos segmentos={cap.segmentos} linkQuestao={linkQuestao} />
+          <nav class="paginacao" aria-label={t.capitulos}>
+            {pagina.anterior ? (
+              <a href={urlCapitulo(lingua, pagina.slug, pagina.anterior)} rel="prev">
+                ← {nomeCapitulo(pagina.anterior.titulo)}
+              </a>
+            ) : (
+              <span />
+            )}
+            {pagina.proximo && (
+              <a href={urlCapitulo(lingua, pagina.slug, pagina.proximo)} rel="next">
+                {nomeCapitulo(pagina.proximo.titulo)} →
+              </a>
+            )}
+          </nav>
+          <aside class="card cta">
+            <h2>{t.ctaObra}</h2>
+            <p>{t.ctaCapituloTexto}</p>
+            <StoreButtons lingua={lingua} />
+          </aside>
+        </div>
+      </>
+    )
+  }
+  {
+    pagina.tipo === 'questao' && (
+      <>
+        <PageHeader eyebrow={pagina.ed.titulo} title={t.questao(pagina.q.numero)} />
+        <div class="container section">
+          <nav aria-label={t.trilha} class="muted trilha">
+            <a href={urlObra(lingua, pagina.slug)}>{pagina.ed.titulo}</a>
+            {' › '}
+            <a href={`${urlCapitulo(lingua, pagina.slug, pagina.q.capitulo)}#q${pagina.q.numero}`}>
+              {nomeCapitulo(pagina.q.capitulo.titulo)}
+            </a>
+          </nav>
+          <Segmentos segmentos={pagina.q.segmentos} />
+          <nav class="paginacao" aria-label={t.obras}>
+            {pagina.anterior ? (
+              <a href={urlQuestaoEm(lingua, pagina.slug, pagina.anterior)} rel="prev">
+                ← {t.questao(pagina.anterior)}
+              </a>
+            ) : (
+              <span />
+            )}
+            {pagina.proxima && (
+              <a href={urlQuestaoEm(lingua, pagina.slug, pagina.proxima)} rel="next">
+                {t.questao(pagina.proxima)} →
+              </a>
+            )}
+          </nav>
+          <aside class="card cta">
+            <h2>{t.ctaQuestao(pagina.ed.titulo)}</h2>
+            <p>{t.ctaQuestaoTexto}</p>
+            <StoreButtons lingua={lingua} />
+          </aside>
+        </div>
+      </>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .capitulos {
+    list-style: none;
+    padding: 0;
+    columns: 2 22rem;
+    column-gap: var(--space-8);
+  }
+  .capitulos li {
+    break-inside: avoid;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .creditos,
+  .trilha {
+    margin-bottom: var(--space-6);
+  }
+  .audio {
+    margin: 0 0 var(--space-8);
+  }
+  .audio audio {
+    width: 100%;
+    margin-top: var(--space-3);
+  }
+  .paginacao {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-top: var(--space-10);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+  .cta {
+    margin-top: var(--space-10);
+  }
+</style>

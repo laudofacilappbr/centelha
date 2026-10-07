@@ -17,6 +17,7 @@ import {
   type CapituloResumo,
 } from '../../../lib/catalogo';
 import { OBRA_COM_QUESTOES, urlQuestao } from '../../../lib/questoes';
+import { alternativas } from '../../../lib/alternativas';
 
 export async function getStaticPaths() {
   const paths = [];
@@ -47,6 +48,7 @@ const primeiroTexto = cap.segmentos.find((s) => s.tipo !== 'titulo')?.texto ?? c
 const linkQuestao = obra.slug === OBRA_COM_QUESTOES ? urlQuestao : undefined;
 // Faixa cifrada (ADR 0004) só toca no app: nada de player, link ou contentUrl aqui.
 const faixa = audioAberto(cap.faixa) ? cap.faixa : null;
+const alt = await alternativas(obra.slug, { tipo: 'capitulo', referencia: cap.referencia_canonica }, Astro.site!);
 
 const ld = [
   {
@@ -75,6 +77,7 @@ const ld = [
   title={cap.seo_titulo || `${nomeCapitulo(cap.titulo)} — ${ed.titulo}`}
   description={cap.seo_descricao || resumir(`${ed.titulo}, ${cap.titulo.toLowerCase()}: ${primeiroTexto}`)}
   jsonLd={ld}
+  alternativas={alt}
 >
   <PageHeader eyebrow={ed.titulo} title={cap.titulo} />
   <div class="container section">

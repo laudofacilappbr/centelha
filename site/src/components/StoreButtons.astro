@@ -1,5 +1,12 @@
 ---
 import { SITE } from '../config';
+import { TEXTOS, type Lingua } from '../lib/idiomas';
+
+interface Props {
+  lingua?: Lingua;
+}
+const { lingua = 'pt' } = Astro.props;
+const t = lingua === 'pt' ? undefined : TEXTOS[lingua];
 
 /** Botões das lojas. Enquanto o app não for publicado, aparecem como "Em breve". */
 const lojas = [
@@ -8,7 +15,7 @@ const lojas = [
 ];
 ---
 
-<ul class="stores" aria-label="Lojas de aplicativos">
+<ul class="stores" aria-label={t?.lojas ?? 'Lojas de aplicativos'}>
   {
     lojas.map((l) => (
       <li>
@@ -19,7 +26,7 @@ const lojas = [
           </a>
         ) : (
           <span class="store soon">
-            <span class="pre">Em breve na</span>
+            <span class="pre">{t?.emBreve ?? 'Em breve na'}</span>
             <span class="name">{l.nome}</span>
           </span>
         )}

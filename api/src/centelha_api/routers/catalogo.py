@@ -45,6 +45,8 @@ class _Base(BaseModel):
 class EdicaoResumo(_Base, CamposSeo):
     id: int
     idioma: str
+    # URL da edição em /fr, /es e /en (#48); o português usa o slug da obra.
+    slug: str | None
     publico: Publico
     titulo: str
     tradutor: str | None
