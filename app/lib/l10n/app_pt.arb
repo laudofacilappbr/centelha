@@ -190,5 +190,14 @@
   "apagarDownloadTitulo": "Apagar o capítulo baixado?",
   "apagarDownloadTexto": "Ele continua no app para ouvir com internet.",
   "apagar": "Apagar",
-  "cancelar": "Cancelar"
+  "cancelar": "Cancelar",
+  "lerEmOutroIdioma": "Ler em outro idioma",
+  "posicaoNaoEncontrada": "Esta parte não está em {edicao}.",
+  "@posicaoNaoEncontrada": {
+    "placeholders": {
+      "edicao": {
+        "type": "String"
+      }
+    }
+  }
 }

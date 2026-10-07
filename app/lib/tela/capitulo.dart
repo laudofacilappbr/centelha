@@ -9,9 +9,10 @@ import '../player/reprodutor.dart';
 import '../tema/centelha_tema.dart';
 import 'comum.dart';
 import 'compartilhar.dart';
+import 'trocar_edicao.dart';
 
 /// Texto do capítulo por segmento. Com [questao], rola até ela e a destaca.
-class TelaCapitulo extends StatelessWidget {
+class TelaCapitulo extends StatefulWidget {
   const TelaCapitulo({
     super.key,
     required this.api,
@@ -21,6 +22,7 @@ class TelaCapitulo extends StatelessWidget {
     this.questao,
     this.subquestao,
     this.citacao,
+    this.origem,
   });
 
   final CatalogoApi api;
@@ -36,26 +38,97 @@ class TelaCapitulo extends StatelessWidget {
   /// compartilhar.
   final Citacao? citacao;
 
+  /// Obra e edição de onde o capítulo veio. Sem ela (o "continuar ouvindo" da tela
+  /// inicial não sabe), não há troca de idioma.
+  final OrigemCapitulo? origem;
+
+  @override
+  State<TelaCapitulo> createState() => _TelaCapituloState();
+}
+
+class _TelaCapituloState extends State<TelaCapitulo> {
+  final _posicao = PosicaoNoTexto();
+
+  /// Troca de idioma (#47): abre a outra edição na mesma questão, ou no capítulo de
+  /// mesma referência canônica, no lugar desta tela.
+  Future<void> _trocarEdicao(OrigemCapitulo origem) async {
+    final t = AppLocalizations.of(context);
+    final mensagens = ScaffoldMessenger.of(context);
+    final navegador = Navigator.of(context);
+    void avisar(String texto) => mensagens
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(texto)));
+
+    final escolhida = await escolherOutraEdicao(context, origem);
+    if (escolhida == null || !mounted) return;
+    final aVista = _posicao.questao;
+    final Destino? destino;
+    try {
+      destino = await mesmaPosicao(
+        widget.api,
+        escolhida,
+        capitulo: widget.resumo,
+        questao: aVista?.numero,
+        subquestao: aVista?.sub,
+      );
+    } on ErroCatalogo {
+      return avisar(t.erroCarregar);
+    }
+    if (!mounted) return;
+    if (destino == null) {
+      return avisar(t.posicaoNaoEncontrada(escolhida.titulo));
+    }
+    final obra = origem.obra;
+    navegador.pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => TelaCapitulo(
+          api: widget.api,
+          resumo: destino!.capitulo,
+          edicao: escolhida.titulo,
+          autor: obra.autor,
+          questao: destino.questao,
+          subquestao: destino.subquestao,
+          citacao: Citacao.daEdicao(obra, escolhida),
+          origem: OrigemCapitulo(obra: obra, edicao: escolhida),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final origem = widget.origem;
+    final citacao = widget.citacao;
     return Scaffold(
-      appBar: AppBar(title: Text(resumo.titulo)),
+      appBar: AppBar(
+        title: Text(widget.resumo.titulo),
+        actions: [
+          if (origem != null && origem.outras.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.translate),
+              tooltip: t.lerEmOutroIdioma,
+              onPressed: () => _trocarEdicao(origem),
+            ),
+        ],
+      ),
       body: Carregavel<Capitulo>(
-        carregar: () => api.capitulo(resumo.id),
+        carregar: () => widget.api.capitulo(widget.resumo.id),
         construir: (context, capitulo) => Column(
           children: [
             Expanded(
               child: TextoCapitulo(
                 segmentos: capitulo.segmentos,
-                questao: questao,
-                subquestao: subquestao,
+                questao: widget.questao,
+                subquestao: widget.subquestao,
                 capitulo: capitulo,
+                posicao: _posicao,
                 compartilhar: citacao == null
                     ? null
                     : (contexto, trecho) => oferecerCompartilhar(
                         contexto,
-                        citacao: citacao!,
-                        capitulo: resumo,
+                        citacao: citacao,
+                        capitulo: widget.resumo,
                         trecho: trecho,
                       ),
               ),
@@ -64,9 +137,9 @@ class TelaCapitulo extends StatelessWidget {
               BarraPlayer(
                 capitulo: capitulo,
                 info: InfoFaixa(
-                  titulo: resumo.titulo,
-                  edicao: edicao,
-                  autor: autor,
+                  titulo: widget.resumo.titulo,
+                  edicao: widget.edicao,
+                  autor: widget.autor,
                 ),
               ),
           ],
@@ -74,6 +147,14 @@ class TelaCapitulo extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Pergunta ao texto qual questão está à vista, na hora da troca de idioma: a que a
+/// narração está lendo ou, sem ela, a primeira que aparece na tela.
+class PosicaoNoTexto {
+  ({int numero, String? sub})? Function()? _ler;
+
+  ({int numero, String? sub})? get questao => _ler?.call();
 }
 
 /// Leitura acompanhada (#32): com o [capitulo] tocando no player, destaca o segmento
@@ -86,9 +167,11 @@ class TextoCapitulo extends StatefulWidget {
     this.subquestao,
     this.capitulo,
     this.compartilhar,
+    this.posicao,
   });
 
   final List<Segmento> segmentos;
+  final PosicaoNoTexto? posicao;
   final int? questao;
   final String? subquestao;
   final Capitulo? capitulo;
@@ -117,6 +200,7 @@ class _TextoCapituloState extends State<TextoCapitulo> {
   @override
   void initState() {
     super.initState();
+    widget.posicao?._ler = _questaoAVista;
     if (widget.questao != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final primeiro = widget.segmentos.where(_daBusca).firstOrNull;
@@ -178,6 +262,28 @@ class _TextoCapituloState extends State<TextoCapitulo> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+  }
+
+  ({int numero, String? sub})? _questaoAVista() {
+    final lido = widget.segmentos.where((s) => s.id == _lendo).firstOrNull;
+    if (lido?.numeroQuestao != null) {
+      return (numero: lido!.numeroQuestao!, sub: lido.subquestao);
+    }
+    // A questão que cruza uma linha a um quarto da altura do texto. Pelo topo, o fim da
+    // questão anterior, que a busca deixa à mostra acima da procurada (alinhamento
+    // 0.1), ganharia; a um quarto, fica a que a pessoa está lendo.
+    final caixa = context.findRenderObject() as RenderBox?;
+    if (caixa == null || !caixa.attached) return null;
+    final topo = caixa.localToGlobal(Offset.zero).dy + caixa.size.height / 4;
+    for (final s in widget.segmentos) {
+      if (s.numeroQuestao == null) continue;
+      final r = _chaves[s.id]?.currentContext?.findRenderObject() as RenderBox?;
+      if (r == null || !r.attached) continue;
+      if (r.localToGlobal(Offset(0, r.size.height)).dy > topo) {
+        return (numero: s.numeroQuestao!, sub: s.subquestao);
+      }
+    }
+    return null;
   }
 
   void _voltarALeitura() {

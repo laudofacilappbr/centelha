@@ -23,7 +23,7 @@ Sem `CENTELHA_API_URL`, o app usa `http://10.0.2.2:8000`, que é o localhost do 
 | `lib/l10n/app_*.arb` | Todas as strings da interface (pt, es, fr, en). O Dart é gerado pelo `flutter gen-l10n` e não vai para o git |
 | `lib/idioma/` | Idioma do aparelho por padrão, troca manual salva no aparelho |
 | `lib/api/` | Cliente da API pública do catálogo |
-| `lib/tela/` | Telas. `compartilhar.dart`: segurar um trecho do capítulo compartilha ou copia o texto com a citação e o link permanente do site, só em edição adulta (o perfil infantil não tem link externo) |
+| `lib/tela/` | Telas. `compartilhar.dart`: segurar um trecho do capítulo compartilha ou copia o texto com a citação e o link permanente do site, só em edição adulta (o perfil infantil não tem link externo). `trocar_edicao.dart`: no capítulo, o botão de idioma abre a outra edição na mesma questão (ou no capítulo de mesma referência canônica), só entre edições do mesmo público |
 | `assets/fonts/` | Comfortaa e Atkinson Hyperlegible, empacotadas com a licença OFL. Nada é baixado em tempo de uso |
 
 String nova: adicione a chave em `app_pt.arb` e nos outros três arquivos. Sem tradução, o `gen-l10n` avisa.

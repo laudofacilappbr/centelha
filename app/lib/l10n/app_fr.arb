@@ -79,5 +79,7 @@
   "apagarDownloadTitulo": "Supprimer le chapitre téléchargé ?",
   "apagarDownloadTexto": "Il reste dans l’app pour l’écouter en ligne.",
   "apagar": "Supprimer",
-  "cancelar": "Annuler"
+  "cancelar": "Annuler",
+  "lerEmOutroIdioma": "Lire dans une autre langue",
+  "posicaoNaoEncontrada": "Ce passage n’est pas dans {edicao}."
 }
