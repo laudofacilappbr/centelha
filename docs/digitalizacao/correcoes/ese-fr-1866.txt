@@ -611,3 +611,75 @@ p. 398: juntar: GRATUITEMENT.
 p. 228: au- Sn — 27 - => au-
 p. 229: NE SACHE PAS CE QUE DONNE LA DROITE. 183 près => près
 p. 229: juntar: près de Dieu!
+
+# Caracteres estranhos que sobraram depois da limpeza das barras (#45): "{", "©", "£",
+# "#" e "|" lidos no lugar de letras, parênteses e "v." de versículo, ou sujeira da
+# margem no meio da linha. Cada um lido no recorte da linha ou na página.
+p. 39: {ment dits => ment dits
+p. 39: juntar: ment dits, qui
+p. 45: [£sans la connaissance => sans la connaissance
+p. 45: juntar: sans la connaissance
+p. 48: attri- # buer => attribuer
+p. 72: à|m reconnaître => à reconnaître
+p. 72: Les hommes | , conservent => Les hommes conservent
+p. 83: Esprit, »# signifient => Esprit, » signifient
+p. 84: dans il {saint Jean => dans saint Jean
+p. 86: d'Oster-#: wald.) => d'Osterwald.)
+p. 87: {surrection, => surrection,
+p. 87: juntar: surrection, le principe
+p. 87: ‘] 47. Mais => 47. Mais
+p. 87: comme une ‘|condition => comme une condition
+p. 105: l'Es-/{ prit => l'Esprit
+p. 106: Motifs de résignation. | & => Motifs de résignation.
+p. 109: apagar: ] d|f
+p. 109: 5: 44. Le calme => 14. Le calme
+p. 109: manière ,, d'envisager => manière d'envisager
+p. 113: « Seigneur | jai => « Seigneur ! j'ai
+p. 133: souffrance | J juste => souffrance juste
+p. 133: vicissitudes | ji terrestres => vicissitudes terrestres
+p. 134: fait que | : l’homme => fait que l’homme
+p. 134: Dieu, et | | % consolation => Dieu, et consolation
+p. 134: égarés | : d'Israël => égarés d'Israël
+p. 134: parole, + | doit => parole, doit
+p. 139: ©c qu’il faut => Ce qu’il faut
+p. 174: ©héissance et résignation. => Obéissance et résignation.
+p. 182: {Saint Matthieu, ch. vii, ©. 3, => (Saint Matthieu, ch. vii, v. 3,
+p. 186: êtes durs, = © => êtes durs,
+p. 187: BIENHEUREUX CEUX QUI SONT MISÉRICORDIEUX. 141 exigeants => exigeants
+p. 187: juntar: exigeants, inflexibles
+p. 191: {(DurÊTrE, => (DUFÊTRE,
+p. 221: pas même} permis => pas même permis
+p. 236: dernière vie |... => dernière vie !...
+p. 254: saint Matthieu, ch. xx, => saint Matthieu, ch. xix, v. 19.)
+p. 254: apagar: 3% A®)
+p. 267: vous {qui avez => vous qui avez
+p. 272: ch. xiii, ©. de 4 à 7 => ch. xiii, v. de 1 à 7
+p. 283: pourquoi ©! la => pourquoi il la
+p. 298: £E'homme de bien. => L'homme de bien.
+p. 328: aut£nt de => autant de
+p. 339: et {u pourras => et tu pourras
+p. 372: {Saint Luc, ch. xii => (Saint Luc, ch. xii
+p. 389: ch. x, ©. 39. => ch. x, v. 39.
+p. 392: les £'sprütsne viennent => les Esprits ne viennent
+p. 399: demande -|qui => demande qui
+p. 399: subordonner -|un => subordonner un
+p. 399: aut|trement => autrement
+p. 417: apagar: € « « « «
+p. 417: apagar: € «
+p. 417: apagar: Z
+p. 417: loi #immuable => loi immuable
+p. 419: ingrats | si => ingrats ! si
+p. 430: n° #4.) => n° 4.)
+p. 431: ten{ation. => tentation.
+p. 433: cerps £vidique => corps fluidique
+p. 442: dans .| la voie => dans la voie
+p. 442: ch. xvii, ÿ|im° 3.) => ch. xvii, n° 3.)
+p. 443: s’écarte l ||de la => s’écarte de la
+p. 445: ‘| Enfin, => Enfin,
+p. 445: nous ‘|| souhaitons => nous souhaitons
+p. 463: apagar: POUR CEUX QUI NE SONT PLUS SUR LA TERRE. #17
+p. 476: dans {a médiumnilé => dans la médiumnité
+p. 479: - | Mais je sais aussi, 6 mon Dieu => Mais je sais aussi, ô mon Dieu
+p. 479: nécessaire © pour => nécessaire pour
+p. 479: en lui l rendant => en lui rendant
+p. 479: l’'amener à de meilleurs , sentiments. => l’amener à de meilleurs sentiments.
