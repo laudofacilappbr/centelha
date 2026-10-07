@@ -6,6 +6,9 @@ Saída: parágrafos com a página de origem, para o relatório apontar onde conf
 - Cabeçalhos e rodapés repetidos saem: a linha que, sem os dígitos, aparece no topo ou
   no pé de muitas páginas (título da obra), e a que está em maiúsculas com o número da
   página na ponta e se repete em 3 ou mais (cabeçalho corrido de cada capítulo).
+- Cabeçalho que não se repete também sai quando o número na ponta é o da página: o
+  número impresso acompanha a página do PDF com um deslocamento fixo. Pega o cabeçalho
+  de capítulo curto e o que o OCR leu torto ("36 CHAPITRE LV.", "PRIÈRES GÉNÉRALES, 387").
 - Linha em branco no meio do parágrafo, que o Tesseract põe, não o parte quando a frase
   está aberta e a linha seguinte começa em minúscula.
 - Número de página sozinho na linha sai.
@@ -23,8 +26,9 @@ _LIGADURAS = str.maketrans({"ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi",
 _ESPACOS = re.compile(r"[ \t   ]+")
 _NUMERO_PAGINA = re.compile(r"^[\s\-–—.]*\d{1,4}[\s\-–—.]*$")
 _ROMANO_PAGINA = re.compile(r"^\s*[ivxlc]{1,7}\s*$", re.IGNORECASE)
-# Fim de linha com hífen depois de letra minúscula: "pala-" + "vra".
-_HIFEN_FINAL = re.compile(r"(\w)[-¬]$")
+# Fim de linha com hífen depois de letra: "pala-" + "vra". Ponto ou vírgula soltos depois
+# do hífen são sujeira da margem ("hu-. |" no Évangile), não fim de frase.
+_HIFEN_FINAL = re.compile(r"(\w)[-¬][.,]?$")
 # Token que começa com barra ou chave, na ponta da linha. Nenhum livro do acervo usa
 # "|" nem chaves: é a lombada ou a página ao lado. Palavra antes da barra ("à|m") fica.
 _RUIDO_INICIO = re.compile(r"^(?:[|{}\\]+\S?\s+)+")
@@ -56,7 +60,8 @@ def _assinatura(linha: str) -> str:
 
 
 def _normal(linha: str) -> str:
-    return " ".join(re.sub(r"[\d\s.\-–—]+", " ", linha.lower()).split())
+    # Vírgula também sai: o OCR lê o ponto do cabeçalho como vírgula ("CONSOLATEUR, 89").
+    return " ".join(re.sub(r"[\d\s.,\-–—]+", " ", linha.lower()).split())
 
 
 # Número de página na ponta da linha: arábico ou romano em maiúsculas.
@@ -104,6 +109,31 @@ def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> tuple[set[str],
     return muitas, {a for a, n in numeradas.items() if n >= 3}
 
 
+def _numero_arabico(linha: str) -> int | None:
+    m = _ARABICO_NA_PONTA.search(linha)
+    return int(m.group().rstrip(".")) if m else None
+
+
+def _deslocamentos(paginas: list[list[str]]) -> set[int]:
+    """Página do PDF menos o número impresso, nos cabeçalhos numerados das bordas.
+
+    Vale o deslocamento que aparece em 3 ou mais páginas: costuma haver mais de um (as
+    páginas preliminares e o corpo, uma gravura sem número no meio)."""
+    contagem: Counter[int] = Counter()
+    for numero, linhas in enumerate(paginas, start=1):
+        for linha in linhas[:2] + linhas[-2:]:
+            if _cabecalho_numerado(linha) and (n := _numero_arabico(linha)) is not None:
+                contagem[numero - n] += 1
+    return {d for d, n in contagem.items() if n >= 3}
+
+
+def _numero_da_pagina(linha: str, numero: int, deslocamentos: set[int]) -> bool:
+    """Cabeçalho em maiúsculas cujo número é o desta página (±1: folga para uma página
+    sem número que ainda não mudou o deslocamento)."""
+    n = _numero_arabico(linha) if _cabecalho_numerado(linha) else None
+    return n is not None and any(abs(numero - d - n) <= 1 for d in deslocamentos)
+
+
 def _sem_ruido(linha: str) -> str:
     return _RUIDO_FIM.sub("", _RUIDO_INICIO.sub("", linha))
 
@@ -116,7 +146,9 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
         ]
         for p in texto_ocr.replace("\r\n", "\n").split("\f")
     ]
-    repetidas, numeradas = _repetidas([[linha for linha in p if linha] for p in paginas])
+    nao_vazias = [[linha for linha in p if linha] for p in paginas]
+    repetidas, numeradas = _repetidas(nao_vazias)
+    deslocamentos = _deslocamentos(nao_vazias)
 
     paragrafos: list[Paragrafo] = []
     atual: list[str] = []
@@ -136,17 +168,25 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
             uteis.pop(0)
         while uteis and not uteis[-1]:
             uteis.pop()
+
+        def cabecalho(linha: str, numero: int = numero) -> bool:
+            return bool(
+                _NUMERO_PAGINA.match(linha)
+                or _ROMANO_PAGINA.match(linha)
+                or _assinatura(linha) in repetidas
+                or (_assinatura(linha) in numeradas and _cabecalho_numerado(linha))
+                or _numero_da_pagina(linha, numero, deslocamentos)
+            )
+
         for borda in (0, -1):
-            for _ in range(2):
+            for _ in range(3):
                 if not uteis:
                     break
                 linha = uteis[borda]
-                if (
-                    _NUMERO_PAGINA.match(linha)
-                    or _ROMANO_PAGINA.match(linha)
-                    or _assinatura(linha) in repetidas
-                    or (_assinatura(linha) in numeradas and _cabecalho_numerado(linha))
-                ):
+                # Sujeira de 1 ou 2 caracteres na ponta ("—", "|", "Us") esconde o
+                # cabeçalho logo depois. Sai só junto com ele: sozinha, pode ser texto.
+                dentro = [x for x in (uteis[1:] if borda == 0 else uteis[-2::-1]) if len(x) > 2][:1]
+                if cabecalho(linha) or (len(linha) <= 2 and dentro and cabecalho(dentro[0])):
                     uteis.pop(borda)
                     while uteis and not uteis[borda]:
                         uteis.pop(borda)
@@ -164,8 +204,9 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
                 continua = atual and linha[:1].islower() and not _FIM_DE_FRASE.search(atual[-1])
                 if not continua:
                     fechar()
-            if atual and _HIFEN_FINAL.search(atual[-1]) and linha[:1].islower():
-                atual[-1] = atual[-1][:-1] + linha.split(" ", 1)[0]
+            hifen = _HIFEN_FINAL.search(atual[-1]) if atual else None
+            if hifen and linha[:1].islower():
+                atual[-1] = atual[-1][: hifen.start() + 1] + linha.split(" ", 1)[0]
                 resto = linha.split(" ", 1)[1:] if " " in linha else []
                 if resto:
                     atual.append(resto[0])
