@@ -342,3 +342,15 @@ def test_cabecalho_de_capitulo_com_numero_sai_e_subtitulo_repetido_fica():
     texto = " ".join(lidos)
     assert "la phrase 2." in texto
     assert texto.count("Instructions des Esprits") == 5
+
+
+def test_titulo_que_abre_o_capitulo_fica_mesmo_com_o_cabecalho_igual():
+    """Regressão da #131: "62 CHAPITRE V." (cabeçalho corrido) e "CHAPITRE V" (título no
+    topo da página que abre o capítulo) têm a mesma assinatura. Só o numerado sai."""
+    paginas = ["CHAPITRE V\n\nBIENHEUREUX LES AFFLIGÉS.\n\nTexte d'ouverture.\n"]
+    for n in range(62, 70, 2):
+        paginas.append(f"{n} CHAPITRE V.\n\nTexte de la page {n}.\n")
+    paginas += [f"Page {n} sans en-tête, avec du texte long.\n" for n in range(40)]
+    lidos = [p.texto for p in limpar_paginas("\f".join(paginas))]
+    assert lidos[:2] == ["CHAPITRE V", "BIENHEUREUX LES AFFLIGÉS."]
+    assert not any(t.endswith("CHAPITRE V.") for t in lidos)
