@@ -449,3 +449,34 @@ def test_linha_so_de_barra_sai_sem_partir_paragrafo():
         "attribuer une origine divine.",
         "Nouveau paragraphe.",
     ]
+
+
+def test_sinal_da_margem_na_frente_da_linha_sai():
+    """Fac-símile da Library of Congress (#45): sinal da margem na frente da linha
+    ("* pour", ". preuve", "-soins", "_ En") ficava no texto e, depois de linha em
+    branco, abria parágrafo falso. Ponto e hífen só saem antes de minúscula."""
+    pagina = (
+        "La religion était\n"
+        "\n"
+        "* pour eux plutôt un moyen. Ainsi l'expiation sert d'é-\n"
+        ". preuve; sacrifiez aux be-\n"
+        "-soins du jour.\n"
+        "=\n"
+        "_ En effet, c'est vrai.\n"
+        "- Non, dit-il.\n"
+    )
+    assert [p.texto for p in limpar_paginas(pagina)] == [
+        "La religion était pour eux plutôt un moyen. Ainsi l'expiation sert d'épreuve; "
+        "sacrifiez aux besoins du jour.",
+        "En effet, c'est vrai. - Non, dit-il.",
+    ]
+
+
+def test_citacao_que_termina_em_ponto_e_parentese_fecha_frase():
+    """No Évangile, o versículo citado fecha com ".)": a questão numerada seguinte abre
+    parágrafo, em vez de entrar no anterior (19 casos no livro, #45)."""
+    pagina = (
+        "Que celui-là entende qui a des oreilles. (Saint Matthieu, ch. xi, v. 15.)\n"
+        "14. Si le principe de la réincarnation exprimé dans saint Jean pouvait.\n"
+    )
+    assert [p.texto[:3] for p in limpar_paginas(pagina)] == ["Que", "14."]

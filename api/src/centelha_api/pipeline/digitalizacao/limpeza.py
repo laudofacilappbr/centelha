@@ -41,7 +41,12 @@ _RUIDO_COLADO_INICIO = re.compile(r"^[|}\\]+(?=[^\s|{}\\])")
 _RUIDO_COLADO_FIM = re.compile(r"(?<=[-¬])[|{}\\]+\S{0,2}$|(?<=[^\s|{}\\])[|}\\][|{}\\]*$")
 # Linha que é só a borda da página vizinha ("|", "| | |", "| :", "‘|"): sai inteira, sem
 # virar linha em branco, que partiria o parágrafo.
-_SO_RUIDO = re.compile(r"^[\s|{}\\\[\]:;.,'‘’_—–-]*[|{}\\][\s|{}\\\[\]:;.,'‘’_—–-]*$")
+_SO_RUIDO = re.compile(r"^[\s|{}\\\[\]:;.,'‘’_—–=+*-]*[|{}\\=+*][\s|{}\\\[\]:;.,'‘’_—–=+*-]*$")
+# Sinal da margem na frente da linha ("* pour eux", "_ faites", ". preuve", ":germer",
+# "-soins"): fica no texto e, depois de linha em branco, abre parágrafo falso. "*", "+",
+# "=" e "_" não começam linha de texto; ".", ":", "‘" e "-" só saem antes de minúscula,
+# que não começa frase.
+_MARGEM_INICIO = re.compile(r"^(?:[*+=_]+\s*(?=\S)|[.:,;‘-]\s*(?=[a-zà-ÿ]))")
 
 
 @dataclass(frozen=True)
@@ -145,7 +150,8 @@ def _numero_da_pagina(linha: str, numero: int, deslocamentos: set[int]) -> bool:
 
 def _sem_ruido(linha: str) -> str:
     linha = _RUIDO_FIM.sub("", _RUIDO_INICIO.sub("", linha))
-    return _RUIDO_COLADO_FIM.sub("", _RUIDO_COLADO_INICIO.sub("", linha)).strip()
+    linha = _RUIDO_COLADO_FIM.sub("", _RUIDO_COLADO_INICIO.sub("", linha)).strip()
+    return _MARGEM_INICIO.sub("", linha)
 
 
 def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
@@ -237,7 +243,8 @@ _ABRE_PARAGRAFO = re.compile(
     r"^(\d{1,4}\s*[.)–-]\s|[a-z]\)\s|[“«\"—–]|(cap[íi]tulo|livro|parte|chapitre|livre|partie)\b)",
     re.IGNORECASE,
 )
-_FIM_DE_FRASE = re.compile(r"[.!?:»”\"]$")
+# A citação que fecha o versículo termina em ".)": "(Saint Matthieu, ch. xi, v. 15.)".
+_FIM_DE_FRASE = re.compile(r"[.!?:»”\"]\)?$")
 
 
 def _inicia_paragrafo(anterior: str, linha: str, tipico: int) -> bool:
