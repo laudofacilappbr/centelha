@@ -1,0 +1,99 @@
+---
+/** Página inicial em /fr, /es e /en (#48): curta, com as obras do idioma. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import { obrasEmTodosOsIdiomas } from '../../lib/catalogo';
+import { CAMINHOS, INICIO } from '../../lib/institucional';
+import { HREFLANG, OUTRAS, edicoesPorLingua, urlObra, urlInicio, type Lingua } from '../../lib/idiomas';
+
+type L = Exclude<Lingua, 'pt'>;
+
+export function getStaticPaths() {
+  return OUTRAS.map((lingua) => ({ params: { lingua }, props: { lingua } }));
+}
+
+const { lingua } = Astro.props as { lingua: L };
+const t = INICIO[lingua];
+const obras = (await obrasEmTodosOsIdiomas()).flatMap((obra) => {
+  const ed = edicoesPorLingua(obra)[lingua];
+  return ed ? [{ obra, ed, slug: ed.slug ?? obra.slug }] : [];
+});
+const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
+  hreflang: HREFLANG[l],
+  href: new URL(urlInicio(l), Astro.site).href,
+}));
+---
+
+<BaseLayout title={t.titulo} tituloCompleto description={t.descricao} lingua={lingua} alternativas={alternativas}>
+  <section class="section inicio" aria-labelledby="inicio-titulo">
+    <div class="container">
+      <span class="eyebrow">{t.eyebrow}</span>
+      <h1 id="inicio-titulo">{t.h1}</h1>
+      <p class="lede">{t.lede}</p>
+      <StoreButtons lingua={lingua} />
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="obras-titulo">
+    <div class="container">
+      <h2 id="obras-titulo">{t.obras}</h2>
+      {
+        obras.length ? (
+          <ul class="grid grid-2" role="list">
+            {obras.map(({ obra, ed, slug }) => (
+              <li class="card">
+                <h3>
+                  <a href={urlObra(lingua, slug)}>{ed.titulo}</a>
+                </h3>
+                <p class="muted">
+                  {obra.autor}
+                  {obra.ano && <> · {obra.ano}</>}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="muted">{t.emBreve}</p>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="como-titulo">
+    <div class="container">
+      <h2 id="como-titulo">{t.como}</h2>
+      <ol class="grid grid-3" role="list">
+        {
+          t.passos.map(([titulo, texto], i) => (
+            <li class="card">
+              <span class="eyebrow">{i + 1}</span>
+              <h3>{titulo}</h3>
+              <p>{texto}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p>
+        <a class="link-arrow" href={CAMINHOS.como[lingua]}>{t.como}</a>
+      </p>
+      <p>
+        <a class="link-arrow" href={CAMINHOS.sobre[lingua]}>{t.sobre}</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .inicio h1 {
+    max-width: 22ch;
+  }
+  .inicio .lede {
+    max-width: 60ch;
+    margin-bottom: var(--space-6);
+  }
+  ol,
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+</style>
