@@ -104,10 +104,10 @@ const pular = lingua === 'pt' ? 'Pular para o conteúdo' : TEXTOS[lingua].pular;
   </head>
   <body>
     <a class="skip-link" href="#conteudo">{pular}</a>
-    <Header />
+    <Header lingua={lingua} />
     <main id="conteudo" tabindex="-1">
       <slot />
     </main>
-    <Footer />
+    <Footer lingua={lingua} alternativas={alternativas} />
   </body>
 </html>

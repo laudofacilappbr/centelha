@@ -1,23 +1,32 @@
 ---
 import Logo from './Logo.astro';
 import ThemeToggle from './ThemeToggle.astro';
+import { TEXTOS, urlObras, type Lingua } from '../lib/idiomas';
 
-const links = [
-  { href: '/obras', label: 'Obras' },
-  { href: '/sobre', label: 'Sobre' },
-  { href: '/como-fazemos', label: 'Como fazemos' },
-  { href: '/kids', label: 'Kids' },
-  { href: '/transparencia', label: 'Transparência' },
-];
+interface Props {
+  lingua?: Lingua;
+}
+const { lingua = 'pt' } = Astro.props;
+// Nos outros idiomas (#48) só existe o acervo; as páginas do projeto são em português.
+const t = lingua === 'pt' ? undefined : TEXTOS[lingua];
+const links = t
+  ? [{ href: urlObras(lingua), label: t.obras }]
+  : [
+      { href: '/obras', label: 'Obras' },
+      { href: '/sobre', label: 'Sobre' },
+      { href: '/como-fazemos', label: 'Como fazemos' },
+      { href: '/kids', label: 'Kids' },
+      { href: '/transparencia', label: 'Transparência' },
+    ];
 const atual = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
 ---
 
 <header class="site-header">
   <div class="container bar">
-    <a href="/" class="brand" aria-label="Centelha — página inicial">
+    <a href={t ? urlObras(lingua) : '/'} class="brand" aria-label={t?.inicio ?? 'Centelha — página inicial'}>
       <Logo width={140} />
     </a>
-    <nav aria-label="Principal" class="nav">
+    <nav aria-label={t?.menu ?? 'Principal'} class="nav">
       <ul>
         {
           links.map((l) => (
@@ -32,7 +41,7 @@ const atual = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/
     </nav>
     <div class="actions">
       <ThemeToggle />
-      <a class="btn btn-primary cta" href="/#lista-espera">Lista de espera</a>
+      {!t && <a class="btn btn-primary cta" href="/#lista-espera">Lista de espera</a>}
     </div>
   </div>
 </header>
