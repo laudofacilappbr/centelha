@@ -7,6 +7,7 @@ Monorepo do Centelha: `api/` (FastAPI), `site/` (Astro), `app/` (Flutter), `infr
 Segue `RICARDO-DEFAULT/20-engenharia/fluxo-desenvolvimento/FLUXO-DE-TRABALHO.md`.
 
 - **Pegar tarefa:** label `em-andamento` + comentário com o branch, antes do primeiro commit.
+- **Merge: PROVISÓRIO pela sessão** (dono, 2026-10-07, até desligar), só depois de `ci/validar.sh` passar com a main atual. Regras e exceções no Passo 6b da skill `centelha-loop`. Merge na `main` é deploy.
 - **Um branch e uma PR por tarefa.** Na PR, `Closes #N` em linha própria, uma por número. Nunca escreva `Closes #N` para dizer que **não** fecha.
 - **Labels (§5):** ausência de label = elegível.
   - `decisao`: escolha de negócio, legal, financeira ou de segurança. O agente escreve opções com risco e reversibilidade e **para naquela tarefa**. Vira `decidida` só com a resposta transcrita num comentário.
