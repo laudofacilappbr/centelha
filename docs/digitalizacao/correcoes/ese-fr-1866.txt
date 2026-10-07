@@ -680,3 +680,58 @@ p. 479: - | Mais je sais aussi, 6 mon Dieu => Mais je sais aussi, ô mon Dieu
 p. 479: nécessaire © pour => nécessaire pour
 p. 479: en lui l rendant => en lui rendant
 p. 479: l’'amener à => l’amener à
+
+# Parágrafos que começavam com minúscula ou sinal solto (#45), lidos na página:
+# cabeçalho corrido ou assinatura de caderno no meio da frase, subtítulo em
+# versalete lido em minúscula, linha fora de ordem e sinal solto da margem.
+p. 45: les inblir sans lutte => les intérêts et les préjugés qu’elles froissent, ne peuvent s’établir sans lutte
+p. 45: apagar: térêts et les préjugés
+p. 50: &. Mais le rôle => 4. Mais le rôle
+p. 53: We mouvement des astres => le mouvement des astres
+p. 53: quirèglent => qui règlent
+p. 53: juntar: le mouvement des astres
+p. 53: apagar: RE ee deate
+p. 53: apagar: !
+p. 53: juntar: rapports une fois
+p. 67: s'éloigner de 22 CHAPITRE Ill. => s'éloigner de
+p. 68: juntar: la sphère où ils
+p. 75: t9 Les Esprits => Les Esprits
+p. 82: apagar: :
+p. 157: apagar: BIENHEUREUX CEUX QUI ONT LE COEUR PUR.
+p. 157: juntar: terrestre, les choses
+p. 160: juntar: de se laver les mains
+p. 167: quelqu'un de ces. => quelqu'un de ces
+p. 168: juntar: pauvres souffrants
+p. 192: divulque pas => divulgue pas
+p. 192: juntar: et alors qu'on ne les
+p. 227: faire le bien sans ostentation, => Faire le bien sans ostentation.
+p. 232: apagar: ?
+p. 254: piété filiale, => Piété filiale.
+p. 257: - Dieu leur donnera => Dieu leur donnera
+p. 257: juntar: Dieu leur donnera
+p. 267: : Alors le Roi => Alors le Roi
+p. 280: utilité providentielle de la fortune. => Utilité providentielle de la fortune.
+p. 366: Qui ne haïit pas => Qui ne hait pas
+p. 366: apagar: .
+p. 373: apagar: ]
+p. 399: pour le pauvre comme 20. => pour le pauvre comme
+p. 399: apagar: ee & +
+p. 400: apagar: 304 CHAPITRE XXVI.
+p. 400: juntar: pour le riche.
+p. 410: il n’est pas moins certain => Il n’est pas moins certain
+p. 444: apagar: BED) CHAPITRE XXVIII.
+p. 444: juntar: enfin, elle nous sollicite
+p. 449: apagar: !
+# P. 449: o OCR pôs a primeira linha do n° 36 antes do título "Action de grâces". Ela
+# vira marcador (as trocas vêm antes de apagar, e o parágrafo refeito começa igual) e
+# volta no lugar, à frente da continuação.
+p. 449: 36. PRÉFACE. Par le danger que nous avons couru, Dieu => (fora de ordem)
+p. 449: apagar: (fora de ordem)
+p. 449: nous montre que nous pouvons d’un moment => 36. PRÉFACE. Par le danger que nous avons couru, Dieu nous montre que nous pouvons d’un moment
+p. 475: pour les malades. => Pour les malades.
+p. 477: : Inspirez-lui => Inspirez-lui
+p. 477: , miques; dans => miques; dans
+p. 477: juntar: miques; dans la
+p. 479: apagar: : 25
+p. 479: ul pe ne doit pas être => Quelle ne doit pas être
+p. 479: être i imalfaisant => être malfaisant
