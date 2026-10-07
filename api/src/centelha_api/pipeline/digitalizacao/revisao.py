@@ -53,7 +53,9 @@ def _contexto(texto: str, inicio: int, fim: int, margem: int = 30) -> str:
     return ("…" if a else "") + texto[a:b].replace("\n", " ") + ("…" if b < len(texto) else "")
 
 
-def suspeitas(paragrafos: list[Paragrafo], idioma: str = "por") -> list[Achado]:
+def suspeitas(
+    paragrafos: list[Paragrafo], idioma: str = "por", conhecidas: set[str] | None = None
+) -> list[Achado]:
     achados: list[Achado] = []
     vocabulario = Counter(w.lower() for p in paragrafos for w in _PALAVRA.findall(p.texto))
     for p in paragrafos:
@@ -90,7 +92,7 @@ def suspeitas(paragrafos: list[Paragrafo], idioma: str = "por") -> list[Achado]:
                 )
         if t[:1].islower():
             achados.append(Achado(p.pagina, "começa com minúscula", t[:60], "juntar ao anterior?"))
-    achados += _parecidas(paragrafos, vocabulario)
+    achados += _parecidas(paragrafos, vocabulario, conhecidas)
     return achados
 
 
@@ -101,12 +103,20 @@ def _so_no_fim(a: str, b: str) -> bool:
     return i >= min(len(a), len(b)) - 2
 
 
-def _parecidas(paragrafos: list[Paragrafo], vocabulario: Counter[str]) -> list[Achado]:
+def _parecidas(
+    paragrafos: list[Paragrafo], vocabulario: Counter[str], conhecidas: set[str] | None = None
+) -> list[Achado]:
     """Palavra rara quase igual a uma frequente do próprio livro ("fregiente" e
     "frequente"): o erro de OCR mais comum, que nenhuma regra fixa pega.
 
     Compara só com palavras do mesmo tamanho (±1) e mesma inicial, para não varrer o
-    vocabulário inteiro a cada palavra."""
+    vocabulário inteiro a cada palavra.
+
+    [conhecidas] é o vocabulário de outro texto da mesma obra (--referencia). Palavra que
+    está nele dificilmente é erro de OCR: dois OCRs independentes raramente erram igual.
+    Sem isso, no francês do Évangile, "versets", "lecture" e "aimons" viravam suspeitas
+    (1.597 achados, a maioria palavra boa).
+    """
     frequentes: dict[tuple[str, int], list[str]] = {}
     for w, n in vocabulario.items():
         if n >= 5 and len(w) >= 5:
@@ -118,13 +128,17 @@ def _parecidas(paragrafos: list[Paragrafo], vocabulario: Counter[str]) -> list[A
             baixa = w.lower()
             if len(baixa) < 5 or vocabulario[baixa] > 2 or baixa in vistas:
                 continue
+            if conhecidas is not None and _chave(baixa) in conhecidas:
+                continue
             candidatas = [
                 c for d in (-1, 0, 1) for c in frequentes.get((baixa[0], len(baixa) + d), [])
             ]
             parecida = [
                 c
                 for c in difflib.get_close_matches(baixa, candidatas, n=3, cutoff=0.75)
-                if not _so_no_fim(baixa, c)
+                # Só acento ou caixa ("l'Evangile", maiúscula sem acento da época) não é
+                # erro de leitura.
+                if not _so_no_fim(baixa, c) and _normal(c) != _normal(baixa)
             ][:1]
             if parecida:
                 vistas.add(baixa)
@@ -132,6 +146,14 @@ def _parecidas(paragrafos: list[Paragrafo], vocabulario: Counter[str]) -> list[A
                     Achado(p.pagina, "parecida com palavra frequente", w, f"talvez {parecida[0]}")
                 )
     return achados
+
+
+def _chave(palavra: str) -> str:
+    return palavra.lower().replace("’", "'")
+
+
+def vocabulario_de(texto: str) -> set[str]:
+    return {_chave(w) for w in _PALAVRA.findall(texto)}
 
 
 def _normal(palavra: str) -> str:
@@ -173,7 +195,7 @@ def revisar(
 ) -> Relatorio:
     texto = "\n".join(p.texto for p in paragrafos)
     rel = Relatorio(
-        achados=suspeitas(paragrafos, idioma),
+        achados=suspeitas(paragrafos, idioma, vocabulario_de(referencia) if referencia else None),
         trocas=trocas or [],
         # Circunflexo a conferir é regra da grafia portuguesa de 1943.
         conferir_circunflexo=a_conferir(texto) if idioma == "por" else [],
