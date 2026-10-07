@@ -65,4 +65,8 @@ Decisão do dono (#76, opção D): a IA faz a **primeira** revisão e aponta os 
 
    O comando recusa a avaliação incompleta, o nível desconhecido e o apontamento sem motivo, e junta os apontamentos automáticos.
 
-5. **Entregar** o `revisao.md` a quem aprova (comentário na issue do capítulo ou anexo da revisão no admin, quando existir) e dizer em uma linha quantos bloqueios há. Não diga que o capítulo "está aprovado": diga que a revisão da IA não achou bloqueios.
+5. **Entregar** a quem aprova.
+   - **No servidor:** acrescente `--anexar` ao passo 4. O relatório fica no capítulo, e o admin mostra a última revisão no detalhe (`revisao_ia`) e todas em `GET /v1/admin/capitulos/{id}/revisoes-ia`.
+   - **Fora do servidor:** quem tem a permissão de editar conteúdo envia o Markdown por `POST /v1/admin/capitulos/{id}/revisoes-ia`, com a contagem que o comando imprimiu.
+
+   Diga em uma linha quantos bloqueios há. Não diga que o capítulo "está aprovado": diga que a revisão da IA não achou bloqueios. O relatório não trava nem libera a aprovação.

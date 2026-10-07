@@ -17,15 +17,18 @@ from ..models import (
     EstadoCapitulo,
     FaixaAudio,
     RegistroAuditoria,
+    RevisaoIA,
     Segmento,
     TipoSegmento,
     Usuario,
 )
+from ..pipeline import revisao_doutrinaria
 from ..ratelimit import ip_do_cliente
 from .admin import exigir, pode_ver_admin
 
 router = APIRouter(prefix="/v1/admin", tags=["admin"])
 pode_editar_segmento = exigir(Permissao.EDITAR_SEGMENTO)
+pode_anexar_revisao = exigir(Permissao.EDITAR_CONTEUDO)
 
 
 class EdicaoResumo(BaseModel):
@@ -64,6 +67,28 @@ class FaixaSaida(BaseModel):
     marcacoes: list[dict]
 
 
+class RevisaoIAResumo(BaseModel):
+    id: int
+    criado_em: datetime
+    bloqueios: int
+    atencoes: int
+    ok: int
+
+
+class RevisaoIASaida(RevisaoIAResumo):
+    relatorio: str
+    usuario_id: int | None
+
+
+class RevisaoIAEntrada(BaseModel):
+    """O Markdown de `revisao_doutrinaria relatorio` e a contagem que ele imprime."""
+
+    relatorio: str = Field(min_length=1, max_length=500_000)
+    bloqueios: int = Field(ge=0)
+    atencoes: int = Field(ge=0)
+    ok: int = Field(ge=0)
+
+
 class CapituloDetalhe(CapituloResumo):
     edicao_id: int
     texto_editavel: bool
@@ -71,6 +96,9 @@ class CapituloDetalhe(CapituloResumo):
     acoes: list[str]
     segmentos: list[SegmentoSaida]
     faixa: FaixaSaida | None
+    # Última revisão doutrinária da IA (#98), só nas adaptações. Informa quem aprova; não
+    # trava a aprovação.
+    revisao_ia: RevisaoIAResumo | None = None
 
 
 class EdicaoTexto(BaseModel):
@@ -153,7 +181,21 @@ def _detalhe(session: Session, capitulo: Capitulo, usuario: Usuario) -> Capitulo
             for s in segmentos
         ],
         faixa=FaixaSaida.model_validate(faixa, from_attributes=True) if faixa else None,
+        revisao_ia=_ultima_revisao_ia(session, capitulo.id),
     )
+
+
+def _revisoes_ia(capitulo_id: int):
+    return (
+        select(RevisaoIA)
+        .where(RevisaoIA.capitulo_id == capitulo_id)
+        .order_by(RevisaoIA.criado_em.desc(), RevisaoIA.id.desc())
+    )
+
+
+def _ultima_revisao_ia(session: Session, capitulo_id: int) -> RevisaoIAResumo | None:
+    r = session.scalar(_revisoes_ia(capitulo_id).limit(1))
+    return RevisaoIAResumo.model_validate(r, from_attributes=True) if r else None
 
 
 def _contagem(e: Edicao) -> dict[EstadoCapitulo, int]:
@@ -309,3 +351,38 @@ def historico(
         .order_by(RegistroAuditoria.id)
     )
     return [EventoHistorico.model_validate(r, from_attributes=True) for r in registros]
+
+
+@router.post("/capitulos/{capitulo_id}/revisoes-ia", status_code=status.HTTP_201_CREATED)
+def anexar_revisao_ia(
+    capitulo_id: int,
+    dados: RevisaoIAEntrada,
+    request: Request,
+    usuario: Usuario = Depends(pode_anexar_revisao),
+    session: Session = Depends(get_session),
+) -> RevisaoIASaida:
+    """Anexa o relatório da revisão por IA (#98) a um capítulo adaptado."""
+    capitulo = _capitulo(session, capitulo_id)
+    contagem = {"bloqueio": dados.bloqueios, "atencao": dados.atencoes, "ok": dados.ok}
+    try:
+        revisao = revisao_doutrinaria.anexar(
+            session, capitulo, dados.relatorio, contagem, usuario, ip_do_cliente(request)
+        )
+    except ValueError as e:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(e)) from e
+    session.commit()
+    return RevisaoIASaida.model_validate(revisao, from_attributes=True)
+
+
+@router.get("/capitulos/{capitulo_id}/revisoes-ia")
+def listar_revisoes_ia(
+    capitulo_id: int,
+    _: Usuario = Depends(pode_ver_admin),
+    session: Session = Depends(get_session),
+) -> list[RevisaoIASaida]:
+    """Da mais recente à mais antiga, com o relatório inteiro."""
+    _capitulo(session, capitulo_id)
+    return [
+        RevisaoIASaida.model_validate(r, from_attributes=True)
+        for r in session.scalars(_revisoes_ia(capitulo_id))
+    ]
