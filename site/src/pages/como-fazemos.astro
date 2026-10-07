@@ -1,9 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
+import { CAMINHOS } from '../lib/institucional';
+import { HREFLANG, OUTRAS, type Lingua } from '../lib/idiomas';
+
+// Versões em outros idiomas (#48).
+const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
+  hreflang: HREFLANG[l],
+  href: new URL(CAMINHOS.como[l], Astro.site).href,
+}));
 ---
 
 <BaseLayout
+  alternativas={alternativas}
   title="Como fazemos: IA, revisão humana e direitos autorais"
   description="Como o Centelha produz os audiolivros espíritas: só obras em domínio público, narração por inteligência artificial e revisão de cada trecho por pessoas."
 >

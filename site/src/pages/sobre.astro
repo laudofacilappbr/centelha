@@ -1,9 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
+import { CAMINHOS } from '../lib/institucional';
+import { HREFLANG, OUTRAS, type Lingua } from '../lib/idiomas';
+
+// Versões em outros idiomas (#48).
+const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
+  hreflang: HREFLANG[l],
+  href: new URL(CAMINHOS.sobre[l], Astro.site).href,
+}));
 ---
 
 <BaseLayout
+  alternativas={alternativas}
   title="Sobre o projeto e a centelha no espiritismo"
   description="O que é o Centelha, por que ele é gratuito e de onde vem o nome: a questão 88 de O Livro dos Espíritos, em que o Espírito é descrito como uma centelha etérea."
 >
