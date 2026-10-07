@@ -100,6 +100,9 @@ services:
       # Áudio cifrado (ADR 0004): desligado até o app decifrar.
       CENTELHA_AUDIO_CIFRAR: ${CENTELHA_AUDIO_CIFRAR:-false}
       CENTELHA_AUDIO_CHAVE_MESTRA: ${CENTELHA_AUDIO_CHAVE_MESTRA:-}
+      # Purge dos .m4a antigos ao recifrar (centelha-recifrar, #73); vazios = purge à mão.
+      CENTELHA_CLOUDFLARE_ZONE_ID: ${CENTELHA_CLOUDFLARE_ZONE_ID:-}
+      CENTELHA_CLOUDFLARE_TOKEN: ${CENTELHA_CLOUDFLARE_TOKEN:-}
     volumes: [audio:/data/audio]
     depends_on:
       postgres: { condition: service_healthy }

@@ -26,6 +26,7 @@ centelha-digitalizar = "centelha_api.pipeline.digitalizacao.cli:main"
 centelha-lgpd = "centelha_api.lgpd:main"
 centelha-admin = "centelha_api.admin_cli:main"
 centelha-video = "centelha_api.pipeline.video_cli:main"
+centelha-recifrar = "centelha_api.pipeline.recifrar:main"
 
 [dependency-groups]
 dev = [
