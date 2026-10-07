@@ -96,5 +96,7 @@
   "planoLer": "Lire",
   "planoProgresso": "{lidos} jours lus sur {total}",
   "leituraIndisponivel": "Cette lecture n’est pas encore publiée dans cette langue.",
-  "questoesDeAte": "questions {de} à {ate}"
+  "questoesDeAte": "questions {de} à {ate}",
+  "kidsTitulo": "Centelha Kids",
+  "kidsVazio": "Les histoires de Clara arrivent bientôt. Reviens vite !"
 }
