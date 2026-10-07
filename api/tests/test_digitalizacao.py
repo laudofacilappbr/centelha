@@ -286,3 +286,59 @@ def test_parecida_nao_aponta_diferenca_so_de_acento():
     paragrafos = [Paragrafo(1, " ".join(["évangile"] * 6) + " L'Evangile du Christ.")]
     achados = [a.trecho for a in revisar(paragrafos, idioma="fra").achados]
     assert "Evangile" not in " ".join(achados)
+
+
+def test_cabecalho_com_romano_dos_dois_lados_sai_mas_titulo_de_capitulo_fica():
+    """Introdução do Évangile: "IV INTRODUCTION." na página par, "INTRODUCTION. V" na
+    ímpar. O romano não pode tirar o título "CAPÍTULO V" que abre um capítulo."""
+    paginas = []
+    for n, cab in enumerate(["IV INTRODUCTION.", "INTRODUCTION. V", "VI INTRODUCTION."], 4):
+        paginas.append(f"{cab}\n\nTexte de la page {n}, qui continue la phrase de la page\n")
+    # Quatro capítulos abrindo no topo da página: sem o romano, "capítulo" se repetiria
+    # em todas e sairia como cabeçalho.
+    corpo = {
+        "I": "Que é Deus?",
+        "II": "Do elemento material.",
+        "III": "Da criação.",
+        "IV": "Do princípio vital.",
+    }
+    for romano, texto in corpo.items():
+        paginas.append(f"CAPÍTULO {romano}\n\n{texto}\n")
+    lidos = [p.texto for p in limpar_paginas("\f".join(paginas))]
+    assert not any("INTRODUCTION" in t for t in lidos)
+    assert all(t in lidos for t in corpo.values())
+    assert [t for t in lidos if t.startswith("CAPÍTULO")] == [
+        "CAPÍTULO I",
+        "CAPÍTULO II",
+        "CAPÍTULO III",
+        "CAPÍTULO IV",
+    ]
+
+
+def test_linha_em_branco_no_meio_do_paragrafo_nao_o_parte():
+    """O Tesseract põe linha em branco dentro do parágrafo; minúscula depois de frase
+    aberta é continuação. Depois de ponto final, é parágrafo novo."""
+    pagina = "Là aussi est la cause de sa\n\npropagation si rapide.\n\nNouveau paragraphe ici.\n"
+    assert [p.texto for p in limpar_paginas(pagina)] == [
+        "Là aussi est la cause de sa propagation si rapide.",
+        "Nouveau paragraphe ici.",
+    ]
+
+
+def test_cabecalho_de_capitulo_com_numero_sai_e_subtitulo_repetido_fica():
+    """O cabeçalho corrido de um capítulo só aparece nas páginas dele, longe dos 30% do
+    livro; tem o número da página na ponta e está em maiúsculas. Subtítulo repetido no
+    topo da página não tem número; linha de texto com número no fim é minúscula."""
+    paginas = []
+    for n in range(2, 12, 2):
+        paginas.append(f"{n} CHAPITRE I.\n\nTexte pair {n}, qui finit avec la phrase {n}.\n")
+        paginas.append(
+            f"JE NE SUIS POINT VENU DÉTRUIRE LA LOI. {n + 1}\n\n"
+            "Instructions des Esprits\n\nAutre paragraphe.\n"
+        )
+    paginas += [f"Page {n} sans en-tête, avec du texte long qui continue.\n" for n in range(40)]
+    lidos = [p.texto for p in limpar_paginas("\f".join(paginas))]
+    assert not any("CHAPITRE" in t or "DÉTRUIRE" in t for t in lidos)
+    texto = " ".join(lidos)
+    assert "la phrase 2." in texto
+    assert texto.count("Instructions des Esprits") == 5

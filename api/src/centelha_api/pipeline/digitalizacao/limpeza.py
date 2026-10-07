@@ -3,8 +3,11 @@
 Entrada: as páginas do OCR, separadas por \\f (form feed, como o Tesseract escreve).
 Saída: parágrafos com a página de origem, para o relatório apontar onde conferir.
 
-- Cabeçalhos e rodapés repetidos (título da obra, nome do capítulo) saem quando a
-  mesma linha, sem os dígitos, aparece no topo ou no pé de muitas páginas.
+- Cabeçalhos e rodapés repetidos saem: a linha que, sem os dígitos, aparece no topo ou
+  no pé de muitas páginas (título da obra), e a que está em maiúsculas com o número da
+  página na ponta e se repete em 3 ou mais (cabeçalho corrido de cada capítulo).
+- Linha em branco no meio do parágrafo, que o Tesseract põe, não o parte quando a frase
+  está aberta e a linha seguinte começa em minúscula.
 - Número de página sozinho na linha sai.
 - Palavra hifenizada no fim da linha, ou no fim da página, é juntada.
 - Ligaduras e espaços estranhos são normalizados; aspas ficam como no exemplar.
@@ -34,21 +37,59 @@ class Paragrafo:
     texto: str
 
 
+_ROTULOS = {"capítulo", "capitulo", "livro", "parte", "chapitre", "livre", "partie", ""}
+
+
 def _assinatura(linha: str) -> str:
-    """Linha sem dígitos e sem caixa: o cabeçalho "O LIVRO DOS ESPÍRITOS 123" de toda
-    página tem a mesma assinatura."""
-    return re.sub(r"[\d\s.\-–—]+", " ", linha.lower()).strip()
+    """Linha sem dígitos, sem caixa e sem o número romano da ponta: o cabeçalho "O LIVRO
+    DOS ESPÍRITOS 123" de toda página tem a mesma assinatura, e "IV INTRODUCTION." e
+    "INTRODUCTION. V" (o romano troca de lado na página par e na ímpar) também.
+
+    Só o romano em maiúsculas e na ponta da linha, onde fica o número de página: "il"
+    no meio da frase francesa não é número. E "CAPÍTULO IV" fica com o número, senão
+    todo título de capítulo no topo da página teria a mesma assinatura e sairia como
+    cabeçalho."""
+    sem_romano = re.sub(r"^[IVXLC]{1,6}\b|\b[IVXLC]{1,6}[.]?$", " ", linha.strip())
+    if _normal(sem_romano) in _ROTULOS:
+        sem_romano = linha
+    return _normal(sem_romano)
+
+
+def _normal(linha: str) -> str:
+    return " ".join(re.sub(r"[\d\s.\-–—]+", " ", linha.lower()).split())
+
+
+# Número de página na ponta da linha: arábico ou romano em maiúsculas.
+_NUMERO_NA_PONTA = re.compile(r"^(\d{1,4}|[IVXLC]{1,6})\b|\b(\d{1,4}|[IVXLC]{1,6})[.]?$")
+
+
+def _cabecalho_numerado(linha: str) -> bool:
+    """Número de página na ponta e o resto em maiúsculas. Linha de texto com número no
+    fim ("la phrase 2.", "Matthieu, ch. V, v. 3") é minúscula e fica."""
+    letras = [c for c in _NUMERO_NA_PONTA.sub("", linha) if c.isalpha()]
+    return bool(_NUMERO_NA_PONTA.search(linha)) and len(letras) >= 3 and "".join(letras).isupper()
 
 
 def _repetidas(paginas: list[list[str]], minimo: float = 0.3) -> set[str]:
-    """Assinaturas que aparecem nas 2 primeiras ou 2 últimas linhas de muitas páginas."""
+    """Assinaturas de cabeçalho ou rodapé: nas 2 primeiras ou 2 últimas linhas.
+
+    Duas regras. A linha que se repete em muitas páginas (o título da obra). E a que
+    traz número de página na ponta e se repete em 3 ou mais: o cabeçalho corrido de
+    cada capítulo ("JE NE SUIS POINT VENU DÉTRUIRE LA LOI. 3", "8 CHAPITRE I.") só
+    aparece nas páginas dele, longe dos 30% do livro. Subtítulo repetido ("Instructions
+    des Esprits") não tem número, e linha de texto com número no fim não é maiúscula."""
     if len(paginas) < 3:
         return set()
     contagem: Counter[str] = Counter()
+    numeradas: Counter[str] = Counter()
     for linhas in paginas:
-        bordas = {_assinatura(linha) for linha in linhas[:2] + linhas[-2:]}
-        contagem.update(a for a in bordas if a)
-    return {a for a, n in contagem.items() if n >= max(3, minimo * len(paginas))}
+        bordas = linhas[:2] + linhas[-2:]
+        contagem.update({a for a in map(_assinatura, bordas) if a})
+        numeradas.update(
+            {a for linha in bordas if _cabecalho_numerado(linha) and (a := _assinatura(linha))}
+        )
+    muitas = {a for a, n in contagem.items() if n >= max(3, minimo * len(paginas))}
+    return muitas | {a for a, n in numeradas.items() if n >= 3}
 
 
 def _sem_ruido(linha: str) -> str:
@@ -69,6 +110,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
     atual: list[str] = []
     pagina_atual = 1
     tipico = 60  # caracteres por linha; recalculado a cada página
+    em_branco = False
 
     def fechar() -> None:
         if atual:
@@ -100,8 +142,15 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
             tipico = tamanhos[len(tamanhos) // 2]
         for linha in uteis:
             if not linha:
-                fechar()
+                em_branco = True
                 continue
+            if em_branco:
+                em_branco = False
+                # O Tesseract põe linha em branco no meio do parágrafo (635 vezes no
+                # Évangile de 1866). Minúscula depois de frase ainda aberta continua.
+                continua = atual and linha[:1].islower() and not _FIM_DE_FRASE.search(atual[-1])
+                if not continua:
+                    fechar()
             if atual and _HIFEN_FINAL.search(atual[-1]) and linha[:1].islower():
                 atual[-1] = atual[-1][:-1] + linha.split(" ", 1)[0]
                 resto = linha.split(" ", 1)[1:] if " " in linha else []
