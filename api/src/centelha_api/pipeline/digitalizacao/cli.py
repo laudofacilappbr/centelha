@@ -22,6 +22,9 @@ from .ocr import ErroOCR, ocr
 from .ortografia import atualizar
 from .revisao import como_markdown, revisar
 
+# Modelos instalados na imagem de digitalização (Dockerfile).
+IDIOMAS = ("por", "fra")
+
 
 def _progresso(i: int, total: int) -> None:
     print(f"\rOCR: página {i}/{total}", end="" if i < total else "\n", file=sys.stderr)
@@ -34,10 +37,12 @@ def processar(
     perfil: str | None = None,
     referencia: str | None = None,
     ortografia: bool = True,
+    idioma: str = "por",
 ) -> Path:
     paragrafos = limpar_paginas(paginas)
     trocas = []
-    if ortografia:
+    # A atualização de grafia é da língua portuguesa (1943 → atual); em francês não se aplica.
+    if ortografia and idioma == "por":
         novos = []
         for p in paragrafos:
             texto, t = atualizar(p.texto)
@@ -46,7 +51,7 @@ def processar(
         paragrafos = novos
     saida.mkdir(parents=True, exist_ok=True)
     (saida / "texto.txt").write_text(como_texto(paragrafos), encoding="utf-8")
-    relatorio = revisar(paragrafos, trocas, referencia, perfil)
+    relatorio = revisar(paragrafos, trocas, referencia, perfil, idioma)
     (saida / "revisao.md").write_text(como_markdown(relatorio, titulo), encoding="utf-8")
     print(
         f"{len(paragrafos)} parágrafos, {len(relatorio.achados)} achados, "
@@ -68,12 +73,19 @@ def main(argv: list[str] | None = None) -> int:
     o.add_argument("origem", type=Path)
     o.add_argument("-o", "--saida", type=Path, required=True)
     o.add_argument("--dpi", type=int, default=300)
+    o.add_argument("--idioma", choices=IDIOMAS, default="por")
 
     def opcoes_processar(p: argparse.ArgumentParser) -> None:
         p.add_argument("--saida", type=Path, required=True, help="pasta de saída")
         p.add_argument("--perfil", choices=["generico", "perguntas"])
         p.add_argument("--referencia", type=Path, help="texto digital para comparar (só apoio)")
         p.add_argument("--sem-ortografia", action="store_true")
+        p.add_argument(
+            "--idioma",
+            choices=IDIOMAS,
+            default="por",
+            help="modelo do Tesseract; fra: originais de Kardec (#45), sem atualizar a grafia",
+        )
 
     p = sub.add_parser("processar", help="páginas → texto.txt e revisao.md")
     p.add_argument("paginas", type=Path)
@@ -87,12 +99,12 @@ def main(argv: list[str] | None = None) -> int:
     a = parser.parse_args(argv)
     try:
         if a.comando == "ocr":
-            a.saida.write_text(ocr(a.origem, dpi=a.dpi, progresso=_progresso), encoding="utf-8")
+            a.saida.write_text(ocr(a.origem, a.idioma, a.dpi, _progresso), encoding="utf-8")
             print(f"páginas gravadas em {a.saida}", file=sys.stderr)
             return 0
         if a.comando == "tudo":
             a.saida.mkdir(parents=True, exist_ok=True)
-            paginas = ocr(a.origem, dpi=a.dpi, progresso=_progresso)
+            paginas = ocr(a.origem, a.idioma, a.dpi, _progresso)
             (a.saida / "paginas.txt").write_text(paginas, encoding="utf-8")
             titulo = a.origem.stem
         else:
@@ -102,7 +114,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"erro: {e}", file=sys.stderr)
         return 1
     referencia = a.referencia.read_text(encoding="utf-8") if a.referencia else None
-    processar(paginas, a.saida, titulo, a.perfil, referencia, not a.sem_ortografia)
+    processar(paginas, a.saida, titulo, a.perfil, referencia, not a.sem_ortografia, a.idioma)
     return 0
 
 

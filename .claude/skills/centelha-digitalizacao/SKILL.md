@@ -32,6 +32,7 @@ docker run --rm -v "$PWD/acervo/le-1944:/dados" centelha-digitalizacao \
 ```
 
 - `--perfil perguntas` para o Livro dos Espíritos e o Livro dos Médiuns: o relatório confere a numeração das questões. Para as outras obras, omita a opção.
+- `--idioma fra` para os originais franceses de Kardec (#45): usa o modelo francês do Tesseract e não atualiza a grafia, que é regra do português de 1943.
 - `--referencia ref.txt` acrescenta as diferenças contra um texto digital, só para apontar onde olhar.
 - Para refazer só o processamento, sem repetir o OCR, que é lento: `processar saida/paginas.txt --saida saida`.
 
