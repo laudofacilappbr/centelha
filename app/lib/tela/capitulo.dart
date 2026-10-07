@@ -23,6 +23,7 @@ class TelaCapitulo extends StatefulWidget {
     this.subquestao,
     this.citacao,
     this.origem,
+    this.pronto,
   });
 
   final CatalogoApi api;
@@ -37,6 +38,9 @@ class TelaCapitulo extends StatefulWidget {
   /// Sem citação (edição juvenil ou infantil, ou origem desconhecida), não há
   /// compartilhar.
   final Citacao? citacao;
+
+  /// Capítulo já em mãos (o baixado): abre sem pedir à API, sem internet.
+  final Capitulo? pronto;
 
   /// Obra e edição de onde o capítulo veio. Sem ela (o "continuar ouvindo" da tela
   /// inicial não sabe), não há troca de idioma.
@@ -113,7 +117,8 @@ class _TelaCapituloState extends State<TelaCapitulo> {
         ],
       ),
       body: Carregavel<Capitulo>(
-        carregar: () => widget.api.capitulo(widget.resumo.id),
+        carregar: () async =>
+            widget.pronto ?? await widget.api.capitulo(widget.resumo.id),
         construir: (context, capitulo) => Column(
           children: [
             Expanded(

@@ -99,6 +99,10 @@ class ClienteChaves {
 
   String _nomeChave(Faixa f) => 'centelha.chave.${f.id}.v${f.versao}';
 
+  /// Até quando a chave guardada da [faixa] toca sem internet; null sem chave.
+  Future<DateTime?> validade(Faixa faixa) async =>
+      (await _guardada(faixa))?.validaAte;
+
   /// Chave AES-256 da [faixa]. Usa a guardada enquanto vale; perto de vencer, tenta
   /// renovar e, sem internet, segue com a guardada até a validade.
   Future<Uint8List> chave(Faixa faixa) async {

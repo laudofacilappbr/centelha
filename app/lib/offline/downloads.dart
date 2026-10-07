@@ -2,6 +2,7 @@
 // .cent, que sem a chave é ilegível, na pasta privada do app; a chave é pedida na
 // hora do download e fica no Keychain/Keystore, válida por 90 dias.
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,7 @@ import '../api/catalogo_api.dart';
 import '../chave/chaves.dart';
 import '../cifra/cent.dart';
 import '../cifra/fonte_cent.dart';
+import '../player/reprodutor.dart';
 
 /// Lê o .cent baixado, bloco a bloco, como a CDN faria por Range.
 class LeitorArquivo implements LeitorCent {
@@ -42,6 +44,19 @@ class ErroDownload implements Exception {
   String toString() => 'ErroDownload: $mensagem';
 }
 
+/// Um capítulo baixado, com o que a tela precisa para abri-lo sem internet.
+class Baixado {
+  Baixado({required this.capitulo, required this.info, this.validaAte});
+
+  final Capitulo capitulo;
+  final InfoFaixa info;
+
+  /// Até quando a chave toca sem internet; null se a chave sumiu do cofre.
+  final DateTime? validaAte;
+
+  Faixa get faixa => capitulo.faixa!;
+}
+
 class Downloads extends ChangeNotifier {
   Downloads(this.pasta, this._chaves, {http.Client? cliente})
     : _cliente = cliente ?? http.Client();
@@ -64,12 +79,16 @@ class Downloads extends ChangeNotifier {
   File arquivo(Faixa f) =>
       File('${pasta.path}/faixa-${f.id}-v${f.versao}.cent');
 
+  /// O capítulo (texto e marcações) e os créditos, ao lado do .cent: sem internet o
+  /// catálogo não carrega, e o baixado precisa abrir mesmo assim.
+  File _ficha(Faixa f) => File('${pasta.path}/faixa-${f.id}-v${f.versao}.json');
+
   bool baixado(Faixa f) => podeBaixar(f) && arquivo(f).existsSync();
 
   /// De 0 a 1 enquanto baixa; null fora disso.
   double? progresso(Faixa f) => _progresso[arquivo(f).path];
 
-  Future<void> baixar(Faixa f) async {
+  Future<void> baixar(Faixa f, {Capitulo? capitulo, InfoFaixa? info}) async {
     if (!podeBaixar(f) || baixado(f) || progresso(f) != null) return;
     final destino = arquivo(f);
     final parcial = File('${destino.path}.parcial');
@@ -103,6 +122,18 @@ class Downloads extends ChangeNotifier {
       await _conferir(parcial);
       await parcial.rename(destino.path);
       await _apagarVersoesAntigas(f);
+      if (capitulo != null && info != null) {
+        await _ficha(f).writeAsString(
+          jsonEncode({
+            'capitulo': capitulo.paraJson(),
+            'info': {
+              'titulo': info.titulo,
+              'edicao': info.edicao,
+              'autor': info.autor,
+            },
+          }),
+        );
+      }
     } on ErroChave catch (e) {
       throw ErroDownload(e.mensagem);
     } on http.ClientException catch (e) {
@@ -133,16 +164,75 @@ class Downloads extends ChangeNotifier {
       final nome = e.uri.pathSegments.last;
       if (e is File &&
           nome.startsWith('faixa-${f.id}-v') &&
-          nome != arquivo(f).uri.pathSegments.last) {
+          nome != arquivo(f).uri.pathSegments.last &&
+          nome != _ficha(f).uri.pathSegments.last) {
         await e.delete();
       }
     }
   }
 
   Future<void> apagar(Faixa f) async {
-    final a = arquivo(f);
-    // Um arquivo só: síncrono, para a tela mudar no mesmo quadro.
-    if (a.existsSync()) a.deleteSync();
+    // Dois arquivos pequenos: síncrono, para a tela mudar no mesmo quadro.
+    for (final a in [arquivo(f), _ficha(f)]) {
+      if (a.existsSync()) a.deleteSync();
+    }
     notifyListeners();
   }
+
+  /// Os baixados com ficha, do mais recente para o mais antigo.
+  Future<List<Baixado>> lista() async {
+    if (!pasta.existsSync()) return [];
+    final fichas = [
+      for (final e in pasta.listSync())
+        if (e is File && e.path.endsWith('.json')) e,
+    ]..sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    final baixados = <Baixado>[];
+    for (final ficha in fichas) {
+      try {
+        final j =
+            jsonDecode(await ficha.readAsString()) as Map<String, dynamic>;
+        final capitulo = Capitulo.deJson(j['capitulo'] as Map<String, dynamic>);
+        final i = j['info'] as Map<String, dynamic>;
+        final faixa = capitulo.faixa;
+        if (faixa == null || !baixado(faixa)) continue;
+        baixados.add(
+          Baixado(
+            capitulo: capitulo,
+            info: InfoFaixa(
+              titulo: i['titulo'] as String,
+              edicao: i['edicao'] as String,
+              autor: i['autor'] as String,
+            ),
+            validaAte: await _chaves.validade(faixa),
+          ),
+        );
+      } on FormatException {
+        continue;
+      } on TypeError {
+        continue;
+      }
+    }
+    return baixados;
+  }
+
+  /// Ao abrir o app: renova as chaves que vencem em até 7 dias. Sem internet, não
+  /// faz nada; o aviso do início pede para conectar.
+  Future<void> renovarChaves() async {
+    for (final b in await lista()) {
+      try {
+        await _chaves.chave(b.faixa);
+      } on ErroChave {
+        // Offline ou servidor fora: segue com a chave guardada.
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Baixados cuja chave vence em até 7 dias (ou já venceu).
+  Future<List<Baixado>> vencendo(DateTime agora) async => [
+    for (final b in await lista())
+      if (b.validaAte == null ||
+          b.validaAte!.isBefore(agora.add(ClienteChaves.folgaRenovacao)))
+        b,
+  ];
 }

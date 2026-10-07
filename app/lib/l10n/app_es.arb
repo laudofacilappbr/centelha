@@ -81,5 +81,12 @@
   "apagar": "Borrar",
   "cancelar": "Cancelar",
   "lerEmOutroIdioma": "Leer en otro idioma",
-  "posicaoNaoEncontrada": "Esta parte no está en {edicao}."
+  "posicaoNaoEncontrada": "Esta parte no está en {edicao}.",
+  "baixados": "Descargados",
+  "baixadosVazio": "No hay capítulos descargados. Usa el botón de descarga en el reproductor del capítulo.",
+  "baixadoValeAte": "{edicao} · se escucha sin internet hasta el {data}",
+  "baixadoRenovar": "{edicao} · conéctate para renovar antes del {data}",
+  "baixadoVencido": "{edicao} · conéctate para volver a escucharlo",
+  "avisoBaixadosVencendo": "{n, plural, =1{1 capítulo descargado necesita} other{{n} capítulos descargados necesitan}} internet pronto para seguir sonando.",
+  "ouvirBaixados": "Escuchar los descargados"
 }

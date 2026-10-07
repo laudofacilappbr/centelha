@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../api/catalogo_api.dart';
 import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
+import '../offline/downloads.dart';
 import '../tema/centelha_tema.dart';
 import '../player/controle_player.dart';
 import '../player/progresso.dart';
 import 'apoio.dart';
 import 'campanha.dart';
+import 'baixados.dart';
 import 'capitulo.dart';
 import 'comum.dart';
 import 'configuracoes.dart';
@@ -48,6 +50,12 @@ class _TelaInicioState extends State<TelaInicio> {
     fecharCampanha(campanha);
   }
 
+  void _abrirBaixados(Downloads downloads) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => TelaBaixados(api: widget.api, downloads: downloads),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -79,11 +87,23 @@ class _TelaInicioState extends State<TelaInicio> {
             );
           }
           if (snap.hasError) {
+            // Sem internet o catálogo não vem, mas os baixados tocam.
+            final downloads = EscopoPlayer.of(context).downloads;
             return Aviso(
               texto: t.erroCatalogo,
-              acao: FilledButton(
-                onPressed: _recarregar,
-                child: Text(t.tentarNovamente),
+              acao: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FilledButton(
+                    onPressed: _recarregar,
+                    child: Text(t.tentarNovamente),
+                  ),
+                  if (downloads != null)
+                    TextButton(
+                      onPressed: () => _abrirBaixados(downloads),
+                      child: Text(t.ouvirBaixados),
+                    ),
+                ],
               ),
             );
           }
@@ -109,6 +129,11 @@ class _TelaInicioState extends State<TelaInicio> {
                     null => const SizedBox.shrink(),
                   },
                 ),
+                if (EscopoPlayer.of(context).downloads case final d?)
+                  _AvisoVencimento(
+                    downloads: d,
+                    abrir: () => _abrirBaixados(d),
+                  ),
                 if (EscopoPlayer.of(context).armazem.ultimo() case final u?)
                   _ContinuarOuvindo(api: widget.api, ultimo: u),
                 for (final obra in obras)
@@ -237,6 +262,44 @@ class _ContinuarOuvindo extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Chave de capítulo baixado perto de vencer (decisão 2B): o app renova sozinho ao
+/// abrir com internet; se ainda está aqui, é porque não conseguiu.
+class _AvisoVencimento extends StatelessWidget {
+  const _AvisoVencimento({required this.downloads, required this.abrir});
+
+  final Downloads downloads;
+  final VoidCallback abrir;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final tema = Theme.of(context);
+    return ListenableBuilder(
+      listenable: downloads,
+      builder: (context, _) => FutureBuilder<List<Baixado>>(
+        future: downloads.vencendo(DateTime.now()),
+        builder: (context, snap) {
+          final n = snap.data?.length ?? 0;
+          if (n == 0) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Card(
+              margin: EdgeInsets.zero,
+              color: tema.colorScheme.surfaceContainerHighest,
+              child: ListTile(
+                leading: const Icon(Icons.wifi_off),
+                title: Text(t.avisoBaixadosVencendo(n)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: abrir,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

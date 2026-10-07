@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../api/catalogo_api.dart';
 import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
+import '../player/controle_player.dart';
 import 'apoio.dart';
+import 'baixados.dart';
 
 class TelaConfiguracoes extends StatelessWidget {
   const TelaConfiguracoes({super.key, required this.idioma, required this.api});
@@ -40,6 +42,19 @@ class TelaConfiguracoes extends StatelessWidget {
                 ],
               ),
             ),
+            if (EscopoPlayer.of(context).downloads case final d?) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.download_done),
+                title: Text(t.baixados),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => TelaBaixados(api: api, downloads: d),
+                  ),
+                ),
+              ),
+            ],
             const Divider(),
             _Secao(t.sobre),
             Padding(

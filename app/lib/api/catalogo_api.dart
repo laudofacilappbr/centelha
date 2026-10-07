@@ -241,6 +241,15 @@ class Segmento {
   final String texto;
   final int? numeroQuestao;
   final String? subquestao;
+
+  Map<String, dynamic> paraJson() => {
+    'id': id,
+    'ordem': ordem,
+    'tipo': tipo.name,
+    'texto': texto,
+    'numero_questao': numeroQuestao,
+    'subquestao': subquestao,
+  };
 }
 
 /// Onde cada segmento começa e termina na faixa (leitura acompanhada e retomada).
@@ -260,6 +269,12 @@ class Marcacao {
   final int segmentoId;
   final int inicioMs;
   final int fimMs;
+
+  Map<String, dynamic> paraJson() => {
+    'segmento_id': segmentoId,
+    'inicio_ms': inicioMs,
+    'fim_ms': fimMs,
+  };
 }
 
 class Faixa {
@@ -316,6 +331,15 @@ class Faixa {
     }
     return null;
   }
+
+  Map<String, dynamic> paraJson() => {
+    'id': id,
+    'url': url,
+    'versao': versao,
+    'duracao_ms': duracaoMs,
+    'marcacoes': [for (final m in marcacoes) m.paraJson()],
+    'formato': formato,
+  };
 }
 
 class Capitulo {
@@ -341,6 +365,18 @@ class Capitulo {
   final CapituloResumo resumo;
   final int edicaoId;
   final List<Segmento> segmentos;
+
+  /// Mesmo formato de GET /v1/capitulos/{id}: o capítulo baixado é lido de volta
+  /// com Capitulo.deJson, sem internet.
+  Map<String, dynamic> paraJson() => {
+    'id': resumo.id,
+    'ordem': resumo.ordem,
+    'titulo': resumo.titulo,
+    'referencia_canonica': resumo.referencia,
+    'edicao_id': edicaoId,
+    'segmentos': [for (final s in segmentos) s.paraJson()],
+    'faixa': faixa?.paraJson(),
+  };
 
   /// null enquanto o capítulo não tem áudio.
   final Faixa? faixa;

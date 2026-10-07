@@ -11,6 +11,7 @@ import 'package:centelha/player/barra_player.dart';
 import 'package:centelha/player/controle_player.dart';
 import 'package:centelha/player/progresso.dart';
 import 'package:centelha/player/reprodutor.dart';
+import 'package:centelha/tela/baixados.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -33,6 +34,33 @@ Faixa _faixa({int versao = 2, String formato = 'cent1'}) => Faixa(
   duracaoMs: 60000,
   marcacoes: const [],
   formato: formato,
+);
+
+const _info = InfoFaixa(
+  titulo: 'Capítulo I',
+  edicao: 'O Livro dos Espíritos',
+  autor: 'Allan Kardec',
+);
+
+Capitulo _cap({int versao = 2}) => Capitulo(
+  resumo: CapituloResumo(
+    id: 1,
+    ordem: 1,
+    titulo: 'Capítulo I — De Deus',
+    referencia: 'LE-C001',
+  ),
+  edicaoId: 1,
+  segmentos: [
+    Segmento(
+      id: 10,
+      ordem: 1,
+      tipo: TipoSegmento.pergunta,
+      texto: 'Que é Deus?',
+      numeroQuestao: 1,
+      subquestao: null,
+    ),
+  ],
+  faixa: _faixa(versao: versao),
 );
 
 class _Cofre implements Cofre {
@@ -93,8 +121,10 @@ void main() {
   late _Cofre cofre;
   late ClienteChaves chaves;
   late Downloads downloads;
+  var agora = DateTime.now();
 
   setUp(() {
+    agora = DateTime.now();
     pasta = Directory.systemTemp.createTempSync('centelha-downloads');
     rede = _Rede();
     cofre = _Cofre();
@@ -103,6 +133,7 @@ void main() {
       cofre: cofre,
       cliente: rede.cliente,
       base: 'https://api.exemplo',
+      agora: () => agora,
     );
     downloads = Downloads(pasta, chaves, cliente: rede.cliente);
   });
@@ -183,6 +214,104 @@ void main() {
     });
   });
 
+  group('lista e vencimento', () {
+    test('o baixado guarda o capítulo e abre sem a API', () async {
+      await downloads.baixar(_faixa(), capitulo: _cap(), info: _info);
+      final [b] = await downloads.lista();
+      expect(b.capitulo.resumo.titulo, 'Capítulo I — De Deus');
+      expect(b.capitulo.segmentos.single.texto, 'Que é Deus?');
+      expect(b.faixa.formato, 'cent1');
+      expect(b.info.edicao, 'O Livro dos Espíritos');
+      expect(b.validaAte!.isAfter(agora.add(const Duration(days: 89))), isTrue);
+
+      await downloads.apagar(_faixa());
+      expect(await downloads.lista(), isEmpty);
+      expect(pasta.listSync(), isEmpty);
+    });
+
+    test('versão nova leva a ficha nova', () async {
+      await downloads.baixar(_faixa(), capitulo: _cap(), info: _info);
+      await downloads.baixar(
+        _faixa(versao: 3),
+        capitulo: _cap(versao: 3),
+        info: _info,
+      );
+      expect(pasta.listSync().map((e) => e.uri.pathSegments.last).toSet(), {
+        'faixa-7-v3.cent',
+        'faixa-7-v3.json',
+      });
+    });
+
+    test('vencendo: só a chave a menos de 7 dias do fim', () async {
+      await downloads.baixar(_faixa(), capitulo: _cap(), info: _info);
+      expect(await downloads.vencendo(agora), isEmpty);
+      final perto = agora.add(const Duration(days: 85));
+      expect(await downloads.vencendo(perto), hasLength(1));
+    });
+
+    test('ao abrir com internet, renova a chave que vai vencer', () async {
+      await downloads.baixar(_faixa(), capitulo: _cap(), info: _info);
+      final antes = (await downloads.lista()).single.validaAte!;
+      agora = agora.add(const Duration(days: 85));
+      rede.pedidos.clear();
+      await downloads.renovarChaves();
+      expect(rede.pedidos, ['/v1/faixas/7/chave']);
+      final depois = (await downloads.lista()).single.validaAte!;
+      expect(depois.isAfter(antes), isTrue);
+    });
+
+    test('sem internet, renovar não quebra e o aviso fica', () async {
+      await downloads.baixar(_faixa(), capitulo: _cap(), info: _info);
+      agora = agora.add(const Duration(days: 85));
+      rede.foraDoAr = true;
+      await downloads.renovarChaves();
+      expect(await downloads.vencendo(agora), hasLength(1));
+    });
+  });
+
+  testWidgets('tela dos baixados abre o capítulo sem a API', (tester) async {
+    await tester.runAsync(
+      () => downloads.baixar(_faixa(), capitulo: _cap(), info: _info),
+    );
+    // API que falha em tudo: como sem internet.
+    final api = CatalogoApi(
+      cliente: MockClient((_) async => throw http.ClientException('sem rede')),
+    );
+    SharedPreferences.setMockInitialValues({});
+    final p = ControlePlayer(
+      ReprodutorFalso(),
+      ArmazemProgresso(await SharedPreferences.getInstance()),
+      chaves: chaves,
+      downloads: downloads,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, filho) => EscopoPlayer(player: p, child: filho!),
+        home: TelaBaixados(api: api, downloads: downloads),
+      ),
+    );
+    for (var i = 0; i < 5; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 30)),
+      );
+      await tester.pump();
+    }
+    expect(find.text('Capítulo I — De Deus'), findsOneWidget);
+    expect(find.textContaining('ouve sem internet até'), findsOneWidget);
+
+    await tester.tap(find.text('Capítulo I — De Deus'));
+    for (var i = 0; i < 5; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 30)),
+      );
+      await tester.pump();
+    }
+    expect(find.text('Que é Deus?'), findsOneWidget);
+  });
+
   group('player', () {
     test('capítulo baixado toca do arquivo, mesmo sem internet', () async {
       await downloads.baixar(_faixa());
@@ -224,7 +353,11 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: BotaoDownload(downloads: downloads, faixa: _faixa()),
+          body: BotaoDownload(
+            downloads: downloads,
+            capitulo: _cap(),
+            info: _info,
+          ),
         ),
       ),
     );
