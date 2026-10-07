@@ -428,3 +428,24 @@ def test_barra_colada_na_palavra_sai_e_o_hifen_junta():
         "une religion entièrement spirituelle ; il leur fallait profanation, et la forme "
         "est toujours belle, mais détériorations et {ous les jours."
     ]
+
+
+def test_linha_so_de_barra_sai_sem_partir_paragrafo():
+    """Fac-símile da Library of Congress (#45): a borda da página vizinha vira linha
+    sozinha ("|", "| | |", "| :"). Ficando, entrava no parágrafo e travava o hífen
+    ("s'éta- | blir"); virando linha em branco, partiria o parágrafo. Sai inteira."""
+    pagina = (
+        "les préjugés qu'elles froissent, ne peuvent s'éta-\n"
+        "|\n"
+        "blir que peu à peu ; il a dù leur\n"
+        "| | |\n"
+        "attribuer une origine divine.\n"
+        "| :\n"
+        "\n"
+        "Nouveau paragraphe.\n"
+    )
+    assert [p.texto for p in limpar_paginas(pagina)] == [
+        "les préjugés qu'elles froissent, ne peuvent s'établir que peu à peu ; il a dù leur "
+        "attribuer une origine divine.",
+        "Nouveau paragraphe.",
+    ]

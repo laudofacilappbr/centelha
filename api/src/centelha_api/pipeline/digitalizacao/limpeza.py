@@ -39,6 +39,9 @@ _RUIDO_FIM = re.compile(r"(?:\s+[|{}\\]+\S{0,2})+$")
 # que vem junto ("-|:"), para a hifenização juntar.
 _RUIDO_COLADO_INICIO = re.compile(r"^[|}\\]+(?=[^\s|{}\\])")
 _RUIDO_COLADO_FIM = re.compile(r"(?<=[-¬])[|{}\\]+\S{0,2}$|(?<=[^\s|{}\\])[|}\\][|{}\\]*$")
+# Linha que é só a borda da página vizinha ("|", "| | |", "| :", "‘|"): sai inteira, sem
+# virar linha em branco, que partiria o parágrafo.
+_SO_RUIDO = re.compile(r"^[\s|{}\\\[\]:;.,'‘’_—–-]*[|{}\\][\s|{}\\\[\]:;.,'‘’_—–-]*$")
 
 
 @dataclass(frozen=True)
@@ -150,6 +153,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
         [
             _sem_ruido(_ESPACOS.sub(" ", linha.translate(_LIGADURAS)).strip())
             for linha in p.split("\n")
+            if not _SO_RUIDO.match(linha)
         ]
         for p in texto_ocr.replace("\r\n", "\n").split("\f")
     ]

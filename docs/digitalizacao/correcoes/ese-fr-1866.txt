@@ -558,7 +558,6 @@ p. 19: apagar: a, x INTRODUCTION.
 p. 28: apagar: XVIII INTRODUCTION.
 p. 28: juntar: culier, et adoptèrent
 p. 34: apagar: v
-p. 39: même | chose. => même chose.
 p. 39: be VIII. Si l’âme => VIII. Si l’âme
 p. 51: annoncé, (p CHAPITRE I. => annoncé,
 p. 52: juntar: et préparer l'accomplissement
@@ -606,3 +605,9 @@ p. 80: juntar: DE NOUVEAU.
 p. 227: juntar: VOTRE MAIN DROITE.
 p. 398: AVEZ RECU => AVEZ REÇU
 p. 398: juntar: GRATUITEMENT.
+
+# Linha só de barra agora sai na limpeza (#45): a assinatura de caderno "27" no pé da
+# p. 228 ficou colada no "au-" que continua na p. 229, depois do cabeçalho corrido.
+p. 228: au- Sn — 27 - => au-
+p. 229: NE SACHE PAS CE QUE DONNE LA DROITE. 183 près => près
+p. 229: juntar: près de Dieu!
