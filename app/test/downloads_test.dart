@@ -8,10 +8,12 @@ import 'package:centelha/cifra/fonte_cent.dart';
 import 'package:centelha/l10n/app_localizations.dart';
 import 'package:centelha/offline/downloads.dart';
 import 'package:centelha/player/barra_player.dart';
+import 'package:centelha/player/carro.dart';
 import 'package:centelha/player/controle_player.dart';
 import 'package:centelha/player/progresso.dart';
 import 'package:centelha/player/reprodutor.dart';
 import 'package:centelha/tela/baixados.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -380,5 +382,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(downloads.baixado(_faixa()), isFalse);
     expect(find.byIcon(Icons.download_outlined), findsOneWidget);
+  });
+
+  group('Android Auto (#43)', () {
+    test('baixados aparecem no carro e tocam sem rede', () async {
+      SharedPreferences.setMockInitialValues({});
+      await downloads.baixar(_faixa(), capitulo: _cap(), info: _info);
+      rede.foraDoAr = true;
+      final motor = ReprodutorFalso();
+      final player = ControlePlayer(
+        motor,
+        ArmazemProgresso(await SharedPreferences.getInstance()),
+        chaves: chaves,
+        downloads: downloads,
+      );
+      final carro = NavegacaoCarro(
+        api: CatalogoApi(cliente: rede.cliente),
+        player: player,
+        textos: () => lookupAppLocalizations(const Locale('pt')),
+      );
+
+      final raiz = await carro.filhos(AudioService.browsableRootId);
+      expect(raiz.map((m) => (m.id, m.playable)), [('baixados', false)]);
+      final baixados = await carro.filhos('baixados');
+      expect(baixados.single.title, 'Capítulo I — De Deus');
+
+      await carro.tocar(baixados.single.id);
+      // Estrada sem sinal: tocou do arquivo, com a chave do cofre.
+      expect(motor.arquivo?.path, downloads.arquivo(_faixa()).path);
+      expect(motor.chave, _chave);
+      expect(motor.estaTocando, isTrue);
+
+      // O que tocou vira o "Continuar ouvindo", também nas sugestões do sistema.
+      final recentes = await carro.filhos(AudioService.recentRootId);
+      expect(recentes.single.id, 'ultimo');
+      expect(recentes.single.artist, 'Capítulo I — De Deus');
+    });
   });
 }

@@ -98,6 +98,11 @@ class ControlePlayer extends ChangeNotifier {
   Future<void> alternar() =>
       _tocando ? _reprodutor.pausar() : _reprodutor.tocar();
 
+  /// Toca (sem alternar): o carro pede "tocar" mesmo se já está tocando.
+  Future<void> tocar() async {
+    if (!_tocando) await _reprodutor.tocar();
+  }
+
   Future<void> pular(Duration delta) {
     final alvo = _posicao + delta;
     return irPara(
