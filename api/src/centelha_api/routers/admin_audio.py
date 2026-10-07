@@ -1,24 +1,28 @@
-"""Admin: gerar áudio do capítulo (#64) e acompanhar a fila.
+"""Admin: gerar áudio do capítulo (#64), acompanhar a fila e ouvir a faixa.
 
 Só enfileira; quem sintetiza é o worker (pipeline/worker.py). As regras de estado,
 idioma da voz e job duplicado ficam em pipeline.jobs.enfileirar, não aqui.
 """
 
+import re
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..db import get_session
 from ..dominio.permissoes import Permissao
-from ..models import Capitulo, EstadoJob, JobAudio, PapelVoz, Segmento, Usuario, Voz
-from ..pipeline import jobs
+from ..models import Capitulo, EstadoJob, FaixaAudio, JobAudio, PapelVoz, Segmento, Usuario, Voz
+from ..pipeline import cifra, jobs
+from ..pipeline.faixa import audio_aberto
 from .admin import exigir, pode_ver_admin
 
 router = APIRouter(prefix="/v1/admin", tags=["admin"])
 pode_gerar_audio = exigir(Permissao.GERAR_AUDIO)
+pode_ouvir_audio = exigir(Permissao.OUVIR_AUDIO)
+_INTERVALO = re.compile(r"^bytes=(\d*)-(\d*)$")
 
 
 class VozSaida(BaseModel):
@@ -130,3 +134,53 @@ def listar_jobs(
         .limit(20)
     )
     return [JobSaida.model_validate(j, from_attributes=True) for j in session.scalars(consulta)]
+
+
+@router.get("/faixas/{faixa_id}/audio")
+def ouvir_faixa(
+    faixa_id: int,
+    range_: str | None = Header(default=None, alias="Range"),
+    _: Usuario = Depends(pode_ouvir_audio),
+    session: Session = Depends(get_session),
+) -> Response:
+    """Faixa aberta para a escuta de revisão, mesmo quando o publicado é .cent.
+
+    É o mesmo áudio que o app toca, sem cópia aberta guardada em lugar nenhum: decifra a
+    cada pedido e nunca fica em cache. Aceita Range de um intervalo, para o revisor
+    pular para o ponto do erro.
+    """
+    faixa = session.get(FaixaAudio, faixa_id)
+    if faixa is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "faixa não encontrada")
+    try:
+        dados = audio_aberto(faixa)
+    except (ValueError, cifra.ErroCifra) as e:
+        # Chave-mestra ausente ou trocada, ou arquivo corrompido: erro do servidor.
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "áudio indisponível") from e
+    cabecalhos = {"Cache-Control": "no-store", "Accept-Ranges": "bytes"}
+    total = len(dados)
+    pedido = _INTERVALO.match(range_.strip()) if range_ else None
+    if range_ and not pedido:
+        # Vários intervalos ou unidade desconhecida: o arquivo inteiro também é resposta válida.
+        return Response(dados, media_type="audio/mp4", headers=cabecalhos)
+    if pedido:
+        a, b = pedido.groups()
+        if a:
+            inicio, fim = int(a), min(int(b), total - 1) if b else total - 1
+        elif b:
+            inicio, fim = max(total - int(b), 0), total - 1
+        else:
+            inicio, fim = total, total - 1
+        if inicio > fim:
+            raise HTTPException(
+                status.HTTP_416_RANGE_NOT_SATISFIABLE,
+                "intervalo fora do arquivo",
+                headers={**cabecalhos, "Content-Range": f"bytes */{total}"},
+            )
+        return Response(
+            dados[inicio : fim + 1],
+            status_code=status.HTTP_206_PARTIAL_CONTENT,
+            media_type="audio/mp4",
+            headers={**cabecalhos, "Content-Range": f"bytes {inicio}-{fim}/{total}"},
+        )
+    return Response(dados, media_type="audio/mp4", headers=cabecalhos)

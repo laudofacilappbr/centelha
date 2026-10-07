@@ -1,6 +1,10 @@
+import base64
+import os
+
 import pytest
 from sqlalchemy import select
 
+from centelha_api.config import get_settings
 from centelha_api.db import SessionLocal
 from centelha_api.dominio import contas
 from centelha_api.models import (
@@ -8,6 +12,7 @@ from centelha_api.models import (
     Edicao,
     EstadoCapitulo,
     EstadoJob,
+    FaixaAudio,
     JobAudio,
     Obra,
     PapelUsuario,
@@ -18,7 +23,7 @@ from centelha_api.models import (
     Usuario,
     Voz,
 )
-from centelha_api.pipeline import worker
+from centelha_api.pipeline import cifra, worker
 from centelha_api.pipeline.armazenamento import ArmazenamentoLocal
 from centelha_api.pipeline.tts.motores import MotorFalso
 
@@ -156,3 +161,96 @@ def test_capitulo_inexistente(client, h):
         headers=h[PapelUsuario.REVISOR_AUDIO],
     )
     assert r.status_code == 404
+
+
+# --- Escuta da faixa ------------------------------------------------------------
+
+URL_AUDIO = "https://audio.exemplo"
+
+
+@pytest.fixture
+def armazenamento(monkeypatch, tmp_path):
+    """Armazenamento local que o worker grava e a API lê."""
+    monkeypatch.setenv("CENTELHA_AUDIO_DIR", str(tmp_path / "audio"))
+    monkeypatch.setenv("CENTELHA_AUDIO_URL_BASE", URL_AUDIO)
+    get_settings.cache_clear()
+    yield ArmazenamentoLocal(tmp_path / "audio", URL_AUDIO)
+    get_settings.cache_clear()
+
+
+@pytest.fixture
+def cifragem(monkeypatch, armazenamento):
+    monkeypatch.setenv("CENTELHA_AUDIO_CIFRAR", "true")
+    monkeypatch.setenv("CENTELHA_AUDIO_CHAVE_MESTRA", base64.b64encode(os.urandom(32)).decode())
+    get_settings.cache_clear()
+    return armazenamento
+
+
+def _faixa_gerada(client, session, h, base, armazenamento):
+    assert _gerar(client, h[PapelUsuario.REVISOR_AUDIO], base).status_code == 202
+    assert worker.processar_um(SessionLocal, armazenamento, motor=MotorFalso())
+    session.expire_all()
+    return session.scalar(select(FaixaAudio).where(FaixaAudio.capitulo_id == base["cap"].id))
+
+
+def test_revisor_ouve_a_faixa_cifrada_decifrada(client, session, h, base, cifragem, tmp_path):
+    """Com a cifragem ligada o publicado é .cent; o revisor de áudio ainda precisa ouvir."""
+    faixa = _faixa_gerada(client, session, h, base, cifragem)
+    assert faixa.formato == cifra.FORMATO
+    publicado = (tmp_path / "audio" / faixa.url.removeprefix(URL_AUDIO + "/")).read_bytes()
+    assert publicado[:4] == b"CENT"
+
+    r = client.get(f"/v1/admin/faixas/{faixa.id}/audio", headers=h[PapelUsuario.REVISOR_AUDIO])
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "audio/mp4"
+    assert r.headers["cache-control"] == "no-store"
+    assert r.content[4:8] == b"ftyp"  # MP4 aberto, não .cent
+    chave = cifra.desembrulhar(faixa.chave_cifrada, get_settings().chave_mestra())
+    assert r.content == cifra.decifrar(publicado, chave)
+
+
+def test_escuta_aceita_intervalo(client, session, h, base, cifragem):
+    """O player do navegador pede Range para pular no áudio."""
+    faixa = _faixa_gerada(client, session, h, base, cifragem)
+    url, hx = f"/v1/admin/faixas/{faixa.id}/audio", h[PapelUsuario.REVISOR_AUDIO]
+    inteiro = client.get(url, headers=hx).content
+    total = len(inteiro)
+
+    r = client.get(url, headers={**hx, "Range": "bytes=10-19"})
+    assert r.status_code == 206
+    assert r.headers["content-range"] == f"bytes 10-19/{total}"
+    assert r.content == inteiro[10:20]
+    assert client.get(url, headers={**hx, "Range": "bytes=-5"}).content == inteiro[-5:]
+    assert client.get(url, headers={**hx, "Range": "bytes=100-"}).content == inteiro[100:]
+    fora = client.get(url, headers={**hx, "Range": f"bytes={total}-"})
+    assert fora.status_code == 416
+    assert fora.headers["content-range"] == f"bytes */{total}"
+
+
+def test_escuta_exige_permissao_de_ouvir(client, session, h, base, cifragem):
+    faixa = _faixa_gerada(client, session, h, base, cifragem)
+    url = f"/v1/admin/faixas/{faixa.id}/audio"
+    assert client.get(url, headers=h[PapelUsuario.REVISOR_TEXTO]).status_code == 403
+    assert client.get(url).status_code == 401
+    adm = h[PapelUsuario.ADMINISTRADOR]
+    assert client.get(url, headers=adm).status_code == 200
+    assert client.get("/v1/admin/faixas/999999/audio", headers=adm).status_code == 404
+
+
+def test_escuta_com_chave_mestra_trocada_e_erro_do_servidor(
+    client, session, h, base, cifragem, monkeypatch
+):
+    faixa = _faixa_gerada(client, session, h, base, cifragem)
+    monkeypatch.setenv("CENTELHA_AUDIO_CHAVE_MESTRA", base64.b64encode(os.urandom(32)).decode())
+    get_settings.cache_clear()
+    r = client.get(f"/v1/admin/faixas/{faixa.id}/audio", headers=h[PapelUsuario.REVISOR_AUDIO])
+    assert r.status_code == 503
+
+
+def test_faixa_aberta_tambem_toca(client, session, h, base, armazenamento):
+    """Cifragem desligada (o padrão hoje): a mesma rota serve o .m4a."""
+    faixa = _faixa_gerada(client, session, h, base, armazenamento)
+    assert faixa.formato == "m4a"
+    r = client.get(f"/v1/admin/faixas/{faixa.id}/audio", headers=h[PapelUsuario.REVISOR_AUDIO])
+    assert r.status_code == 200
+    assert r.content[4:8] == b"ftyp"
