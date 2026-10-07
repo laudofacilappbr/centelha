@@ -122,14 +122,92 @@ void main() {
     );
   });
 
-  test('edição que não está no site vai sem link', () {
-    final frances = _obra('adulto', idioma: 'fr-FR');
-    final citacao = Citacao.daEdicao(frances, frances.edicoes.single)!;
-    final paragrafo = _s(9, TipoSegmento.paragrafo, 'Hors la charité.');
-    expect(linkNoSite(citacao, _capitulo, [paragrafo]), isNull);
+  test('edição em outra língua leva à página dela no site (#48)', () {
+    EdicaoResumo ed(int id, String idioma, {String? slug}) => EdicaoResumo(
+      id: id,
+      idioma: idioma,
+      publico: 'adulto',
+      titulo: 'Le Livre des Esprits',
+      tradutor: null,
+      slug: slug,
+    );
+    final obra = Obra(
+      slug: 'o-livro-dos-espiritos',
+      sigla: 'LE',
+      autor: 'Allan Kardec',
+      tituloOriginal: 'Le Livre des Esprits',
+      ano: 1857,
+      edicoes: [
+        ed(1, 'fr-FR', slug: 'le-livre-des-esprits'),
+        ed(2, 'fr-FR', slug: 'le-livre-des-esprits-1860'),
+        ed(3, 'es', slug: 'el-libro-de-los-espiritus'),
+        ed(4, 'de-DE', slug: 'das-buch-der-geister'),
+      ],
+    );
+    Uri? link(int edicao, Segmento s) => linkNoSite(
+      Citacao.daEdicao(obra, obra.edicoes[edicao - 1])!,
+      _capitulo,
+      [s],
+      site: 'https://centelha.com.br',
+    );
+    final q88 = _s(
+      2,
+      TipoSegmento.pergunta,
+      'Les Esprits ont-ils une forme ?',
+      88,
+    );
+    final paragrafo = _s(9, TipoSegmento.paragrafo, 'Introduction.');
+
+    // Os mesmos caminhos de site/src/lib/idiomas.ts (urlQuestaoEm, urlCapitulo).
     expect(
-      textoParaCompartilhar(t, citacao, _capitulo, [paragrafo]),
+      link(1, q88).toString(),
+      'https://centelha.com.br/fr/le-livre-des-esprits/question/88',
+    );
+    expect(
+      link(1, paragrafo).toString(),
+      'https://centelha.com.br/fr/oeuvres/le-livre-des-esprits/chapitre-3',
+    );
+    expect(
+      link(3, q88).toString(),
+      'https://centelha.com.br/es/el-libro-de-los-espiritus/pregunta/88',
+    );
+    // O site publica só a primeira edição adulta de cada língua; a segunda francesa e a
+    // alemã (língua fora do site) não têm página, e vão sem link.
+    expect(link(2, q88), isNull);
+    expect(link(4, q88), isNull);
+    expect(
+      textoParaCompartilhar(
+        t,
+        Citacao.daEdicao(obra, obra.edicoes[3])!,
+        _capitulo,
+        [paragrafo],
+      ),
       isNot(contains('http')),
+    );
+  });
+
+  test('edição sem slug usa o da obra, como o site', () {
+    final ingles = EdicaoResumo(
+      id: 5,
+      idioma: 'en',
+      publico: 'adulto',
+      titulo: 'The Gospel According to Spiritism',
+      tradutor: null,
+    );
+    final obra = _obra('adulto');
+    final comIngles = Obra(
+      slug: obra.slug,
+      sigla: obra.sigla,
+      autor: obra.autor,
+      tituloOriginal: obra.tituloOriginal,
+      ano: obra.ano,
+      edicoes: [...obra.edicoes, ingles],
+    );
+    expect(
+      linkNoSite(Citacao.daEdicao(comIngles, ingles)!, _capitulo, [
+        _s(9, TipoSegmento.paragrafo, 'Outside charity.'),
+      ], site: 'https://centelha.com.br').toString(),
+      'https://centelha.com.br/en/works/o-evangelho-segundo-o-espiritismo/chapter-3',
     );
   });
 
@@ -167,7 +245,10 @@ void main() {
       compartilhador = (texto, origem) async => compartilhados.add(texto);
     });
 
-    Future<void> abrirCapitulo(WidgetTester tester) async {
+    Future<void> abrirCapitulo(
+      WidgetTester tester, {
+      bool frances = false,
+    }) async {
       tester.platformDispatcher.localesTestValue = const [Locale('pt', 'BR')];
       addTearDown(tester.platformDispatcher.clearLocalesTestValue);
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -188,7 +269,13 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('O Livro dos Espíritos'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Capítulo I — De Deus'));
+      if (frances) {
+        await tester.tap(find.text('Français'));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(
+        find.text(frances ? 'Chapitre premier — Dieu' : 'Capítulo I — De Deus'),
+      );
       await tester.pumpAndSettle();
     }
 
@@ -225,6 +312,20 @@ void main() {
       expect(copiado, startsWith('2. Pergunta de exemplo 2?'));
       expect(find.text('Trecho copiado.'), findsOneWidget);
       expect(compartilhados, isEmpty);
+    });
+
+    testWidgets('na edição francesa, o link é da página em /fr', (
+      tester,
+    ) async {
+      await abrirCapitulo(tester, frances: true);
+      await tester.longPress(find.text('Paragraphe d’exemple sur Dieu.'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Compartilhar trecho'));
+      await tester.pumpAndSettle();
+      expect(
+        compartilhados.single,
+        contains('/fr/oeuvres/le-livre-des-esprits/chapitre-1'),
+      );
     });
 
     testWidgets('título do capítulo não oferece compartilhar', (tester) async {

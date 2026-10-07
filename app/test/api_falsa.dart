@@ -89,6 +89,15 @@ final _rotas = <String, Object>{
     'capitulos': [_capitulo(20, 1, 'Chapitre premier — Dieu')],
   },
   '/v1/capitulos/10': capituloLongo,
+  '/v1/capitulos/20': {
+    ..._capitulo(20, 1, 'Chapitre premier — Dieu'),
+    'edicao_id': 2,
+    'faixa': null,
+    'segmentos': [
+      _segmento(21, 'titulo', 'Dieu'),
+      _segmento(22, 'paragrafo', 'Paragraphe d’exemple sur Dieu.'),
+    ],
+  },
   '/v1/edicoes/1/questoes/88': {
     'edicao_id': 1,
     'numero': 88,

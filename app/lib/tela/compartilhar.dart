@@ -16,20 +16,31 @@ class Citacao {
     required this.obra,
     required this.slugObra,
     this.tradutor,
-    this.comLink = true,
+    this.lingua = 'pt',
+    this.slugEdicao,
   });
 
   /// Edição adulta vira citação; juvenil e infantil, null.
   static Citacao? daEdicao(Obra obra, EdicaoResumo edicao) {
     if (edicao.publico != 'adulto') return null;
+    final lingua = _linguas.contains(edicao.idioma.split('-').first)
+        ? edicao.idioma.split('-').first
+        : null;
+    // O site publica, em cada língua, a primeira edição adulta da obra
+    // (edicoesPorLingua em site/src/lib/idiomas.ts). Link para outra edição levaria a
+    // um texto diferente do compartilhado: ela vai sem link.
+    final doSite = obra.edicoes
+        .where(
+          (e) => e.publico == 'adulto' && e.idioma.split('-').first == lingua,
+        )
+        .firstOrNull;
     return Citacao(
       autor: obra.autor,
       obra: edicao.titulo,
       slugObra: obra.slug,
       tradutor: edicao.tradutor,
-      // O site só publica a edição pt-BR adulta; link para outra apontaria para um
-      // texto diferente do compartilhado.
-      comLink: edicao.idioma == 'pt-BR',
+      lingua: doSite?.id == edicao.id ? lingua : null,
+      slugEdicao: edicao.slug,
     );
   }
 
@@ -37,8 +48,23 @@ class Citacao {
   final String obra;
   final String slugObra;
   final String? tradutor;
-  final bool comLink;
+
+  /// Língua do site onde o trecho está publicado ('pt', 'fr', 'es', 'en'); null = sem
+  /// página no site, compartilha sem link.
+  final String? lingua;
+
+  /// Endereço da edição em /fr, /es e /en; sem ele, o site usa o slug da obra.
+  final String? slugEdicao;
 }
+
+const _linguas = {'pt', 'fr', 'es', 'en'};
+
+/// Nomes das seções em cada língua: os mesmos de ROTAS em site/src/lib/idiomas.ts.
+const _rotas = {
+  'fr': (obras: 'oeuvres', capitulo: 'chapitre', questao: 'question'),
+  'es': (obras: 'obras', capitulo: 'capitulo', questao: 'pregunta'),
+  'en': (obras: 'works', capitulo: 'chapter', questao: 'question'),
+};
 
 /// Abre a folha de compartilhar do sistema. Trocável nos testes, que não têm o canal
 /// nativo do share_plus.
@@ -69,21 +95,33 @@ List<Segmento> trechoDe(Segmento escolhido, List<Segmento> segmentos) {
 }
 
 /// Link permanente no site: a página da questão no LE, senão a do capítulo. Os
-/// caminhos seguem site/src/lib (urlQuestao e slugCapitulo) e não mudam depois de
-/// publicados.
+/// caminhos seguem site/src/lib (urlQuestao, slugCapitulo e idiomas.ts) e não mudam
+/// depois de publicados.
 Uri? linkNoSite(
   Citacao citacao,
   CapituloResumo capitulo,
   List<Segmento> trecho, {
   String site = urlSitePadrao,
 }) {
-  if (!citacao.comLink) return null;
+  final lingua = citacao.lingua;
+  if (lingua == null) return null;
   final base = Uri.parse(site);
   final n = trecho.first.numeroQuestao;
-  if (citacao.slugObra == _obraComQuestoes && n != null) {
-    return base.resolve('/livro-dos-espiritos/questao/$n');
+  final questao = citacao.slugObra == _obraComQuestoes && n != null;
+  if (lingua == 'pt') {
+    return base.resolve(
+      questao
+          ? '/livro-dos-espiritos/questao/$n'
+          : '/obras/${citacao.slugObra}/capitulo-${capitulo.ordem}',
+    );
   }
-  return base.resolve('/obras/${citacao.slugObra}/capitulo-${capitulo.ordem}');
+  final r = _rotas[lingua]!;
+  final slug = citacao.slugEdicao ?? citacao.slugObra;
+  return base.resolve(
+    questao
+        ? '/$lingua/$slug/${r.questao}/$n'
+        : '/$lingua/${r.obras}/$slug/${r.capitulo}-${capitulo.ordem}',
+  );
 }
 
 String textoParaCompartilhar(
