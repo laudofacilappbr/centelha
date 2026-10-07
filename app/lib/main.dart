@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'api/catalogo_api.dart';
 import 'app.dart';
 import 'chave/chaves.dart';
+import 'conta/conta.dart';
 import 'idioma/preferencia_idioma.dart';
 import 'l10n/app_localizations.dart';
 import 'offline/downloads.dart';
@@ -52,7 +53,10 @@ Future<void> main() async {
     ),
   );
   reprodutor.conectarCarro(filhos: carro.filhos, tocar: carro.tocar);
-  runApp(CentelhaApp(api: api, idioma: idioma, player: player));
+  final conta = Conta(cofre: CofreSeguro());
+  // Sem esperar: sem internet, o app abre do mesmo jeito.
+  unawaited(conta.carregar());
+  runApp(CentelhaApp(api: api, idioma: idioma, player: player, conta: conta));
 }
 
 // As fontes vão empacotadas no app; a OFL pede que a licença vá junto.

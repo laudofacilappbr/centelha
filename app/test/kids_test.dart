@@ -147,6 +147,7 @@ void main() {
       'planos.dart',
       'chaves.dart',
       'downloads.dart',
+      'conta.dart',
       'url_launcher',
       'share_plus',
     ];
