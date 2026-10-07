@@ -240,5 +240,47 @@
       }
     }
   },
-  "ouvirBaixados": "Ouvir os baixados"
+  "ouvirBaixados": "Ouvir os baixados",
+  "planosDeEstudo": "Planos de estudo",
+  "planosDeEstudoChamada": "Um roteiro de leitura, dia a dia",
+  "planoDias": "{n} dias",
+  "planoDia": "Dia {n}",
+  "planoLer": "Ler",
+  "planoProgresso": "{lidos} de {total} dias lidos",
+  "leituraIndisponivel": "Esta leitura ainda não está publicada neste idioma.",
+  "questoesDeAte": "questões {de} a {ate}",
+  "@planoDias": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@planoDia": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@planoProgresso": {
+    "placeholders": {
+      "lidos": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@questoesDeAte": {
+    "placeholders": {
+      "de": {
+        "type": "int"
+      },
+      "ate": {
+        "type": "int"
+      }
+    }
+  }
 }
