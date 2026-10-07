@@ -75,6 +75,8 @@ class Par:
     adaptacao: str
     trechos: list[Trecho] = field(default_factory=list)
     geral: list[Apontamento] = field(default_factory=list)
+    # Id do capítulo adaptado no banco, para anexar o relatório (--anexar).
+    capitulo_id: int | None = None
 
 
 def _chave(s: Seg) -> str:
@@ -271,6 +273,7 @@ def relatorio(par: Par, avaliacao: dict[str, Apontamento]) -> tuple[str, dict[st
 
 def _par_de_json(dados: dict) -> Par:
     par = Par(**{k: dados[k] for k in ("obra", "capitulo", "publico", "original", "adaptacao")})
+    par.capitulo_id = dados.get("capitulo_id")
     par.geral = [Apontamento(**a) for a in dados.get("geral", [])]
     par.trechos = [
         Trecho(
@@ -327,7 +330,7 @@ def _montar_do_banco(capitulo_id: int, original_edicao_id: int | None) -> Par:
         def segs(c) -> list[Seg]:
             return [Seg(x.tipo.value, x.texto, x.numero_questao, x.subquestao) for x in c.segmentos]
 
-        return montar_par(
+        par = montar_par(
             segs(cap_original),
             segs(cap),
             obra=ed.obra.slug,
@@ -337,6 +340,33 @@ def _montar_do_banco(capitulo_id: int, original_edicao_id: int | None) -> Par:
             titulo_adaptacao=ed.titulo,
             fonte_adaptacao=ed.fonte,
         )
+        par.capitulo_id = cap.id
+        return par
+
+
+def anexar(session, capitulo, relatorio_md: str, contagem: dict[str, int], usuario=None, ip=None):
+    """Guarda o relatório no capítulo adaptado, para quem aprova no admin (#98).
+    ValueError se o capítulo não é de adaptação."""
+    from ..dominio import contas
+    from ..models import Publico, RevisaoIA
+
+    if capitulo.edicao.publico == Publico.ADULTO:
+        raise ValueError("o capítulo é de edição adulta: a revisão doutrinária é das adaptações")
+    revisao = RevisaoIA(
+        capitulo_id=capitulo.id,
+        relatorio=relatorio_md,
+        bloqueios=contagem["bloqueio"],
+        atencoes=contagem["atencao"],
+        ok=contagem["ok"],
+        usuario_id=usuario.id if usuario else None,
+    )
+    session.add(revisao)
+    session.flush()
+    contas.registrar(
+        session, "revisao_ia_anexada", usuario, "capitulo", capitulo.id, ip,
+        revisao_id=revisao.id, bloqueios=revisao.bloqueios, atencoes=revisao.atencoes,
+    )  # fmt: skip
+    return revisao
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -350,6 +380,11 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("par", type=Path)
     r.add_argument("avaliacao", type=Path)
     r.add_argument("--saida", type=Path, required=True)
+    r.add_argument(
+        "--anexar",
+        action="store_true",
+        help="grava o relatório no capítulo, no banco, para quem aprova no admin",
+    )
     a = p.parse_args(argv)
 
     if a.comando == "montar":
@@ -373,6 +408,25 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     texto, contagem = relatorio(par, avaliacao)
     a.saida.write_text(texto, encoding="utf-8")
+    if a.anexar:
+        if par.capitulo_id is None:
+            print("o par não tem capitulo_id: monte-o de novo com 'montar'", file=sys.stderr)
+            return 1
+        from ..db import SessionLocal
+        from ..models import Capitulo
+
+        with SessionLocal() as s:
+            capitulo = s.get(Capitulo, par.capitulo_id)
+            if capitulo is None:
+                print("capítulo não encontrado", file=sys.stderr)
+                return 1
+            try:
+                revisao = anexar(s, capitulo, texto, contagem)
+            except ValueError as e:
+                print(e, file=sys.stderr)
+                return 1
+            s.commit()
+            print(f"relatório anexado ao capítulo {capitulo.id} (revisão {revisao.id})")
     print(
         f"bloqueio: {contagem['bloqueio']} · atenção: {contagem['atencao']} · "
         f"ok: {contagem['ok']}; relatório em {a.saida}"

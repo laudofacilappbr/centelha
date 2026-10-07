@@ -217,6 +217,23 @@ class FaixaAudio(Base):
     capitulo: Mapped[Capitulo] = relationship(back_populates="faixas")
 
 
+class RevisaoIA(Base):
+    """Relatório da primeira revisão doutrinária feita por IA num capítulo adaptado (#98).
+    Só informa quem aprova no admin: não muda o estado nem trava a aprovação."""
+
+    __tablename__ = "revisao_ia"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    capitulo_id: Mapped[int] = mapped_column(ForeignKey("capitulo.id"), index=True)
+    relatorio: Mapped[str] = mapped_column(Text)
+    bloqueios: Mapped[int]
+    atencoes: Mapped[int]
+    ok: Mapped[int]
+    # Nulo quando veio do comando no servidor, sem usuário do admin.
+    usuario_id: Mapped[int | None] = mapped_column(ForeignKey("usuario.id"))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Pronuncia(Timestamps, Base):
     __tablename__ = "pronuncia"
     __table_args__ = (UniqueConstraint("idioma", "termo"),)
