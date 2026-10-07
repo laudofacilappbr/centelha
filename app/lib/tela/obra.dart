@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import 'capitulo.dart';
 import 'comum.dart';
 import 'compartilhar.dart';
+import 'trocar_edicao.dart';
 
 /// Uma obra: escolha da edição, busca por questão e lista de capítulos.
 class TelaObra extends StatefulWidget {
@@ -38,6 +39,7 @@ class _TelaObraState extends State<TelaObra> {
         carregar: () => widget.api.edicao(_edicao.id),
         construir: (context, edicao) {
           final citacao = Citacao.daEdicao(widget.obra, _edicao);
+          final origem = OrigemCapitulo(obra: widget.obra, edicao: _edicao);
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
@@ -54,6 +56,7 @@ class _TelaObraState extends State<TelaObra> {
                 edicao: edicao.titulo,
                 autor: widget.obra.autor,
                 citacao: citacao,
+                origem: origem,
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
@@ -73,6 +76,7 @@ class _TelaObraState extends State<TelaObra> {
                     edicao: edicao.titulo,
                     autor: widget.obra.autor,
                     citacao: citacao,
+                    origem: origem,
                   ),
                 ),
             ],
@@ -92,6 +96,7 @@ void abrirCapitulo(
   int? questao,
   String? subquestao,
   Citacao? citacao,
+  OrigemCapitulo? origem,
 }) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
@@ -103,6 +108,7 @@ void abrirCapitulo(
         questao: questao,
         subquestao: subquestao,
         citacao: citacao,
+        origem: origem,
       ),
     ),
   );
@@ -180,6 +186,7 @@ class _BuscaQuestao extends StatefulWidget {
     required this.edicao,
     required this.autor,
     this.citacao,
+    this.origem,
   });
 
   final CatalogoApi api;
@@ -187,6 +194,7 @@ class _BuscaQuestao extends StatefulWidget {
   final String edicao;
   final String autor;
   final Citacao? citacao;
+  final OrigemCapitulo? origem;
 
   @override
   State<_BuscaQuestao> createState() => _BuscaQuestaoState();
@@ -226,6 +234,7 @@ class _BuscaQuestaoState extends State<_BuscaQuestao> {
         questao: busca.numero,
         subquestao: busca.sub,
         citacao: widget.citacao,
+        origem: widget.origem,
       );
     } on ErroCatalogo {
       avisar(t.erroCarregar);

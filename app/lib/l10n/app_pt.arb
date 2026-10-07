@@ -191,6 +191,15 @@
   "apagarDownloadTexto": "Ele continua no app para ouvir com internet.",
   "apagar": "Apagar",
   "cancelar": "Cancelar",
+  "lerEmOutroIdioma": "Ler em outro idioma",
+  "posicaoNaoEncontrada": "Esta parte não está em {edicao}.",
+  "@posicaoNaoEncontrada": {
+    "placeholders": {
+      "edicao": {
+        "type": "String"
+      }
+    }
+  },
   "baixados": "Baixados",
   "baixadosVazio": "Nenhum capítulo baixado. Use o botão de download no player do capítulo.",
   "baixadoValeAte": "{edicao} · ouve sem internet até {data}",

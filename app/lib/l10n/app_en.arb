@@ -80,6 +80,8 @@
   "apagarDownloadTexto": "It stays in the app to listen online.",
   "apagar": "Remove",
   "cancelar": "Cancel",
+  "lerEmOutroIdioma": "Read in another language",
+  "posicaoNaoEncontrada": "This part is not in {edicao}.",
   "baixados": "Downloads",
   "baixadosVazio": "No downloaded chapters. Use the download button in a chapter's player.",
   "baixadoValeAte": "{edicao} · plays offline until {data}",

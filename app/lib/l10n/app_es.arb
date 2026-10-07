@@ -80,6 +80,8 @@
   "apagarDownloadTexto": "Sigue en la app para escucharlo con internet.",
   "apagar": "Borrar",
   "cancelar": "Cancelar",
+  "lerEmOutroIdioma": "Leer en otro idioma",
+  "posicaoNaoEncontrada": "Esta parte no está en {edicao}.",
   "baixados": "Descargados",
   "baixadosVazio": "No hay capítulos descargados. Usa el botón de descarga en el reproductor del capítulo.",
   "baixadoValeAte": "{edicao} · se escucha sin internet hasta el {data}",
