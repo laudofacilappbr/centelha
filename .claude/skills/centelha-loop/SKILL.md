@@ -8,7 +8,9 @@ description: Uma volta do ciclo de desenvolvimento do Centelha — sincroniza a 
 Repositório: `laudofacilappbr/centelha` · checkout principal: `D:\REPOSITORIOS\CENTELHA`.
 Regras do projeto em `CLAUDE.md` (raiz) e fluxo em `RICARDO-DEFAULT/20-engenharia/fluxo-desenvolvimento/FLUXO-DE-TRABALHO.md`. Este arquivo não as repete: aplica.
 
-Cada volta faz **uma** tarefa, do começo ao PR validado em Docker. Nunca faz merge: merge é do dono.
+Cada volta faz **uma** tarefa, do começo ao PR validado em Docker.
+
+> **Merge pela sessão: PROVISÓRIO**, autorizado pelo dono em 2026-10-07 até ele desligar. Para desligar, apague este bloco e o **Passo 6b**, e volte a frase acima para "Nunca faz merge: merge é do dono". Enquanto valer, a sessão faz o merge da própria PR seguindo o Passo 6b. Merge na `main` dispara o Deploy: é ir para produção.
 
 ## Passo 0 — Parar antes de começar?
 
@@ -111,8 +113,28 @@ Corpo da PR: o que muda, o resultado do `ci/validar.sh` (alvos e número de test
 
 Não espere checks do GitHub: a PR não tem. Se a main andou enquanto você trabalhava, traga-a para a branch (`git merge origin/main`), resolva conflitos e rode `ci/validar.sh` de novo antes do push.
 
+## Passo 6b — Merge (provisório, ver o aviso no topo)
+
+Só a PR desta sessão. Pule o merge, deixe para o dono e diga por quê, se:
+- a issue tem `decisao` ou `manual` sem resposta transcrita, ou a PR pede decisão do dono;
+- a PR mexe em `.github/workflows/`, `infra/vps/`, segredos ou nas regras (`CLAUDE.md`, esta skill);
+- `ci/validar.sh` não passou inteiro, ou alguma verificação de verdade falhou.
+
+Senão, imediatamente antes do merge:
+
+```sh
+git fetch && git merge origin/main          # na worktree; resolva conflitos
+bash ci/validar.sh                          # de novo, com a main de agora: saída 0 em todos os alvos
+cd api && uv run alembic heads              # migração: exatamente uma head
+git push
+gh pr view <n> -R laudofacilappbr/centelha --json mergeable   # MERGEABLE
+gh pr merge <n> -R laudofacilappbr/centelha --squash --delete-branch
+```
+
+Uma PR por vez: se outra sessão fez merge enquanto você validava (`git fetch` mostra a main nova), repita. Depois do merge, comente na PR o resultado da validação final.
+
 ## Passo 7 — Fechar a volta
 
 - `git worktree remove ../CENTELHA-$N` (a branch fica no remoto, na PR).
-- Mantenha `em-andamento` até a PR entrar (o passo 1 da próxima volta limpa).
-- Relatório curto ao dono: issue e PR (links), o que foi verificado, o que ficou de fora, o que precisa dele (merge, decisão, ação manual), e se a próxima volta vai parar no passo 0.
+- Mantenha `em-andamento` até a PR entrar (o passo 1 da próxima volta limpa). Se a sessão fez o merge, tire a label já, e comente o que falta se a issue não fechou.
+- Relatório curto ao dono: issue e PR (links), o que foi verificado, o que ficou de fora, o que precisa dele (merge, se não foi feito, decisão, ação manual), e se a próxima volta vai parar no passo 0.
