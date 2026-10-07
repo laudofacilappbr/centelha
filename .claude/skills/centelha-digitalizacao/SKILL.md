@@ -1,6 +1,6 @@
 ---
 name: centelha-digitalizacao
-description: Converte um exemplar escaneado (PDF ou fotos) de uma obra do Centelha em texto revisado e pronto para a ingestão. Faz OCR com Tesseract em português, limpa cabeçalhos, números de página e hifenização, atualiza a grafia de 1943 para a atual e gera um relatório de revisão com a página do exemplar. Use quando houver um exemplar novo para digitalizar (edição-fonte da #2), para revisar o OCR de uma obra ou para preparar o texto antes da centelha-ingestao.
+description: Converte um exemplar escaneado (PDF ou fotos) de uma obra do Centelhar em texto revisado e pronto para a ingestão. Faz OCR com Tesseract em português, limpa cabeçalhos, números de página e hifenização, atualiza a grafia de 1943 para a atual e gera um relatório de revisão com a página do exemplar. Use quando houver um exemplar novo para digitalizar (edição-fonte da #2), para revisar o OCR de uma obra ou para preparar o texto antes da centelha-ingestao.
 ---
 
 # /centelha-digitalizacao — do exemplar escaneado ao texto revisado

@@ -39,7 +39,7 @@ jobs:
           target: ${{ matrix.alvo }}
           push: true
           build-args: |
-            PUBLIC_API_URL=${{ vars.PUBLIC_API_URL || 'https://api.centelha.com.br' }}
+            PUBLIC_API_URL=${{ vars.PUBLIC_API_URL || 'https://api.centelhar.com.br' }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/centelha-${{ matrix.servico }}:latest
             ghcr.io/${{ github.repository_owner }}/centelha-${{ matrix.servico }}:${{ github.sha }}

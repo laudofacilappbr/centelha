@@ -1,6 +1,8 @@
 # Regras deste repositório
 
-Monorepo do Centelha: `api/` (FastAPI), `site/` (Astro), `app/` (Flutter), `infra/` (Docker Compose + Caddy). Plano em [docs/ROADMAP.md](docs/ROADMAP.md), especificação em [docs-iniciais/MDs/](docs-iniciais/MDs/).
+Monorepo do Centelhar: `api/` (FastAPI), `site/` (Astro), `app/` (Flutter), `infra/` (Docker Compose + Caddy). Plano em [docs/ROADMAP.md](docs/ROADMAP.md), especificação em [docs-iniciais/MDs/](docs-iniciais/MDs/).
+
+Marca: **Centelhar**, domínio `centelhar.com.br` ([ADR 0007](docs/decisoes/0007-marca-centelhar.md)). Texto visível usa Centelhar; identificadores internos (`centelha_api`, `package:centelha`, `CENTELHA_*`, banco, imagens, `/opt/centelha`) continuam `centelha` de propósito.
 
 ## Fluxo de trabalho
 
