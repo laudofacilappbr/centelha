@@ -13,7 +13,7 @@ typedef AbrirLink = Future<bool> Function(Uri uri);
 Future<bool> abrirNoNavegador(Uri uri) =>
     launchUrl(uri, mode: LaunchMode.externalApplication);
 
-/// "Apoie o Centelha" (#40). Apoiar não libera nada: o app é o mesmo para todos.
+/// "Apoie o Centelhar" (#40). Apoiar não libera nada: o app é o mesmo para todos.
 /// Só aparece com o apoio ligado na configuração remota, e nunca no perfil infantil.
 class TelaApoio extends StatelessWidget {
   const TelaApoio({

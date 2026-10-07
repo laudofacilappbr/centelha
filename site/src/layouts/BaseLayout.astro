@@ -13,7 +13,7 @@ import { organizationLd } from '../lib/jsonld';
 import { HREFLANG, OG_LOCALE, TEXTOS, type Alternativa, type Lingua } from '../lib/idiomas';
 
 interface Props {
-  /** Título da página (sem o sufixo "| Centelha"). Na home, use o título completo. */
+  /** Título da página (sem o sufixo "| Centelhar"). Na home, use o título completo. */
   title: string;
   description?: string;
   /** Imagem de compartilhamento (caminho absoluto no site). */
@@ -23,7 +23,7 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
   /** Desliga qualquer analítica nesta página (obrigatório em /kids). */
   semAnalitica?: boolean;
-  /** Título já completo (não acrescenta " | Centelha"). */
+  /** Título já completo (não acrescenta " | Centelhar"). */
   tituloCompleto?: boolean;
   noindex?: boolean;
   /** Idioma da página (#48); o português fica na raiz. */
@@ -36,7 +36,7 @@ const {
   title,
   description = SITE.descricaoPadrao,
   ogImage = '/og/share-1200x630.png',
-  ogImageAlt = 'Centelha — as obras de Kardec para ouvir, grátis',
+  ogImageAlt = 'Centelhar — as obras de Kardec para ouvir, grátis',
   jsonLd = [],
   semAnalitica = false,
   tituloCompleto = false,

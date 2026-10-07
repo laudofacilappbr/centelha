@@ -2,6 +2,9 @@
 
 Oct 5, 2026 · @Ricardo
 
+> **Nome atualizado em 06/10/2026:** a marca passou a ser **Centelhar** (domínio centelhar.com.br; mascote "Clara, a pequena centelha"). Este texto é anterior à mudança; onde disser "Centelha" como marca, leia Centelhar. Ver [a definição](CENTELHAR_Alteracao_de_Nome_e_Arquitetura_da_Marca.md) e o [ADR 0007](../../docs/decisoes/0007-marca-centelhar.md).
+
+
 ## Objetivo
 
 Os canais divulgam o app Centelha com vídeos curtos gerados com IA a partir das mesmas obras em domínio público do app. Cada vídeo é um trecho ou uma ideia de Kardec em até 60 segundos, com chamada para ouvir a obra completa no app.

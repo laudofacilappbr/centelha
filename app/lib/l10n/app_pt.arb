@@ -1,6 +1,6 @@
 {
   "@@locale": "pt",
-  "appTitulo": "Centelha",
+  "appTitulo": "Centelhar",
   "obras": "Obras",
   "configuracoes": "Configurações",
   "carregando": "Carregando…",
@@ -103,9 +103,9 @@
   "acompanharLeitura": "Acompanhar a leitura",
   "ouvirDaqui": "Ouvir a partir daqui",
   "lendoAgora": "Lendo agora",
-  "apoieTitulo": "Apoie o Centelha",
+  "apoieTitulo": "Apoie o Centelhar",
   "apoioIndisponivel": "O apoio não está disponível agora.",
-  "apoioMensagemPadrao": "O Centelha é gratuito e sem anúncios. O apoio ajuda a pagar a narração, o servidor e as lojas.",
+  "apoioMensagemPadrao": "O Centelhar é gratuito e sem anúncios. O apoio ajuda a pagar a narração, o servidor e as lojas.",
   "apoioNaoLibera": "Apoiar não libera nenhum conteúdo: o app é o mesmo para todos.",
   "apoioRecebedor": "O apoio vai para {recebedor}.",
   "@apoioRecebedor": {
@@ -150,7 +150,7 @@
       }
     }
   },
-  "campanhaDireto": "A doação vai direto para a instituição, pela chave Pix dela. O Centelha não recebe nem vê nada.",
+  "campanhaDireto": "A doação vai direto para a instituição, pela chave Pix dela. O Centelhar não recebe nem vê nada.",
   "campanhaDoarSite": "Doar pelo site da instituição",
   "campanhaSiteInstituicao": "Conhecer a instituição",
   "compartilharTrecho": "Compartilhar trecho",

@@ -108,7 +108,7 @@ def test_chave_pix_cpf_ou_invalida_e_recusada(client, h, chave):
 @pytest.mark.parametrize(
     ("chave", "gravada"),
     [
-        ("apoio@centelha.app", "apoio@centelha.app"),
+        ("apoio@centelhar.com.br", "apoio@centelhar.com.br"),
         ("+55 11 91234-5678".replace("-", ""), "+5511912345678"),
         ("12.345.678/0001-95", "12345678000195"),
     ],

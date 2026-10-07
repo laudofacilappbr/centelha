@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class CamposSeo(BaseModel):
-    # 60 porque o site acrescenta " | Centelha"; 160 é o que a busca costuma mostrar.
+    # 60 porque o site acrescenta " | Centelhar"; 160 é o que a busca costuma mostrar.
     seo_titulo: str | None = Field(default=None, max_length=60)
     seo_descricao: str | None = Field(default=None, max_length=160)
 

@@ -8,10 +8,10 @@ import '../api/catalogo_api.dart';
 import '../l10n/app_localizations.dart';
 import 'apoio.dart' show AbrirLink;
 
-/// Site do Centelha, definido no build como a API: --dart-define=CENTELHA_SITE_URL=...
+/// Site do Centelhar, definido no build como a API: --dart-define=CENTELHA_SITE_URL=...
 const urlSitePadrao = String.fromEnvironment(
   'CENTELHA_SITE_URL',
-  defaultValue: 'https://centelha.com.br',
+  defaultValue: 'https://centelhar.com.br',
 );
 
 const _chaveFechada = 'campanha_fechada';

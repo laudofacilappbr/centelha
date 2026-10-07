@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Site e landing page do Centelha — audiolivros espíritas gratuitos.",
+  "description": "Site e landing page do Centelhar — audiolivros espíritas gratuitos.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

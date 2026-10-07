@@ -1,6 +1,6 @@
-# Centelha — site e landing page
+# Centelhar — site e landing page
 
-Site estático do Centelha (Astro + TypeScript + CSS puro com os tokens da marca).
+Site estático do Centelhar (Astro + TypeScript + CSS puro com os tokens da marca).
 Fase 0 + base da Fase 1: landing com lista de espera, `/sobre`, `/como-fazemos`,
 `/transparencia`, `/kids` e páginas legais (`/privacidade`, `/termos`, `/suporte`).
 
@@ -24,7 +24,7 @@ npm run check             # astro check (tipos e diagnósticos)
 | Variável | Uso |
 | --- | --- |
 | `PUBLIC_API_URL` | URL base da API, sem barra final. O formulário faz `POST ${PUBLIC_API_URL}/v1/waitlist` com `{"email": "...", "origem": "site"}`. Também entra no `connect-src` da CSP. Vazia = formulário mostra "lista indisponível". |
-| `SITE_URL` | URL canônica (canonical, Open Graph, sitemap, robots.txt). Padrão `https://centelha.com.br` (domínio ainda a confirmar). |
+| `SITE_URL` | URL canônica (canonical, Open Graph, sitemap, robots.txt). Padrão `https://centelhar.com.br` (domínio ainda a confirmar). |
 | `PUBLIC_PLAUSIBLE_DOMAIN` | Opcional. Liga o Plausible (sem cookies). A página `/kids` nunca carrega analítica. |
 
 Como o site é estático, mudar qualquer variável exige novo build.
@@ -73,8 +73,8 @@ O site roda num container próprio: build com Node e serviço com nginx na porta
 
 ```bash
 docker build \
-  --build-arg PUBLIC_API_URL=https://api.centelha.com.br \
-  --build-arg SITE_URL=https://centelha.com.br \
+  --build-arg PUBLIC_API_URL=https://api.centelhar.com.br \
+  --build-arg SITE_URL=https://centelhar.com.br \
   -t centelha-site .
 
 docker run -d --name centelha-site --restart unless-stopped -p 8080:80 centelha-site

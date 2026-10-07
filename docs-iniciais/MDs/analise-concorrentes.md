@@ -2,6 +2,9 @@
 
 Oct 5, 2026 · @Ricardo
 
+> **Nome atualizado em 06/10/2026:** a marca passou a ser **Centelhar** (domínio centelhar.com.br; mascote "Clara, a pequena centelha"). Este texto é anterior à mudança; onde disser "Centelha" como marca, leia Centelhar. Ver [a definição](CENTELHAR_Alteracao_de_Nome_e_Arquitetura_da_Marca.md) e o [ADR 0007](../../docs/decisoes/0007-marca-centelhar.md).
+
+
 ## Resumo
 
 Nenhum concorrente encontrado faz exatamente o que o Centelha propõe: um app gratuito, só de áudio, com as obras de Kardec narradas integralmente, offline, com leitura acompanhada e versões para crianças. O mercado se divide em quatro grupos:

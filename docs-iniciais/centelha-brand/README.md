@@ -1,5 +1,7 @@
 # Centelha — Brand Package v1.0
 
+> **Nome atualizado em 06/10/2026: Centelhar** ([ADR 0007](../../docs/decisoes/0007-marca-centelhar.md)). Os logos horizontais já trazem o wordmark "Centelhar" (o "r" é o glyph da Comfortaa Bold, na mesma escala). As referências PNG em `reference/` e o `app-icon-1024.png` são do pacote original.
+
 Pacote produzido a partir das três referências fornecidas em 05/10/2026. A marca não foi redesenhada: a geometria foi reconstruída em vetor e sistematizada.
 
 ## Comece aqui

@@ -31,6 +31,6 @@ Saída: 30 capítulos (Prefácio, Introdução e capítulos I a XXVIII) e 1.709 
 - **(#3, advogado):** a revisão ortográfica de 2013 feita pela FEB é ato técnico, sem criação nova, e não gera direito que impeça o uso? O pipeline normaliza a grafia de qualquer forma.
 - **(#2, antes do áudio):** conferir por amostragem contra o exemplar FEB de 1949 que só a grafia mudou. Comparar a introdução e um capítulo inteiro.
 
-**Crédito:** *O Evangelho segundo o Espiritismo*, de Allan Kardec, tradução de Guillon Ribeiro. Texto conferido com a edição FEB de [ano do exemplar]. Narração por voz sintética ([motor]). Áudio e leitura acompanhada: Centelha.
+**Crédito:** *O Evangelho segundo o Espiritismo*, de Allan Kardec, tradução de Guillon Ribeiro. Texto conferido com a edição FEB de [ano do exemplar]. Narração por voz sintética ([motor]). Áudio e leitura acompanhada: Centelhar.
 
 **Campos para o admin (`Direitos`):** falecimento_tradutor = 1943-10-26 · base_legal = "Tradução de Guillon Ribeiro (†1943), domínio público desde 1º/1/2014 (Lei 9.610/98, art. 41). Sem notas, explicações e nota explicativa da editora (FEB)." · documento_url = <fotos da folha de rosto do exemplar antigo, na #2>

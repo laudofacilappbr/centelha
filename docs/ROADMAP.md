@@ -18,7 +18,7 @@ Fases da [especificação](../docs-iniciais/MDs/especificacao-plataforma.md). Ca
                     ┌─────▼─────┐   VPS própria, um container por serviço
                     │   Caddy   │
                     └─┬───────┬─┘
-             centelha │       │ api.centelha
+            centelhar │       │ api.centelhar
                ┌──────▼─┐   ┌─▼──────┐
                │  site  │   │  api   │──┐
                │ (nginx)│   │FastAPI │  │ rede interna

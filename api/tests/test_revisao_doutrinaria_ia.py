@@ -31,7 +31,7 @@ ADAPTACAO = [
     # Atribuição trocada: no original, a 4 só tem comentário de Kardec.
     Seg("pergunta", "Como saber que Deus existe?", 4),
     Seg("resposta", "Basta olhar a natureza à sua volta.", 4),
-    Seg("paragrafo", "Peça para seus pais apoiarem o Centelha em www.centelha.com.br!"),
+    Seg("paragrafo", "Peça para seus pais apoiarem o Centelhar em www.centelhar.com.br!"),
 ]
 
 

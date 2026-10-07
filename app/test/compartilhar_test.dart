@@ -90,7 +90,7 @@ void main() {
       _citacaoLe,
       _capitulo,
       trechoDe(_le[1], _le),
-      site: 'https://centelha.com.br',
+      site: 'https://centelhar.com.br',
     );
     expect(
       texto,
@@ -100,7 +100,7 @@ void main() {
       '\n'
       '— Allan Kardec, O Livro dos Espíritos, questão 88. '
       'Tradução de Guillon Ribeiro.\n'
-      'https://centelha.com.br/livro-dos-espiritos/questao/88',
+      'https://centelhar.com.br/livro-dos-espiritos/questao/88',
     );
     expect(
       textoParaCompartilhar(t, _citacaoLe, _capitulo, [_le[3], _le[4]]),
@@ -117,8 +117,8 @@ void main() {
     expect(
       linkNoSite(citacao, _capitulo, [
         paragrafo,
-      ], site: 'https://centelha.com.br').toString(),
-      'https://centelha.com.br/obras/o-evangelho-segundo-o-espiritismo/capitulo-3',
+      ], site: 'https://centelhar.com.br').toString(),
+      'https://centelhar.com.br/obras/o-evangelho-segundo-o-espiritismo/capitulo-3',
     );
   });
 
@@ -148,7 +148,7 @@ void main() {
       Citacao.daEdicao(obra, obra.edicoes[edicao - 1])!,
       _capitulo,
       [s],
-      site: 'https://centelha.com.br',
+      site: 'https://centelhar.com.br',
     );
     final q88 = _s(
       2,
@@ -161,15 +161,15 @@ void main() {
     // Os mesmos caminhos de site/src/lib/idiomas.ts (urlQuestaoEm, urlCapitulo).
     expect(
       link(1, q88).toString(),
-      'https://centelha.com.br/fr/le-livre-des-esprits/question/88',
+      'https://centelhar.com.br/fr/le-livre-des-esprits/question/88',
     );
     expect(
       link(1, paragrafo).toString(),
-      'https://centelha.com.br/fr/oeuvres/le-livre-des-esprits/chapitre-3',
+      'https://centelhar.com.br/fr/oeuvres/le-livre-des-esprits/chapitre-3',
     );
     expect(
       link(3, q88).toString(),
-      'https://centelha.com.br/es/el-libro-de-los-espiritus/pregunta/88',
+      'https://centelhar.com.br/es/el-libro-de-los-espiritus/pregunta/88',
     );
     // O site publica só a primeira edição adulta de cada língua; a segunda francesa e a
     // alemã (língua fora do site) não têm página, e vão sem link.
@@ -206,8 +206,8 @@ void main() {
     expect(
       linkNoSite(Citacao.daEdicao(comIngles, ingles)!, _capitulo, [
         _s(9, TipoSegmento.paragrafo, 'Outside charity.'),
-      ], site: 'https://centelha.com.br').toString(),
-      'https://centelha.com.br/en/works/o-evangelho-segundo-o-espiritismo/chapter-3',
+      ], site: 'https://centelhar.com.br').toString(),
+      'https://centelhar.com.br/en/works/o-evangelho-segundo-o-espiritismo/chapter-3',
     );
   });
 

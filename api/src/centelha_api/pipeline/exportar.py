@@ -30,9 +30,9 @@ LEIAME = """\
 {autor}{tradutor}
 
 Exportação para uso pessoal, feita a pedido por acessibilidade (pedido {pedido}).
-Os arquivos são o mesmo áudio do app Centelha, em formato aberto, para tocar em
+Os arquivos são o mesmo áudio do app Centelhar, em formato aberto, para tocar em
 qualquer player. Não redistribua: o texto pode ter direitos de tradução, e o
-Centelha só o oferece dentro do app.
+Centelhar só o oferece dentro do app.
 
 Narração gerada por voz sintética e revisada por pessoas.
 Fonte do texto: {fonte}

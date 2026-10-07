@@ -23,7 +23,7 @@ from .video import ErroVideo, TrechoLegenda, montar_video
 
 # Só trecho cujo áudio passou pela revisão humana vai para a rede.
 ESTADOS_PERMITIDOS = {EstadoCapitulo.AUDIO_REVISADO, EstadoCapitulo.PUBLICADO}
-CHAMADA = "Ouça o capítulo completo no app Centelha"
+CHAMADA = "Ouça o capítulo completo no app Centelhar"
 
 
 def _segmentos(session, capitulo: Capitulo, questao: int | None, faixa: str | None):
