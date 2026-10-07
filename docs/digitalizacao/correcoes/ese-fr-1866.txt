@@ -8,6 +8,10 @@
 #
 #   centelha-digitalizar processar saida/paginas.txt --saida saida --idioma fra \
 #     --referencia archive-djvu.txt --correcoes docs/digitalizacao/correcoes/ese-fr-1866.txt
+#   centelha-ingestao saida/texto.txt --comecar-em "PRÉFACE" --cortar-em "TABLE DES MATIÈRES"
+#
+# A ingestão começa na PRÉFACE: folha de rosto e lista de obras não são texto da obra
+# (decisão do dono na #45).
 
 # Cap. VI, Le Christ consolateur
 p. 133: autre consoläteur => autre consolateur
@@ -591,8 +595,9 @@ p. 457: juntar: elle ne peut faire que
 
 # Estrutura para a ingestão: títulos de capítulo partidos em duas linhas e o cabeçalho
 # "24 CHAPITRE III." que perdeu o número (#45). O "CHAPITRE XVI" de "Soyez parfaits"
-# (p. 297) é erro tipográfico do próprio exemplar (cabeçalhos e sumário dizem XVII):
-# fica como impresso, à espera da decisão do dono.
+# (p. 297) é erro tipográfico do próprio exemplar: os cabeçalhos das p. 298-312 e o
+# sumário dizem XVII. Corrigido por decisão do dono na #45 ("sempre corrigir").
+p. 297: CHAPITRE XVI => CHAPITRE XVII
 p. 13: JL. BuT DE CET OUVRAGE. => I. BUT DE CET OUVRAGE.
 p. 67: juntar: MON PÈRE.
 p. 70: apagar: CHAPITRE IIL

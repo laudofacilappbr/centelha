@@ -421,6 +421,19 @@ def cortar_em(paragrafos: list[str], inicio: str) -> list[str]:
     raise ValueError(f"nenhum parágrafo começa com {inicio!r}")
 
 
+def comecar_em(paragrafos: list[str], inicio: str) -> list[str]:
+    """Descarta o que vem antes do primeiro parágrafo que começa com `inicio`.
+
+    O par de `cortar_em` para a frente do livro: folha de rosto e lista de obras antes da
+    PRÉFACE do Évangile (decisão do dono na #45). Texto não encontrado é erro, pelo mesmo
+    motivo.
+    """
+    for n, p in enumerate(paragrafos):
+        if p.startswith(inicio):
+            return paragrafos[n:]
+    raise ValueError(f"nenhum parágrafo começa com {inicio!r}")
+
+
 def ler(caminho: Path, paginas: tuple[int, int] | None = None) -> list[str]:
     leitor = LEITORES.get(caminho.suffix.lower())
     if leitor is None:
