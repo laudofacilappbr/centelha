@@ -33,6 +33,12 @@ _HIFEN_FINAL = re.compile(r"(\w)[-¬][.,]?$")
 # "|" nem chaves: é a lombada ou a página ao lado. Palavra antes da barra ("à|m") fica.
 _RUIDO_INICIO = re.compile(r"^(?:[|{}\\]+\S?\s+)+")
 _RUIDO_FIM = re.compile(r"(?:\s+[|{}\\]+\S{0,2})+$")
+# Barra colada na palavra, sem espaço: "|profanation", "spiri-|", "détério-|:", "est}".
+# Só "|", "}" e "\": o "{" no começo da palavra costuma ser "1" ou "t" mal lido ("{ous",
+# "{er"), e isso é correção, não ruído. Depois do hífen sai também a pontuação solta
+# que vem junto ("-|:"), para a hifenização juntar.
+_RUIDO_COLADO_INICIO = re.compile(r"^[|}\\]+(?=[^\s|{}\\])")
+_RUIDO_COLADO_FIM = re.compile(r"(?<=[-¬])[|{}\\]+\S{0,2}$|(?<=[^\s|{}\\])[|}\\][|{}\\]*$")
 
 
 @dataclass(frozen=True)
@@ -135,7 +141,8 @@ def _numero_da_pagina(linha: str, numero: int, deslocamentos: set[int]) -> bool:
 
 
 def _sem_ruido(linha: str) -> str:
-    return _RUIDO_FIM.sub("", _RUIDO_INICIO.sub("", linha))
+    linha = _RUIDO_FIM.sub("", _RUIDO_INICIO.sub("", linha))
+    return _RUIDO_COLADO_FIM.sub("", _RUIDO_COLADO_INICIO.sub("", linha)).strip()
 
 
 def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:

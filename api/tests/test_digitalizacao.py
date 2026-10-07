@@ -411,3 +411,20 @@ def test_hifen_com_sujeira_da_margem_depois_ainda_junta():
     assert [p.texto for p in limpar_paginas(pagina)] == [
         "fustigez votre orgueil ; recevez les humiliations sans murmurer."
     ]
+
+
+def test_barra_colada_na_palavra_sai_e_o_hifen_junta():
+    """Fac-símile da Library of Congress (#45): a borda da página vizinha entra colada
+    na palavra, sem espaço. O "{" no começo da palavra fica: é "1" ou "t" mal lido."""
+    pagina = (
+        "une religion entièrement spiri-|\n"
+        "tuelle ; il leur fallait\n"
+        "|profanation, et la forme est}\n"
+        "toujours belle, mais dé- |\n"
+        "tério-|:\n"
+        "rations et {ous les jours.\n"
+    )
+    assert [p.texto for p in limpar_paginas(pagina)] == [
+        "une religion entièrement spirituelle ; il leur fallait profanation, et la forme "
+        "est toujours belle, mais détériorations et {ous les jours."
+    ]
