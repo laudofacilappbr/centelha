@@ -9,6 +9,7 @@ from .routers import (
     admin_custos,
     admin_direitos,
     admin_editorial,
+    admin_exportacao,
     admin_pronuncia,
     admin_seo,
     apoio,
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
     app.include_router(site.router)
     app.include_router(planos.router)
     app.include_router(conta.router)
+    app.include_router(admin_exportacao.router)
     return app
 
 

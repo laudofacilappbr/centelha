@@ -21,7 +21,7 @@ from sqlalchemy import select
 
 from ..db import SessionLocal
 from ..dominio.publicacao import faixa_atual
-from ..models import Capitulo, Edicao, EstadoCapitulo, StatusDireitos
+from ..models import Capitulo, Edicao, EstadoCapitulo, FaixaAudio, StatusDireitos
 from . import cifra
 from .faixa import audio_aberto
 
@@ -49,13 +49,45 @@ def _nome(texto: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "-", sem_acento).strip("-").lower()[:60] or "capitulo"
 
 
+def edicao_exportavel(edicao: Edicao) -> bool:
+    return edicao.publicada_em is not None and (
+        edicao.direitos is not None and edicao.direitos.status == StatusDireitos.APROVADO
+    )
+
+
+def nome_do_arquivo(capitulo: Capitulo, posicao: int, largura: int) -> str:
+    return f"{posicao:0{largura}d}-{_nome(capitulo.titulo)}.m4a"
+
+
+def leiame(edicao: Edicao, pedido: str) -> str:
+    return LEIAME.format(
+        titulo=edicao.titulo,
+        autor=edicao.obra.autor,
+        tradutor=f" · tradução de {edicao.tradutor}" if edicao.tradutor else "",
+        pedido=pedido,
+        fonte=edicao.fonte,
+    )
+
+
+def capitulo_exportavel(session, capitulo_id: int) -> tuple[Capitulo, FaixaAudio] | None:
+    """O capítulo e a faixa que sairiam numa exportação, pelas mesmas regras do comando:
+    para a entrega pela conta do app (#134), capítulo por capítulo."""
+    capitulo = session.get(Capitulo, capitulo_id)
+    if (
+        capitulo is None
+        or capitulo.estado != EstadoCapitulo.PUBLICADO
+        or not edicao_exportavel(capitulo.edicao)
+    ):
+        return None
+    faixa = session.scalar(faixa_atual(capitulo.id))
+    return (capitulo, faixa) if faixa is not None else None
+
+
 def exportar(session, edicao_id: int, saida: Path, pedido: str) -> list[Path]:
     edicao = session.get(Edicao, edicao_id)
     if edicao is None:
         raise ErroExportacao("edição não encontrada")
-    if edicao.publicada_em is None or (
-        edicao.direitos is None or edicao.direitos.status != StatusDireitos.APROVADO
-    ):
+    if not edicao_exportavel(edicao):
         raise ErroExportacao("só edição publicada, com direitos aprovados, é exportada")
     capitulos = session.scalars(
         select(Capitulo)
@@ -71,19 +103,10 @@ def exportar(session, edicao_id: int, saida: Path, pedido: str) -> list[Path]:
     largura = len(str(len(faixas)))
     gravados = []
     for i, (capitulo, faixa) in enumerate(faixas, 1):
-        destino = saida / f"{i:0{largura}d}-{_nome(capitulo.titulo)}.m4a"
+        destino = saida / nome_do_arquivo(capitulo, i, largura)
         destino.write_bytes(audio_aberto(faixa))
         gravados.append(destino)
-    (saida / "LEIAME.txt").write_text(
-        LEIAME.format(
-            titulo=edicao.titulo,
-            autor=edicao.obra.autor,
-            tradutor=f" · tradução de {edicao.tradutor}" if edicao.tradutor else "",
-            pedido=pedido,
-            fonte=edicao.fonte,
-        ),
-        encoding="utf-8",
-    )
+    (saida / "LEIAME.txt").write_text(leiame(edicao, pedido), encoding="utf-8")
     return gravados
 
 
