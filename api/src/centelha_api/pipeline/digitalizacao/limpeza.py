@@ -168,6 +168,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
             uteis.pop(0)
         while uteis and not uteis[-1]:
             uteis.pop()
+
         def cabecalho(linha: str, numero: int = numero) -> bool:
             return bool(
                 _NUMERO_PAGINA.match(linha)
