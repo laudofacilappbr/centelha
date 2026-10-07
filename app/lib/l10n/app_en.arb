@@ -64,5 +64,11 @@
   "campanhaCnpj": "CNPJ {cnpj}",
   "campanhaDireto": "Donations go straight to the institution, through its own Pix key. Centelha receives and sees nothing.",
   "campanhaDoarSite": "Donate on the institution's website",
-  "campanhaSiteInstituicao": "About the institution"
+  "campanhaSiteInstituicao": "About the institution",
+  "compartilharTrecho": "Share passage",
+  "copiarTrecho": "Copy passage",
+  "trechoCopiado": "Passage copied.",
+  "segurarParaCompartilhar": "share or copy",
+  "citacaoQuestao": "{obra}, question {numero}",
+  "citacaoTradutor": "Translated by {tradutor}."
 }

@@ -5,6 +5,7 @@ import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
 import 'capitulo.dart';
 import 'comum.dart';
+import 'compartilhar.dart';
 
 /// Uma obra: escolha da edição, busca por questão e lista de capítulos.
 class TelaObra extends StatefulWidget {
@@ -35,43 +36,48 @@ class _TelaObraState extends State<TelaObra> {
         // Trocar de edição recarrega; a chave descarta o Future da anterior.
         key: ValueKey(_edicao.id),
         carregar: () => widget.api.edicao(_edicao.id),
-        construir: (context, edicao) => ListView(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            _Creditos(obra: widget.obra, edicao: edicao),
-            if (widget.obra.edicoes.length > 1)
-              _EscolhaEdicao(
-                edicoes: widget.obra.edicoes,
-                atual: _edicao,
-                escolher: (e) => setState(() => _edicao = e),
+        construir: (context, edicao) {
+          final citacao = Citacao.daEdicao(widget.obra, _edicao);
+          return ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              _Creditos(obra: widget.obra, edicao: edicao),
+              if (widget.obra.edicoes.length > 1)
+                _EscolhaEdicao(
+                  edicoes: widget.obra.edicoes,
+                  atual: _edicao,
+                  escolher: (e) => setState(() => _edicao = e),
+                ),
+              _BuscaQuestao(
+                api: widget.api,
+                edicaoId: edicao.id,
+                edicao: edicao.titulo,
+                autor: widget.obra.autor,
+                citacao: citacao,
               ),
-            _BuscaQuestao(
-              api: widget.api,
-              edicaoId: edicao.id,
-              edicao: edicao.titulo,
-              autor: widget.obra.autor,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: Text(
-                t.capitulos,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            for (final c in edicao.capitulos)
-              ListTile(
-                title: Text(c.titulo),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => abrirCapitulo(
-                  context,
-                  widget.api,
-                  c,
-                  edicao: edicao.titulo,
-                  autor: widget.obra.autor,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                child: Text(
+                  t.capitulos,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-          ],
-        ),
+              for (final c in edicao.capitulos)
+                ListTile(
+                  title: Text(c.titulo),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => abrirCapitulo(
+                    context,
+                    widget.api,
+                    c,
+                    edicao: edicao.titulo,
+                    autor: widget.obra.autor,
+                    citacao: citacao,
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -85,6 +91,7 @@ void abrirCapitulo(
   required String autor,
   int? questao,
   String? subquestao,
+  Citacao? citacao,
 }) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
@@ -95,6 +102,7 @@ void abrirCapitulo(
         autor: autor,
         questao: questao,
         subquestao: subquestao,
+        citacao: citacao,
       ),
     ),
   );
@@ -171,12 +179,14 @@ class _BuscaQuestao extends StatefulWidget {
     required this.edicaoId,
     required this.edicao,
     required this.autor,
+    this.citacao,
   });
 
   final CatalogoApi api;
   final int edicaoId;
   final String edicao;
   final String autor;
+  final Citacao? citacao;
 
   @override
   State<_BuscaQuestao> createState() => _BuscaQuestaoState();
@@ -215,6 +225,7 @@ class _BuscaQuestaoState extends State<_BuscaQuestao> {
         autor: widget.autor,
         questao: busca.numero,
         subquestao: busca.sub,
+        citacao: widget.citacao,
       );
     } on ErroCatalogo {
       avisar(t.erroCarregar);

@@ -151,5 +151,28 @@
   },
   "campanhaDireto": "A doação vai direto para a instituição, pela chave Pix dela. O Centelha não recebe nem vê nada.",
   "campanhaDoarSite": "Doar pelo site da instituição",
-  "campanhaSiteInstituicao": "Conhecer a instituição"
+  "campanhaSiteInstituicao": "Conhecer a instituição",
+  "compartilharTrecho": "Compartilhar trecho",
+  "copiarTrecho": "Copiar trecho",
+  "trechoCopiado": "Trecho copiado.",
+  "segurarParaCompartilhar": "compartilhar ou copiar",
+  "citacaoQuestao": "{obra}, questão {numero}",
+  "@citacaoQuestao": {
+    "placeholders": {
+      "obra": {
+        "type": "String"
+      },
+      "numero": {
+        "type": "int"
+      }
+    }
+  },
+  "citacaoTradutor": "Tradução de {tradutor}.",
+  "@citacaoTradutor": {
+    "placeholders": {
+      "tradutor": {
+        "type": "String"
+      }
+    }
+  }
 }
