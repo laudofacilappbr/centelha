@@ -279,3 +279,71 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
     },
   },
 };
+
+/** Página inicial de cada idioma (/fr, /es, /en). */
+export interface Inicio {
+  titulo: string;
+  descricao: string;
+  eyebrow: string;
+  h1: string;
+  lede: string;
+  obras: string;
+  emBreve: string;
+  como: string;
+  passos: [string, string][];
+  sobre: string;
+}
+
+export const INICIO: Record<Exclude<Lingua, 'pt'>, Inicio> = {
+  fr: {
+    titulo: 'Centelha — les œuvres d’Allan Kardec à écouter, gratuitement',
+    descricao:
+      'Livres audio spirites gratuits : Le Livre des Esprits et les autres œuvres d’Allan Kardec, dans le domaine public, à écouter hors ligne en suivant le texte. Sans publicité.',
+    eyebrow: 'Livres audio spirites gratuits',
+    h1: 'Les œuvres d’Allan Kardec à écouter, gratuitement.',
+    lede: 'Le Livre des Esprits et les autres œuvres fondamentales du spiritisme, dans leur texte original, à écouter où que vous soyez.',
+    obras: 'Œuvres en français',
+    emBreve: 'Les premières œuvres en français arrivent bientôt.',
+    como: 'Comment nous faisons',
+    passos: [
+      ['Uniquement le domaine public', 'Nous n’utilisons que des œuvres et des éditions déjà dans le domaine public.'],
+      ['Narration par IA', 'Une voix de synthèse, claire et calme, lit le texte de l’édition source, passage par passage.'],
+      ['Relecture par des personnes', 'Chaque passage est écouté et vérifié avant d’arriver dans l’application.'],
+    ],
+    sobre: 'Ce qu’est Centelha et d’où vient son nom',
+  },
+  es: {
+    titulo: 'Centelha — las obras de Allan Kardec para escuchar, gratis',
+    descricao:
+      'Audiolibros espíritas gratuitos: El Libro de los Espíritus y las demás obras de Allan Kardec, de dominio público, para escuchar sin conexión siguiendo el texto. Sin anuncios.',
+    eyebrow: 'Audiolibros espíritas gratuitos',
+    h1: 'Las obras de Allan Kardec para escuchar, gratis.',
+    lede: 'El Libro de los Espíritus y las demás obras básicas del espiritismo, para escuchar donde estés.',
+    obras: 'Obras en español',
+    emBreve: 'Las primeras obras en español llegarán pronto.',
+    como: 'Cómo lo hacemos',
+    passos: [
+      ['Solo dominio público', 'Usamos únicamente obras y ediciones que ya están en dominio público.'],
+      ['Narración por IA', 'Una voz sintética, clara y serena, narra el texto de la edición fuente, fragmento a fragmento.'],
+      ['Revisión por personas', 'Cada fragmento se escucha y se revisa antes de llegar a la app.'],
+    ],
+    sobre: 'Qué es Centelha y de dónde viene su nombre',
+  },
+  en: {
+    titulo: 'Centelha — the works of Allan Kardec to listen to, for free',
+    descricao:
+      'Free Spiritist audiobooks: The Spirits’ Book and the other works of Allan Kardec, in the public domain, to listen to offline while following the text. No ads.',
+    eyebrow: 'Free Spiritist audiobooks',
+    h1: 'The works of Allan Kardec to listen to, for free.',
+    lede: 'The Spirits’ Book and the other core works of Spiritism, to listen to wherever you are.',
+    obras: 'Works in English',
+    emBreve: 'The first works in English are coming soon.',
+    como: 'How we make it',
+    passos: [
+      ['Public domain only', 'We only use works and editions that are already in the public domain.'],
+      ['AI narration', 'A clear, calm synthetic voice reads the text of the source edition, passage by passage.'],
+      ['Reviewed by people', 'Every passage is listened to and checked before it reaches the app.'],
+    ],
+    sobre: 'What Centelha is and where its name comes from',
+  },
+};

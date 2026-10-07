@@ -4,7 +4,7 @@
  * idioma quando ela existe (hreflang da página); senão, à lista de obras daquele idioma.
  */
 import { obrasEmTodosOsIdiomas } from '../lib/catalogo';
-import { HREFLANG, NOMES, OUTRAS, edicoesPorLingua, urlObras, type Alternativa, type Lingua } from '../lib/idiomas';
+import { HREFLANG, NOMES, OUTRAS, edicoesPorLingua, urlInicio, type Alternativa, type Lingua } from '../lib/idiomas';
 
 interface Props {
   lingua: Lingua;
@@ -21,7 +21,7 @@ const opcoes = (['pt', ...OUTRAS] as Lingua[])
   .filter((l) => comObra.has(l))
   .map((l) => {
     const alt = alternativas.find((a) => a.hreflang === HREFLANG[l]);
-    const href = alt ? new URL(alt.href).pathname : l === 'pt' ? '/' : urlObras(l);
+    const href = alt ? new URL(alt.href).pathname : urlInicio(l);
     return { l, href };
   });
 ---

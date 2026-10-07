@@ -8,6 +8,7 @@ import faq from '../data/faq.json';
 import { campanhasPublicadas, dataCampanha, urlCampanha } from '../lib/campanhas';
 import { mobileApplicationLd, faqLd } from '../lib/jsonld';
 import { resumir } from '../lib/catalogo';
+import { HREFLANG, OUTRAS, urlInicio, type Lingua } from '../lib/idiomas';
 import playerDark from '../assets/player-dark.svg?raw';
 import playerLight from '../assets/player-light.svg?raw';
 
@@ -31,6 +32,11 @@ const statusLabel: Record<string, string> = {
 };
 
 const site = Astro.site!;
+// Página inicial em /fr, /es e /en (#48).
+const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
+  hreflang: HREFLANG[l],
+  href: new URL(urlInicio(l), site).href,
+}));
 ---
 
 <BaseLayout
@@ -38,6 +44,7 @@ const site = Astro.site!;
   tituloCompleto
   description="Audiolivros espíritas grátis: O Livro dos Espíritos, O Evangelho Segundo o Espiritismo e outras obras de Allan Kardec narradas em português. Ouça offline e acompanhe o texto. Sem anúncios."
   jsonLd={[mobileApplicationLd(site), faqLd(faq)]}
+  alternativas={alternativas}
 >
   <!-- 1. Topo -->
   <section class="hero" aria-labelledby="hero-titulo">
