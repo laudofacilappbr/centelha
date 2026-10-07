@@ -228,7 +228,7 @@ void main() {
     await tester.tap(_cartao);
     await tester.pumpAndSettle();
     expect(abertos, [
-      Uri.parse('https://centelha.com.br/campanhas/natal-2026'),
+      Uri.parse('https://centelhar.com.br/campanhas/natal-2026'),
     ]);
     expect(find.text('Copiar chave Pix'), findsNothing);
     debugDefaultTargetPlatformOverride = null;

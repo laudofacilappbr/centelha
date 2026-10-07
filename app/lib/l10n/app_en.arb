@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitulo": "Centelha",
+  "appTitulo": "Centelhar",
   "obras": "Works",
   "configuracoes": "Settings",
   "carregando": "Loading…",
@@ -47,9 +47,9 @@
   "acompanharLeitura": "Follow along",
   "ouvirDaqui": "Listen from here",
   "lendoAgora": "Now reading",
-  "apoieTitulo": "Support Centelha",
+  "apoieTitulo": "Support Centelhar",
   "apoioIndisponivel": "Support isn't available right now.",
-  "apoioMensagemPadrao": "Centelha is free and ad-free. Support helps pay for narration, the server and the app stores.",
+  "apoioMensagemPadrao": "Centelhar is free and ad-free. Support helps pay for narration, the server and the app stores.",
   "apoioNaoLibera": "Supporting doesn't unlock any content: the app is the same for everyone.",
   "apoioRecebedor": "Support goes to {recebedor}.",
   "apoioValoresSugeridos": "Suggested amounts",
@@ -63,7 +63,7 @@
   "campanhaFechar": "Close campaign",
   "campanhaMeta": "Goal: {valor}",
   "campanhaCnpj": "CNPJ {cnpj}",
-  "campanhaDireto": "Donations go straight to the institution, through its own Pix key. Centelha receives and sees nothing.",
+  "campanhaDireto": "Donations go straight to the institution, through its own Pix key. Centelhar receives and sees nothing.",
   "campanhaDoarSite": "Donate on the institution's website",
   "campanhaSiteInstituicao": "About the institution",
   "compartilharTrecho": "Share passage",
@@ -97,6 +97,6 @@
   "planoProgresso": "{lidos} of {total} days read",
   "leituraIndisponivel": "This reading is not published in this language yet.",
   "questoesDeAte": "questions {de} to {ate}",
-  "kidsTitulo": "Centelha Kids",
+  "kidsTitulo": "Centelhar Kids",
   "kidsVazio": "Clara's stories are on their way. Come back soon!"
 }

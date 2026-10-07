@@ -2,6 +2,9 @@
 
 Oct 5, 2026 · @Ricardo
 
+> **Nome atualizado em 06/10/2026:** a marca passou a ser **Centelhar** (domínio centelhar.com.br; mascote "Clara, a pequena centelha"). Este texto é anterior à mudança; onde disser "Centelha" como marca, leia Centelhar. Ver [a definição](CENTELHAR_Alteracao_de_Nome_e_Arquitetura_da_Marca.md) e o [ADR 0007](../../docs/decisoes/0007-marca-centelhar.md).
+
+
 ## Contexto
 
 Cole este bloco antes de qualquer prompt abaixo, para a ferramenta de imagem entender o projeto.

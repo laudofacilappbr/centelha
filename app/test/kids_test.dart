@@ -101,7 +101,7 @@ void main() {
     tester,
   ) async {
     await _abrir(tester, _obras);
-    expect(find.text('Centelha Kids'), findsOneWidget);
+    expect(find.text('Centelhar Kids'), findsOneWidget);
     expect(find.text('A Clara e o Livro dos Espíritos'), findsOneWidget);
     expect(find.text('O Livro dos Espíritos'), findsNothing);
     expect(find.text('O Livro dos Espíritos para jovens'), findsNothing);

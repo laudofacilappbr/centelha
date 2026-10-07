@@ -108,7 +108,7 @@ class _TelaInicioState extends State<TelaInicio> {
               ),
             );
           }
-          // O infantil fica só no Centelha Kids (#50): aqui não aparece.
+          // O infantil fica só no Centelhar Kids (#50): aqui não aparece.
           final obras = [for (final o in snap.data!) ?o.semInfantil()];
           if (obras.isEmpty) return Aviso(texto: t.catalogoVazio);
           final idioma = idiomaDoConteudo(Localizations.localeOf(context));

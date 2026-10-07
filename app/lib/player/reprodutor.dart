@@ -93,8 +93,8 @@ class ReprodutorAudioService implements Reprodutor {
     final manipulador = await AudioService.init(
       builder: _Manipulador.new,
       config: const AudioServiceConfig(
-        androidNotificationChannelId: 'app.centelha.audio',
-        androidNotificationChannelName: 'Centelha',
+        androidNotificationChannelId: 'br.com.centelhar.app.audio',
+        androidNotificationChannelName: 'Centelhar',
         androidNotificationOngoing: true,
         androidStopForegroundOnPause: true,
         fastForwardInterval: Duration(seconds: 15),

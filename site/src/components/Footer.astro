@@ -28,7 +28,7 @@ const kids = Astro.url.pathname.startsWith('/kids');
     <div class="top">
       <div class="about">
         <Logo width={150} />
-        <p class="muted">{t ? t.rodape : `${SITE.slogan} Obras em domínio público, narração por IA com revisão humana.`}</p>
+        <p class="muted">{t ? t.rodape : `${SITE.assinatura} ${SITE.slogan} Obras em domínio público, narração por IA com revisão humana.`}</p>
         <StoreButtons lingua={lingua} />
       </div>
 
@@ -37,11 +37,11 @@ const kids = Astro.url.pathname.startsWith('/kids');
           <nav aria-label="Projeto" class="col">
             <h2>Projeto</h2>
             <ul>
-              <li><a href="/sobre">Sobre o Centelha</a></li>
+              <li><a href="/sobre">Sobre o Centelhar</a></li>
               <li><a href="/como-fazemos">Como fazemos</a></li>
               <li><a href="/temas">Temas</a></li>
               <li><a href="/glossario">Glossário</a></li>
-              <li><a href="/kids">Centelha Kids</a></li>
+              <li><a href="/kids">Centelhar Kids</a></li>
               <li><a href="/transparencia">Transparência</a></li>
               {!kids && <li>{apoioLigado ? <a href="/apoie">Apoie</a> : <span class="muted">Apoie (em breve)</span>}</li>}
               {!kids && temCampanha && <li><a href="/campanhas">Campanhas</a></li>}
@@ -97,7 +97,7 @@ const kids = Astro.url.pathname.startsWith('/kids');
       }
     </div>
     <p class="legal muted">
-      © {ano} Centelha. {t ? t.legal : 'Textos de Allan Kardec em domínio público. Feito com cuidado e sem anúncios.'}
+      © {ano} Centelhar. {t ? t.legal : 'Textos de Allan Kardec em domínio público. Feito com cuidado e sem anúncios.'}
     </p>
   </div>
 </footer>

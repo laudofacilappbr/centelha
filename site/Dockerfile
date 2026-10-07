@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Variáveis de build (ficam embutidas no HTML/JS estático).
 ARG PUBLIC_API_URL=""
-ARG SITE_URL="https://centelha.com.br"
+ARG SITE_URL="https://centelhar.com.br"
 ARG PUBLIC_PLAUSIBLE_DOMAIN=""
 ARG CATALOGO_API_URL=""
 ARG CATALOGO_OBRIGATORIO=""

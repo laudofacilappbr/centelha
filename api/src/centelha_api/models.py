@@ -111,7 +111,7 @@ class Edicao(Timestamps, Base):
     # O português continua no slug da obra.
     slug: Mapped[str | None] = mapped_column(String(120))
     # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
-    # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
+    # site acrescenta " | Centelhar"; descrição no tamanho que a busca mostra.
     seo_titulo: Mapped[str | None] = mapped_column(String(60))
     seo_descricao: Mapped[str | None] = mapped_column(String(160))
     tradutor: Mapped[str | None] = mapped_column(String(200))
@@ -153,7 +153,7 @@ class Capitulo(Timestamps, Base):
     ordem: Mapped[int]
     titulo: Mapped[str] = mapped_column(String(300))
     # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
-    # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
+    # site acrescenta " | Centelhar"; descrição no tamanho que a busca mostra.
     seo_titulo: Mapped[str | None] = mapped_column(String(60))
     seo_descricao: Mapped[str | None] = mapped_column(String(160))
     # Liga o mesmo capítulo entre idiomas, ex.: "ESE-05".
@@ -469,7 +469,7 @@ class Post(Timestamps, Base):
     # Uma ou duas frases: lista do blog e <meta description>.
     resumo: Mapped[str] = mapped_column(String(300))
     # SEO opcional (#42): vazio, o site usa o modelo da página. Título curto porque o
-    # site acrescenta " | Centelha"; descrição no tamanho que a busca mostra.
+    # site acrescenta " | Centelhar"; descrição no tamanho que a busca mostra.
     seo_titulo: Mapped[str | None] = mapped_column(String(60))
     seo_descricao: Mapped[str | None] = mapped_column(String(160))
     # Markdown restrito (parágrafos, subtítulos, listas, ênfase e links); o site

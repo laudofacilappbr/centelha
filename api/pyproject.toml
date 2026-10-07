@@ -1,7 +1,7 @@
 [project]
 name = "centelha-api"
 version = "0.1.0"
-description = "API do Centelha: catálogo, direitos, pipeline e lista de espera"
+description = "API do Centelhar: catálogo, direitos, pipeline e lista de espera"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",

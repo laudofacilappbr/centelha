@@ -23,7 +23,7 @@ Ficha da skill [`dossie-direitos`](../../../.claude/skills/dossie-direitos/SKILL
 
 **Como o texto foi feito.** OCR próprio com o Tesseract `fra` (`centelha-digitalizar tudo exemplar.pdf --saida saida --idioma fra`), sem atualização de grafia. O OCR que o próprio archive.org publica (`_djvu.txt`) não é fonte: serve só para cruzar com o nosso (`centelha-cruzar`) e apontar onde olhar o fac-símile.
 
-**Crédito:** *L'Évangile selon le Spiritisme*, d'Allan Kardec (Paris, Dentu, 1866, 3e édition). Fac-similé : Library of Congress. Narration par voix de synthèse ([moteur]). Audio et lecture accompagnée : Centelha.
+**Crédito:** *L'Évangile selon le Spiritisme*, d'Allan Kardec (Paris, Dentu, 1866, 3e édition). Fac-similé : Library of Congress. Narration par voix de synthèse ([moteur]). Audio et lecture accompagnée : Centelhar.
 
 **Riscos**
 - OCR de livro do século XIX: tipografia antiga e hifenização. Mitigação: o relatório de suspeitas da #86 e a revisão no admin.

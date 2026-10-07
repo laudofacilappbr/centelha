@@ -97,7 +97,7 @@ def test_seo_da_edicao_e_do_capitulo_chega_ao_catalogo(client, session, ha, edic
 
 @pytest.mark.parametrize(("campo", "tamanho"), [("seo_titulo", 61), ("seo_descricao", 161)])
 def test_tamanho_maximo(client, ha, edicao, campo, tamanho):
-    """O site acrescenta " | Centelha" ao título; a busca corta descrição longa."""
+    """O site acrescenta " | Centelhar" ao título; a busca corta descrição longa."""
     r = client.put(f"/v1/admin/edicoes/{edicao.id}/seo", json={campo: "x" * tamanho}, headers=ha)
     assert r.status_code == 422
 

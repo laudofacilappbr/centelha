@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import { loadEnv } from 'vite';
 
 const env = loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), '');
-const SITE_URL = env.SITE_URL || 'https://centelha.com.br'; // TODO: domínio definitivo
+const SITE_URL = env.SITE_URL || 'https://centelhar.com.br';
 const API_URL = (env.PUBLIC_API_URL || '').replace(/\/+$/, '');
 let apiOrigin = '';
 try {
@@ -12,7 +12,7 @@ try {
 } catch {
   apiOrigin = '';
 }
-// Origem do storage de áudio (faixas dos capítulos), ex.: https://audio.centelha.com.br
+// Origem do storage de áudio (faixas dos capítulos), ex.: https://audio.centelhar.com.br
 let audioOrigin = '';
 try {
   audioOrigin = env.AUDIO_URL ? new URL(env.AUDIO_URL).origin : '';

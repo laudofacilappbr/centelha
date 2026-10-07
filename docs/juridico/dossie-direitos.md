@@ -4,7 +4,7 @@ Preparado em 2026-10-06 pelo agente, para o(a) advogado(a) que vai emitir o pare
 
 ## O projeto em uma frase
 
-O Centelha publica, num app gratuito para iOS e Android e num site, audiolivros das obras de Allan Kardec na tradução de Guillon Ribeiro, narrados por voz sintética (TTS), com o texto acompanhando a narração. Não vende conteúdo; aceita apoio voluntário (#40) e divulga campanhas de doação de instituições parceiras (#41). Titular, por ora: pessoa física (#4, opção A).
+O Centelhar publica, num app gratuito para iOS e Android e num site, audiolivros das obras de Allan Kardec na tradução de Guillon Ribeiro, narrados por voz sintética (TTS), com o texto acompanhando a narração. Não vende conteúdo; aceita apoio voluntário (#40) e divulga campanhas de doação de instituições parceiras (#41). Titular, por ora: pessoa física (#4, opção A).
 
 ## Resumo
 
@@ -54,7 +54,7 @@ O Centelha publica, num app gratuito para iOS e Android e num site, audiolivros 
 
 A licença Blizzard 2013 concede uso "exclusively for Research Purposes only" e exclui do conceito de pesquisa o uso "for any commercial purpose, including the development, marketing, commercialisation, sale or licencing of voice synthesis or speech recognition products or services". O mantenedor do Piper diz que não pode dar orientação jurídica e que "it is the responsibility of the end user to make the ultimate judgement" ([discussão #271](https://github.com/rhasspy/piper/discussions/271)).
 
-**Leitura do agente:** as três vozes pt-BR são ajustes finos de um modelo treinado com esses dados. Mesmo gratuito, o Centelha é um serviço público de síntese de voz nas lojas, com apoio financeiro voluntário; isso dificilmente cabe em "Research Purposes".
+**Leitura do agente:** as três vozes pt-BR são ajustes finos de um modelo treinado com esses dados. Mesmo gratuito, o Centelhar é um serviço público de síntese de voz nas lojas, com apoio financeiro voluntário; isso dificilmente cabe em "Research Purposes".
 
 **A CONFIRMAR (prioridade):**
 - a restrição da licença dos dados alcança um modelo derivado (pesos ajustados) e o áudio que ele gera?
@@ -85,7 +85,7 @@ Não há intérprete humano, então não há direito conexo de artista (arts. 89
 - Art. 96: "É de setenta anos o prazo de proteção aos direitos conexos, contados a partir de 1º de janeiro do ano subseqüente" à fixação.
 - Art. 107, I: pune quem altera, suprime ou inutiliza dispositivos técnicos destinados a evitar ou restringir cópia.
 
-**Leitura do agente:** o texto é livre, mas cada faixa gerada pelo Centelha é um fonograma, e o Centelha, como produtor, tem direito conexo sobre ele por 70 anos. Isso sustenta a proteção contra cópia decidida em #73 ([ADR 0004](../decisoes/0004-audio-cifrado-e-chave-atestada.md)) e a reação a quem republicar o áudio. As marcações de tempo e a leitura acompanhada reforçam o caráter de produto próprio. Ninguém fica impedido de ler o mesmo texto em domínio público e gravar o próprio áudio.
+**Leitura do agente:** o texto é livre, mas cada faixa gerada pelo Centelhar é um fonograma, e o Centelhar, como produtor, tem direito conexo sobre ele por 70 anos. Isso sustenta a proteção contra cópia decidida em #73 ([ADR 0004](../decisoes/0004-audio-cifrado-e-chave-atestada.md)) e a reação a quem republicar o áudio. As marcações de tempo e a leitura acompanhada reforçam o caráter de produto próprio. Ninguém fica impedido de ler o mesmo texto em domínio público e gravar o próprio áudio.
 
 **A CONFIRMAR:**
 - som produzido inteiramente por máquina, sem execução humana, é "fixação de outros sons" e gera direito conexo ao produtor?
@@ -99,14 +99,14 @@ Não há intérprete humano, então não há direito conexo de artista (arts. 89
 - Art. 53, parágrafo único: o editor deve mencionar, em cada exemplar, os dados de identificação da obra; no caso de obra traduzida, o título original e o nome do tradutor (**A CONFIRMAR** a redação exata e se o app é "exemplar" para esse fim).
 
 **Proposta de crédito** (app, site e ficha das lojas), por edição:
-> *O Livro dos Espíritos*, de Allan Kardec (*Le Livre des Esprits*, 1857). Tradução de Guillon Ribeiro, edição FEB de [ano] ([fonte]). Narração por voz sintética ([motor]). Áudio e leitura acompanhada: Centelha.
+> *O Livro dos Espíritos*, de Allan Kardec (*Le Livre des Esprits*, 1857). Tradução de Guillon Ribeiro, edição FEB de [ano] ([fonte]). Narração por voz sintética ([motor]). Áudio e leitura acompanhada: Centelhar.
 
 O aviso de voz sintética também é exigido pelo código de conduta do Azure e recomendado pelas lojas.
 
 ## 5. Adaptações infantis e juvenis (#49)
 
 - Art. 14: quem adapta obra em domínio público é titular da adaptação, sem impedir outras adaptações.
-- Adaptar a partir do original francês ou de Guillon Ribeiro (ambos livres) dá ao Centelha a titularidade da adaptação, sem terceiros.
+- Adaptar a partir do original francês ou de Guillon Ribeiro (ambos livres) dá ao Centelhar a titularidade da adaptação, sem terceiros.
 - Art. 24, §2º: o Estado defende a integridade da obra em domínio público. Uma adaptação apresentada **como adaptação**, com crédito ao original, não deve ferir a integridade.
 
 **A CONFIRMAR:** a adaptação deve ser rotulada como tal ("adaptado de…") para não ser confundida com o texto de Kardec; algum limite à simplificação de texto doutrinário?

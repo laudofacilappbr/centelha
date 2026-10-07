@@ -39,12 +39,12 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
     sobre: {
       titulo: 'À propos du projet et de l’étincelle dans le spiritisme',
       descricao:
-        'Ce qu’est Centelha, pourquoi il est gratuit et d’où vient son nom : la question 88 du Livre des Esprits, où l’Esprit est décrit comme une étincelle éthérée.',
+        'Ce qu’est Centelhar, pourquoi il est gratuit et d’où vient son nom : la question 88 du Livre des Esprits, où l’Esprit est décrit comme une étincelle éthérée.',
       eyebrow: 'À propos',
       h1: 'Une étincelle en allume une autre',
-      lede: 'Centelha transforme les œuvres d’Allan Kardec en livres audio gratuits, à écouter en voiture, dans les transports, avant de dormir ou quand lire est difficile.',
+      lede: 'Centelhar transforme les œuvres d’Allan Kardec en livres audio gratuits, à écouter en voiture, dans les transports, avant de dormir ou quand lire est difficile.',
       blocos: [
-        { h2: 'Ce qu’est Centelha' },
+        { h2: 'Ce qu’est Centelhar' },
         {
           p: 'Une application gratuite, sans publicité, qui réunit les œuvres fondamentales du spiritisme en audio. Tout le catalogue vient d’œuvres du domaine public, avec une narration produite par intelligence artificielle et relue par des personnes. Vous pouvez télécharger les chapitres pour écouter hors ligne et suivre le texte surligné pendant l’écoute.',
         },
@@ -53,7 +53,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
         },
         { h2: 'L’étincelle dans le spiritisme' },
         {
-          p: '« Centelha » veut dire « étincelle » en portugais. Le nom vient du <cite>Livre des Esprits</cite>. À la question 88, Kardec demande si les Esprits ont une forme déterminée, limitée et constante. La réponse :',
+          p: '« Centelhar » est un verbe portugais : jeter des étincelles, scintiller. Il vient de « centelha », étincelle : faire naître la lumière et la répandre. L’image vient du <cite>Livre des Esprits</cite>. À la question 88, Kardec demande si les Esprits ont une forme déterminée, limitée et constante. La réponse :',
         },
         {
           citacao:
@@ -73,7 +73,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
         },
         { h2: 'Comment le projet se finance' },
         {
-          p: `Centelha est gratuit pour qui écoute. Les coûts (serveurs, stockage de l’audio et production de la narration) sont couverts par des dons volontaires, avec des comptes publics sur la page ${pt('/transparencia', 'transparence', '(en portugais)')}.`,
+          p: `Centelhar est gratuit pour qui écoute. Les coûts (serveurs, stockage de l’audio et production de la narration) sont couverts par des dons volontaires, avec des comptes publics sur la page ${pt('/transparencia', 'transparence', '(en portugais)')}.`,
         },
       ],
       seguir: { pagina: 'como', texto: 'Voir comment nous faisons les livres audio' },
@@ -81,7 +81,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
     como: {
       titulo: 'Comment nous faisons : IA, relecture humaine et droits d’auteur',
       descricao:
-        'Comment Centelha produit ses livres audio spirites : uniquement des œuvres du domaine public, une narration par intelligence artificielle et la relecture de chaque passage par des personnes.',
+        'Comment Centelhar produit ses livres audio spirites : uniquement des œuvres du domaine public, une narration par intelligence artificielle et la relecture de chaque passage par des personnes.',
       eyebrow: 'Comment nous faisons',
       h1: 'La technologie au service du texte',
       lede: 'Nous utilisons l’intelligence artificielle pour la narration et des personnes pour la vérification. Et nous ne publions que ce qui est dans le domaine public.',
@@ -91,7 +91,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
           p: 'Les œuvres d’Allan Kardec ont été publiées au XIX<sup>e</sup> siècle et sont dans le domaine public. En français, nous utilisons les éditions originales de l’époque, comme la 2<sup>e</sup> édition du <cite>Livre des Esprits</cite> (Didier, 1860), transcrite par Wikisource. Avant d’entrer dans le catalogue, chaque édition source est enregistrée avec son origine.',
         },
         {
-          p: 'C’est pourquoi Centelha ne propose pas d’œuvres d’auteurs contemporains, encore protégées par le droit d’auteur.',
+          p: 'C’est pourquoi Centelhar ne propose pas d’œuvres d’auteurs contemporains, encore protégées par le droit d’auteur.',
         },
         { h2: '2. Narration par intelligence artificielle' },
         {
@@ -115,19 +115,19 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
           p: `Même avec la relecture, quelque chose peut échapper. Si vous entendez un mot erroné ou une prononciation étrange, dites-le-nous sur la page ${pt('/suporte', 'd’assistance', '(en portugais)')}, en indiquant l’œuvre et le numéro de la question ou du chapitre.`,
         },
       ],
-      seguir: { pagina: 'sobre', texto: 'Ce qu’est Centelha' },
+      seguir: { pagina: 'sobre', texto: 'Ce qu’est Centelhar' },
     },
   },
   es: {
     sobre: {
       titulo: 'Sobre el proyecto y la chispa en el espiritismo',
       descricao:
-        'Qué es Centelha, por qué es gratuito y de dónde viene su nombre: la pregunta 88 de El Libro de los Espíritus, donde el Espíritu se describe como una chispa etérea.',
+        'Qué es Centelhar, por qué es gratuito y de dónde viene su nombre: la pregunta 88 de El Libro de los Espíritus, donde el Espíritu se describe como una chispa etérea.',
       eyebrow: 'Sobre',
       h1: 'Una chispa enciende otra',
-      lede: 'Centelha convierte las obras de Allan Kardec en audiolibros gratuitos, para escuchar en el coche, en el autobús, antes de dormir o cuando leer es difícil.',
+      lede: 'Centelhar convierte las obras de Allan Kardec en audiolibros gratuitos, para escuchar en el coche, en el autobús, antes de dormir o cuando leer es difícil.',
       blocos: [
-        { h2: 'Qué es Centelha' },
+        { h2: 'Qué es Centelhar' },
         {
           p: 'Una app gratuita, sin anuncios, que reúne las obras básicas del espiritismo en audio. Todo el catálogo viene de obras de dominio público, con narración generada por inteligencia artificial y revisada por personas. Puedes descargar los capítulos para escuchar sin conexión y seguir el texto resaltado mientras escuchas.',
         },
@@ -136,7 +136,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
         },
         { h2: 'La chispa en el espiritismo' },
         {
-          p: '«Centelha» significa «chispa» en portugués. El nombre viene de <cite>El Libro de los Espíritus</cite>. En la pregunta 88, Kardec pregunta si los Espíritus tienen una forma determinada, limitada y constante. La respuesta:',
+          p: '«Centelhar» es un verbo portugués: echar chispas, centellear. Viene de «centelha», chispa: hacer que la luz surja y se extienda. La imagen viene de <cite>El Libro de los Espíritus</cite>. En la pregunta 88, Kardec pregunta si los Espíritus tienen una forma determinada, limitada y constante. La respuesta:',
         },
         {
           citacao: '«A vuestros ojos, no; a los nuestros, sí; es, si queréis, una llama, un resplandor o una chispa etérea.»',
@@ -155,7 +155,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
         },
         { h2: 'Cómo se mantiene el proyecto' },
         {
-          p: `Centelha es gratuito para quien escucha. Los costos (servidores, almacenamiento del audio y generación de la narración) se cubren con apoyo voluntario, con rendición de cuentas abierta en la página de ${pt('/transparencia', 'transparencia', '(en portugués)')}.`,
+          p: `Centelhar es gratuito para quien escucha. Los costos (servidores, almacenamiento del audio y generación de la narración) se cubren con apoyo voluntario, con rendición de cuentas abierta en la página de ${pt('/transparencia', 'transparencia', '(en portugués)')}.`,
         },
       ],
       seguir: { pagina: 'como', texto: 'Mira cómo hacemos los audiolibros' },
@@ -163,7 +163,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
     como: {
       titulo: 'Cómo lo hacemos: IA, revisión humana y derechos de autor',
       descricao:
-        'Cómo Centelha produce los audiolibros espíritas: solo obras de dominio público, narración por inteligencia artificial y revisión de cada fragmento por personas.',
+        'Cómo Centelhar produce los audiolibros espíritas: solo obras de dominio público, narración por inteligencia artificial y revisión de cada fragmento por personas.',
       eyebrow: 'Cómo lo hacemos',
       h1: 'Tecnología al servicio del texto',
       lede: 'Usamos inteligencia artificial para narrar y personas para revisar. Y solo publicamos lo que está en dominio público.',
@@ -173,7 +173,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
           p: 'Las obras de Allan Kardec se publicaron en el siglo XIX y están en dominio público. Usamos ediciones y traducciones que también están en dominio público. Antes de entrar en el catálogo, cada edición fuente se registra con su origen.',
         },
         {
-          p: 'Por eso Centelha no tiene obras de autores contemporáneos ni traducciones recientes, que aún están protegidas por derechos de autor.',
+          p: 'Por eso Centelhar no tiene obras de autores contemporáneos ni traducciones recientes, que aún están protegidas por derechos de autor.',
         },
         { h2: '2. Narración por inteligencia artificial' },
         {
@@ -195,19 +195,19 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
           p: `Aun con revisión, algo puede escaparse. Si oyes una palabra cambiada o una pronunciación extraña, cuéntanoslo en la página de ${pt('/suporte', 'soporte', '(en portugués)')}, indicando la obra y el número de la pregunta o del capítulo.`,
         },
       ],
-      seguir: { pagina: 'sobre', texto: 'Qué es Centelha' },
+      seguir: { pagina: 'sobre', texto: 'Qué es Centelhar' },
     },
   },
   en: {
     sobre: {
       titulo: 'About the project and the spark in Spiritism',
       descricao:
-        'What Centelha is, why it is free and where its name comes from: question 88 of The Spirits’ Book, where the Spirit is described as an ethereal spark.',
+        'What Centelhar is, why it is free and where its name comes from: question 88 of The Spirits’ Book, where the Spirit is described as an ethereal spark.',
       eyebrow: 'About',
       h1: 'One spark lights another',
-      lede: 'Centelha turns the works of Allan Kardec into free audiobooks, to listen to in the car, on the bus, before sleep or when reading is hard.',
+      lede: 'Centelhar turns the works of Allan Kardec into free audiobooks, to listen to in the car, on the bus, before sleep or when reading is hard.',
       blocos: [
-        { h2: 'What Centelha is' },
+        { h2: 'What Centelhar is' },
         {
           p: 'A free app, with no ads, that brings together the core works of Spiritism in audio. The whole catalogue comes from public domain works, narrated by artificial intelligence and reviewed by people. You can download chapters to listen offline and follow the highlighted text as you listen.',
         },
@@ -216,7 +216,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
         },
         { h2: 'The spark in Spiritism' },
         {
-          p: '“Centelha” means “spark” in Portuguese. The name comes from <cite>The Spirits’ Book</cite>. In question 88, Kardec asks whether Spirits have a definite, limited and constant form. The answer:',
+          p: '“Centelhar” is a Portuguese verb: to give off sparks, to sparkle. It comes from “centelha”, spark: making light appear and spread. The image comes from <cite>The Spirits’ Book</cite>. In question 88, Kardec asks whether Spirits have a definite, limited and constant form. The answer:',
         },
         {
           citacao: '“To your eyes, no; to ours, yes; it is, if you will, a flame, a glow or an ethereal spark.”',
@@ -235,7 +235,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
         },
         { h2: 'How the project is funded' },
         {
-          p: `Centelha is free for listeners. The costs (servers, audio storage and producing the narration) are covered by voluntary support, with open accounts on the ${pt('/transparencia', 'transparency page', '(in Portuguese)')}.`,
+          p: `Centelhar is free for listeners. The costs (servers, audio storage and producing the narration) are covered by voluntary support, with open accounts on the ${pt('/transparencia', 'transparency page', '(in Portuguese)')}.`,
         },
       ],
       seguir: { pagina: 'como', texto: 'See how we make the audiobooks' },
@@ -243,7 +243,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
     como: {
       titulo: 'How we make it: AI, human review and copyright',
       descricao:
-        'How Centelha produces its Spiritist audiobooks: public domain works only, narration by artificial intelligence and every passage reviewed by people.',
+        'How Centelhar produces its Spiritist audiobooks: public domain works only, narration by artificial intelligence and every passage reviewed by people.',
       eyebrow: 'How we make it',
       h1: 'Technology in service of the text',
       lede: 'We use artificial intelligence to narrate and people to check. And we only publish what is in the public domain.',
@@ -253,7 +253,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
           p: 'Allan Kardec’s works were published in the 19th century and are in the public domain. We use editions and translations that are also in the public domain. Before joining the catalogue, each source edition is recorded with its origin.',
         },
         {
-          p: 'That is why Centelha has no works by contemporary authors and no recent translations, which are still protected by copyright.',
+          p: 'That is why Centelhar has no works by contemporary authors and no recent translations, which are still protected by copyright.',
         },
         { h2: '2. Narration by artificial intelligence' },
         {
@@ -275,7 +275,7 @@ export const CONTEUDO: Record<Exclude<Lingua, 'pt'>, Record<PaginaInstitucional,
           p: `Even with review, something may slip through. If you hear a wrong word or an odd pronunciation, let us know on the ${pt('/suporte', 'support page', '(in Portuguese)')}, with the work and the number of the question or chapter.`,
         },
       ],
-      seguir: { pagina: 'sobre', texto: 'What Centelha is' },
+      seguir: { pagina: 'sobre', texto: 'What Centelhar is' },
     },
   },
 };
@@ -296,7 +296,7 @@ export interface Inicio {
 
 export const INICIO: Record<Exclude<Lingua, 'pt'>, Inicio> = {
   fr: {
-    titulo: 'Centelha — les œuvres d’Allan Kardec à écouter, gratuitement',
+    titulo: 'Centelhar — les œuvres d’Allan Kardec à écouter, gratuitement',
     descricao:
       'Livres audio spirites gratuits : Le Livre des Esprits et les autres œuvres d’Allan Kardec, dans le domaine public, à écouter hors ligne en suivant le texte. Sans publicité.',
     eyebrow: 'Livres audio spirites gratuits',
@@ -310,10 +310,10 @@ export const INICIO: Record<Exclude<Lingua, 'pt'>, Inicio> = {
       ['Narration par IA', 'Une voix de synthèse, claire et calme, lit le texte de l’édition source, passage par passage.'],
       ['Relecture par des personnes', 'Chaque passage est écouté et vérifié avant d’arriver dans l’application.'],
     ],
-    sobre: 'Ce qu’est Centelha et d’où vient son nom',
+    sobre: 'Ce qu’est Centelhar et d’où vient son nom',
   },
   es: {
-    titulo: 'Centelha — las obras de Allan Kardec para escuchar, gratis',
+    titulo: 'Centelhar — las obras de Allan Kardec para escuchar, gratis',
     descricao:
       'Audiolibros espíritas gratuitos: El Libro de los Espíritus y las demás obras de Allan Kardec, de dominio público, para escuchar sin conexión siguiendo el texto. Sin anuncios.',
     eyebrow: 'Audiolibros espíritas gratuitos',
@@ -327,10 +327,10 @@ export const INICIO: Record<Exclude<Lingua, 'pt'>, Inicio> = {
       ['Narración por IA', 'Una voz sintética, clara y serena, narra el texto de la edición fuente, fragmento a fragmento.'],
       ['Revisión por personas', 'Cada fragmento se escucha y se revisa antes de llegar a la app.'],
     ],
-    sobre: 'Qué es Centelha y de dónde viene su nombre',
+    sobre: 'Qué es Centelhar y de dónde viene su nombre',
   },
   en: {
-    titulo: 'Centelha — the works of Allan Kardec to listen to, for free',
+    titulo: 'Centelhar — the works of Allan Kardec to listen to, for free',
     descricao:
       'Free Spiritist audiobooks: The Spirits’ Book and the other works of Allan Kardec, in the public domain, to listen to offline while following the text. No ads.',
     eyebrow: 'Free Spiritist audiobooks',
@@ -344,6 +344,6 @@ export const INICIO: Record<Exclude<Lingua, 'pt'>, Inicio> = {
       ['AI narration', 'A clear, calm synthetic voice reads the text of the source edition, passage by passage.'],
       ['Reviewed by people', 'Every passage is listened to and checked before it reaches the app.'],
     ],
-    sobre: 'What Centelha is and where its name comes from',
+    sobre: 'What Centelhar is and where its name comes from',
   },
 };

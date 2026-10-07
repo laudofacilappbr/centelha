@@ -32,6 +32,6 @@ Saída: 32 capítulos, 3.363 segmentos e 1.017 questões, de 1 a 1.019.
 
 **A CONFIRMAR (#2, antes do áudio).** Conferir por amostragem contra um exemplar FEB antigo (décadas de 1940–1950), com a introdução, um capítulo inteiro e a q. 88, que o texto do corpo é o de Guillon Ribeiro. A 76ª edição pode ter revisão silenciosa.
 
-**Crédito:** *O Livro dos Espíritos*, de Allan Kardec, tradução de Guillon Ribeiro. Texto conferido com a edição FEB de [ano do exemplar]. Narração por voz sintética ([motor]). Áudio e leitura acompanhada: Centelha.
+**Crédito:** *O Livro dos Espíritos*, de Allan Kardec, tradução de Guillon Ribeiro. Texto conferido com a edição FEB de [ano do exemplar]. Narração por voz sintética ([motor]). Áudio e leitura acompanhada: Centelhar.
 
 **Campos para o admin (`Direitos`):** falecimento_tradutor = 1943-10-26 · base_legal = "Tradução de Guillon Ribeiro (†1943), domínio público desde 1º/1/2014 (Lei 9.610/98, art. 41). Sem as notas da editora (FEB)." · documento_url = <fotos da folha de rosto do exemplar antigo, na #2>

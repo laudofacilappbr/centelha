@@ -1,4 +1,4 @@
-"""Atendimento a pedidos do titular (LGPD art. 18) sobre os dados que o Centelha coleta.
+"""Atendimento a pedidos do titular (LGPD art. 18) sobre os dados que o Centelhar coleta.
 
 Dados pessoais: o e-mail da lista de espera e a conta opcional de quem lê (#43). A conta
 também se exporta e se exclui pelo próprio app. Ferramenta de administrador,
@@ -35,7 +35,7 @@ def exportar(session: Session, email: str) -> dict:
                 "email": i.email,
                 "origem": i.origem,
                 "inscrito_em": i.criado_em.isoformat(),
-                "finalidade": "avisar sobre o lançamento do app Centelha",
+                "finalidade": "avisar sobre o lançamento do app Centelhar",
                 "base_legal": "consentimento (LGPD art. 7º, I)",
             }
             for i in inscricoes

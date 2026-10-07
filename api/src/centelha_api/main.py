@@ -29,7 +29,7 @@ from .routers import (
 
 def create_app() -> FastAPI:
     configurar_logs("api")
-    app = FastAPI(title="Centelha API", version="0.1.0")
+    app = FastAPI(title="Centelhar API", version="0.1.0")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=get_settings().cors_origins,

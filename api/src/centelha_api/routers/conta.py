@@ -27,8 +27,8 @@ router = APIRouter(prefix="/v1/conta", tags=["conta"])
 limitador = JanelaDeslizante()
 log = logging.getLogger(__name__)
 
-_ASSUNTO = "Seu código de acesso ao Centelha"
-_TEXTO = """Seu código de acesso ao Centelha: {codigo}
+_ASSUNTO = "Seu código de acesso ao Centelhar"
+_TEXTO = """Seu código de acesso ao Centelhar: {codigo}
 
 Digite-o no app. Ele vale por {minutos} minutos e só uma vez.
 

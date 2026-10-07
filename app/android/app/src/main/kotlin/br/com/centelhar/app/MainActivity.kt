@@ -1,4 +1,4 @@
-package app.centelha.centelha
+package br.com.centelhar.app
 
 import com.ryanheise.audioservice.AudioServiceActivity
 

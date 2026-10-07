@@ -81,7 +81,7 @@ class Obra {
   final int? ano;
   final List<EdicaoResumo> edicoes;
 
-  /// Sem as edições infantis, que vivem só no Centelha Kids (#50, ADR 0006); null se
+  /// Sem as edições infantis, que vivem só no Centelhar Kids (#50, ADR 0006); null se
   /// não sobra nenhuma.
   Obra? semInfantil() {
     final restantes = [

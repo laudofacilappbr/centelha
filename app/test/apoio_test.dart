@@ -19,7 +19,7 @@ const _apoioLigado = {
   'mensagem': null,
   'valores_centavos': [500, 1000, 2500],
   'compra_no_app': false,
-  'chave_pix': 'apoio@centelha.app',
+  'chave_pix': 'apoio@centelhar.com.br',
   'link_externo': 'https://apoie.exemplo.org/centelha',
 };
 
@@ -73,7 +73,7 @@ Widget _telaApoio(CatalogoApi api, AbrirLink abrirLink) => MaterialApp(
 void main() {
   testWidgets('com o apoio desligado, a entrada não aparece', (tester) async {
     await _abrirConfiguracoes(tester, _api(ligado: false));
-    expect(find.text('Apoie o Centelha'), findsNothing);
+    expect(find.text('Apoie o Centelhar'), findsNothing);
     expect(find.text('Licenças'), findsOneWidget);
   });
 
@@ -81,7 +81,7 @@ void main() {
     tester,
   ) async {
     await _abrirConfiguracoes(tester, _api(ligado: true));
-    await tester.tap(find.text('Apoie o Centelha'));
+    await tester.tap(find.text('Apoie o Centelhar'));
     await tester.pumpAndSettle();
     expect(find.text('O apoio vai para Fulano de Tal.'), findsOneWidget);
     expect(find.text('R\$ 5,00'), findsOneWidget);
@@ -116,7 +116,7 @@ void main() {
 
     await tester.tap(find.text('Copiar chave Pix'));
     await tester.pumpAndSettle();
-    expect(copiado, ['apoio@centelha.app']);
+    expect(copiado, ['apoio@centelhar.com.br']);
     expect(find.text('Chave Pix copiada.'), findsOneWidget);
 
     await tester.tap(find.text('Apoiar pelo site'));

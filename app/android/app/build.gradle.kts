@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "app.centelha.centelha"
+    namespace = "br.com.centelhar.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "app.centelha.centelha"
+        applicationId = "br.com.centelhar.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -29,19 +29,19 @@ android {
         versionName = flutter.versionName
     }
 
-    // Dois apps do mesmo código (#50, ADR 0006): o principal e o Centelha Kids, com
+    // Dois apps do mesmo código (#50, ADR 0006): o principal e o Centelhar Kids, com
     // id próprio nas lojas. Kids: flutter build apk --flavor kids -t lib/main_kids.dart
     buildFeatures { resValues = true }
     flavorDimensions += "app"
     productFlavors {
         create("principal") {
             dimension = "app"
-            resValue("string", "app_name", "Centelha")
+            resValue("string", "app_name", "Centelhar")
         }
         create("kids") {
             dimension = "app"
             applicationIdSuffix = ".kids"
-            resValue("string", "app_name", "Centelha Kids")
+            resValue("string", "app_name", "Centelhar Kids")
         }
     }
 

@@ -27,7 +27,7 @@ const ld = [
     datePublished: p.publicado_em,
     dateModified: p.atualizado_em,
     ...(p.capa_url ? { image: p.capa_url } : {}),
-    publisher: { '@type': 'Organization', name: 'Centelha' },
+    publisher: { '@type': 'Organization', name: 'Centelhar' },
     citation: p.fontes.map((f) => ({ '@type': 'CreativeWork', name: f.titulo, url: new URL(urlItem(f), Astro.site).href })),
   },
 ];
@@ -59,7 +59,7 @@ const ld = [
 
     <aside class="card cta">
       <h2>Ouça o trecho no app</h2>
-      <p>No Centelha, grátis, com o texto acompanhando a narração.</p>
+      <p>No Centelhar, grátis, com o texto acompanhando a narração.</p>
       <StoreButtons />
     </aside>
   </div>

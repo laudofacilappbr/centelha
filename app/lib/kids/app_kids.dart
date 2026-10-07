@@ -1,4 +1,4 @@
-// Centelha Kids (#50, ADR 0006): app separado, só com as edições infantis, na
+// Centelhar Kids (#50, ADR 0006): app separado, só com as edições infantis, na
 // categoria Kids das lojas. Mesmo código do app principal, outra entrada
 // (lib/main_kids.dart).
 //

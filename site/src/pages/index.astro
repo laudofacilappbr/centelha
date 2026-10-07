@@ -17,7 +17,7 @@ const prepSvg = (svg: string) =>
   svg.replace('<svg ', '<svg aria-hidden="true" focusable="false" width="300" height="649" ');
 const mockDark = prepSvg(playerDark);
 const mockLight = prepSvg(playerLight);
-const mockAlt = 'Tela do player do Centelha tocando O Livro dos Espíritos, com controles de velocidade e temporizador';
+const mockAlt = 'Tela do player do Centelhar tocando O Livro dos Espíritos, com controles de velocidade e temporizador';
 
 // Seção 8: a campanha em andamento no admin (#41), uma por vez. O Pix é da instituição,
 // e o projeto não vê quanto entrou: sem barra de progresso, só a meta.
@@ -40,7 +40,7 @@ const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
 ---
 
 <BaseLayout
-  title="Centelha — As obras de Allan Kardec para ouvir, grátis"
+  title="Centelhar — Audiolivros Espíritas: as obras de Kardec para ouvir"
   tituloCompleto
   description="Audiolivros espíritas grátis: O Livro dos Espíritos, O Evangelho Segundo o Espiritismo e outras obras de Allan Kardec narradas em português. Ouça offline e acompanhe o texto. Sem anúncios."
   jsonLd={[mobileApplicationLd(site), faqLd(faq)]}
@@ -75,7 +75,7 @@ const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
     <div class="container two-col">
       <div>
         <span class="eyebrow">Ouça agora</span>
-        <h2 id="ouca-titulo">A questão que deu nome ao app</h2>
+        <h2 id="ouca-titulo">A questão que inspirou o nome do app</h2>
         <p class="lede">
           Aperte o play e acompanhe o texto: cada trecho se ilumina enquanto é narrado, do jeito que funciona no app.
         </p>
@@ -84,10 +84,10 @@ const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
     </div>
   </section>
 
-  <!-- 3. Por que Centelha -->
+  <!-- 3. Por que Centelhar -->
   <section class="section" aria-labelledby="porque-titulo">
     <div class="container">
-      <span class="eyebrow">Por que Centelha</span>
+      <span class="eyebrow">Por que Centelhar</span>
       <h2 id="porque-titulo">Feito para estudar no seu ritmo</h2>
       <ul class="grid grid-3 cards" role="list">
         <li class="card">
@@ -117,7 +117,10 @@ const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
           resposta descreve o Espírito como “uma chama, um clarão, ou uma centelha etérea”. Logo depois (88a), a cor dessa
           centelha vai do escuro e opaco ao brilho do rubi, conforme o Espírito seja mais ou menos puro.
         </p>
-        <p>Quanto mais aprendemos, mais a luz cresce. E uma centelha acende outra.</p>
+        <p>
+          Centelha é a luz que existe em cada pessoa. <strong>Centelhar</strong> é alimentar essa luz com o conhecimento:
+          fazer a luz surgir e se espalhar. Quanto mais aprendemos, mais ela cresce. E uma centelha acende outra.
+        </p>
         <a class="link-arrow" href="/sobre">Conheça o projeto</a>
       </div>
       <img class="nome-spark" src="/brand/symbol-color.svg" alt="" width="280" height="280" loading="lazy" />
@@ -153,13 +156,13 @@ const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
     </div>
   </section>
 
-  <!-- 6. Centelha Kids -->
+  <!-- 6. Centelhar Kids -->
   <section class="section kids" aria-labelledby="kids-titulo">
     <div class="container two-col">
       <img class="kids-icon" src="/brand/app-icon-kids.svg" alt="" width="220" height="220" loading="lazy" />
       <div>
-        <span class="eyebrow">Centelha Kids</span>
-        <h2 id="kids-titulo">Oi! Eu sou a Clara, a luzinha do Centelha.</h2>
+        <span class="eyebrow">Centelhar Kids</span>
+        <h2 id="kids-titulo">Oi! Eu sou a Clara, a pequena centelha. Vamos centelhar juntos?</h2>
         <p>
           No perfil Kids, a Clara conta histórias curtas inspiradas nos ensinamentos e faz perguntas simples sobre o que a
           criança ouviu. Sem anúncios e sem coleta de dados das crianças.
@@ -214,7 +217,7 @@ const alternativas = (['pt', ...OUTRAS] as Lingua[]).map((l) => ({
               {campanha.meta_centavos != null && <> Meta: {reais(campanha.meta_centavos)}.</>}
             </p>
             <p>{resumir(campanha.texto, 240)}</p>
-            <p class="muted">A doação vai direto para a instituição, pelo Pix dela. O Centelha não recebe nada.</p>
+            <p class="muted">A doação vai direto para a instituição, pelo Pix dela. O Centelhar não recebe nada.</p>
             <p>
               <a class="link-arrow" href={urlCampanha(campanha.slug)}>
                 Como doar

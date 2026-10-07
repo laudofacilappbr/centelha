@@ -1,4 +1,4 @@
-# 0006 — Centelha Kids: app separado para o público infantil
+# 0006 — Centelhar Kids: app separado para o público infantil
 
 Data: 2026-10-07 · Status: aceita (#50)
 
@@ -15,7 +15,7 @@ Um perfil infantil dentro do app principal sujeitaria o app inteiro a essas regr
 
 Resposta do dono transcrita na #50: **1a, 2a**.
 
-1. **Só o app Centelha Kids separado (1a).** Nada de perfil infantil no app principal: as edições com `publico = infantil` não aparecem nele (`Obra.semInfantil`) e só aparecem no Kids.
+1. **Só o app Centelhar Kids separado (1a).** Nada de perfil infantil no app principal: as edições com `publico = infantil` não aparecem nele (`Obra.semInfantil`) e só aparecem no Kids.
 2. **Link só do app principal para o Kids (2a).** O Kids não tem link para fora, nem para o app principal.
 
 ## Como fica no código
@@ -23,7 +23,7 @@ Resposta do dono transcrita na #50: **1a, 2a**.
 - **Mesmo projeto Flutter, outra entrada:** `lib/main_kids.dart` sobe o `CentelhaKidsApp` (`lib/kids/app_kids.dart`). Ele lista só as edições infantis, abre os capítulos e toca o áudio.
 - **A regra é garantida no import, não num `if`.** O Kids não importa apoio, campanhas, configurações, compartilhar, baixados, planos, chaves, downloads, `url_launcher` nem `share_plus`, e `test/kids_test.dart` confere. O capítulo abre sem citação e sem origem, o que desliga compartilhar e trocar de edição.
 - **Limite:** a tela do capítulo é a mesma do app principal, e ela importa o código de compartilhar. Por isso `share_plus` e `url_launcher` entram no binário do Kids, embora nenhuma tela do Kids os chame. Nenhum dos dois é SDK de analítica ou anúncio. Se a revisão da loja reclamar, a tela do capítulo se separa em leitura e ações.
-- **Android:** *flavors* `principal` e `kids` (`applicationIdSuffix ".kids"`, nome "Centelha Kids"). O padrão é `principal` (`default-flavor` no `pubspec.yaml`), então os builds sem `--flavor` seguem como antes. O Kids sai com `flutter build apk --flavor kids -t lib/main_kids.dart`.
+- **Android:** *flavors* `principal` e `kids` (`applicationIdSuffix ".kids"`, nome "Centelhar Kids"). O padrão é `principal` (`default-flavor` no `pubspec.yaml`), então os builds sem `--flavor` seguem como antes. O Kids sai com `flutter build apk --flavor kids -t lib/main_kids.dart`.
 - **iOS:** ainda sem *scheme* nem *target* Kids. Isso entra junto com a ficha na App Store (#39), que pede o bundle id do dono.
 - **Áudio:** o Kids não tem atestação nem downloads por enquanto, e toca só `.m4a` aberto. A decisão 4A da #73 (atestação também no infantil) entra com os atestadores reais.
 

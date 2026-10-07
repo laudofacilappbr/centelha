@@ -1,4 +1,4 @@
-// Entrada do Centelha Kids (#50, ADR 0006):
+// Entrada do Centelhar Kids (#50, ADR 0006):
 //   flutter run -t lib/main_kids.dart
 //   flutter build apk --flavor kids -t lib/main_kids.dart
 //

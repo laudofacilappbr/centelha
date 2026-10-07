@@ -1,4 +1,4 @@
-# App Centelha (Flutter)
+# App Centelhar (Flutter)
 
 Android e iOS, um código só. MVP sem login: preferências e progresso ficam no aparelho.
 
@@ -36,7 +36,7 @@ bash ci/validar.sh app   # na raiz: format, analyze e testes em Docker
 
 ## Antes da primeira publicação na loja
 
-- O `applicationId`/bundle id (`app.centelha.centelha`) não pode mudar depois do primeiro envio. Confirme antes.
+- O `applicationId`/bundle id (`br.com.centelhar.app`) não pode mudar depois do primeiro envio. Confirme antes.
 - Ícone, splash e assinatura dos builds ainda não estão configurados.
 
 ## Player
