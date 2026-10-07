@@ -23,6 +23,7 @@ def audio(monkeypatch, tmp_path):
     monkeypatch.setenv("CENTELHA_AUDIO_CHAVE_MESTRA", base64.b64encode(MESTRA).decode())
     monkeypatch.delenv("CENTELHA_CLOUDFLARE_ZONE_ID", raising=False)
     monkeypatch.delenv("CENTELHA_CLOUDFLARE_TOKEN", raising=False)
+    monkeypatch.delenv("CENTELHA_API_URL_PUBLICA", raising=False)
     get_settings.cache_clear()
     yield raiz
     get_settings.cache_clear()
@@ -162,8 +163,26 @@ def test_cli_executa_e_lista_urls_sem_token(session, audio, capsys):
     assert f"{BASE}/le/pt-BR/e1/le-c001-v2.m4a" in saida
 
 
-def test_cli_purga_com_token(session, audio, monkeypatch, capsys):
-    _faixas(session, audio, 1)
+def test_cli_purga_audio_e_json_do_capitulo(session, audio, monkeypatch, capsys):
+    """O JSON público do capítulo leva a URL da faixa e fica 1 h na CDN: sem purgá-lo,
+    o app receberia por até uma hora o endereço do .m4a apagado."""
+    [faixa] = _faixas(session, audio, 1)
+    monkeypatch.setenv("CENTELHA_CLOUDFLARE_ZONE_ID", "zona")
+    monkeypatch.setenv("CENTELHA_CLOUDFLARE_TOKEN", "tok")
+    monkeypatch.setenv("CENTELHA_API_URL_PUBLICA", "https://api.exemplo/")
+    get_settings.cache_clear()
+    pedidos = []
+    monkeypatch.setattr(recifrar, "_enviar", lambda p: pedidos.append(p) or {"success": True})
+    assert recifrar.main(["--executar"]) == 0
+    assert json.loads(pedidos[0].data)["files"] == [
+        f"{BASE}/le/pt-BR/e1/le-c001-v2.m4a",
+        f"https://api.exemplo/v1/capitulos/{faixa.capitulo_id}",
+    ]
+    assert "purge pedido para 2 URLs" in capsys.readouterr().out
+
+
+def test_cli_sem_api_publica_avisa_do_json_do_capitulo(session, audio, monkeypatch, capsys):
+    [faixa] = _faixas(session, audio, 1)
     monkeypatch.setenv("CENTELHA_CLOUDFLARE_ZONE_ID", "zona")
     monkeypatch.setenv("CENTELHA_CLOUDFLARE_TOKEN", "tok")
     get_settings.cache_clear()
@@ -171,4 +190,4 @@ def test_cli_purga_com_token(session, audio, monkeypatch, capsys):
     monkeypatch.setattr(recifrar, "_enviar", lambda p: pedidos.append(p) or {"success": True})
     assert recifrar.main(["--executar"]) == 0
     assert json.loads(pedidos[0].data)["files"] == [f"{BASE}/le/pt-BR/e1/le-c001-v2.m4a"]
-    assert "purge pedido" in capsys.readouterr().out
+    assert f"capítulos {faixa.capitulo_id}" in capsys.readouterr().err

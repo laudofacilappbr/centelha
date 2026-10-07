@@ -103,6 +103,8 @@ services:
       # Purge dos .m4a antigos ao recifrar (centelha-recifrar, #73); vazios = purge à mão.
       CENTELHA_CLOUDFLARE_ZONE_ID: ${CENTELHA_CLOUDFLARE_ZONE_ID:-}
       CENTELHA_CLOUDFLARE_TOKEN: ${CENTELHA_CLOUDFLARE_TOKEN:-}
+      # O JSON do capítulo leva a URL da faixa e fica 1 h na CDN: também é purgado.
+      CENTELHA_API_URL_PUBLICA: https://api.${DOMINIO}
     volumes: [audio:/data/audio]
     depends_on:
       postgres: { condition: service_healthy }
