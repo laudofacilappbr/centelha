@@ -5,8 +5,9 @@ import WaitlistForm from '../components/WaitlistForm.astro';
 import DemoPlayer from '../components/DemoPlayer.astro';
 import obras from '../data/obras.json';
 import faq from '../data/faq.json';
-import campanhas from '../data/campanhas.json';
+import { campanhasPublicadas, dataCampanha, urlCampanha } from '../lib/campanhas';
 import { mobileApplicationLd, faqLd } from '../lib/jsonld';
+import { resumir } from '../lib/catalogo';
 import playerDark from '../assets/player-dark.svg?raw';
 import playerLight from '../assets/player-light.svg?raw';
 
@@ -17,18 +18,11 @@ const mockDark = prepSvg(playerDark);
 const mockLight = prepSvg(playerLight);
 const mockAlt = 'Tela do player do Centelha tocando O Livro dos Espíritos, com controles de velocidade e temporizador';
 
-interface Campanha {
-  titulo: string;
-  descricao: string;
-  meta: number;
-  arrecadado: number;
-  unidade?: string;
-  url?: string;
-}
-// Seção 8 só aparece se houver campanha ativa em src/data/campanhas.json
-const campanha = (campanhas as Campanha[])[0] ?? null;
-const pct = campanha ? Math.min(100, Math.round((campanha.arrecadado / campanha.meta) * 100)) : 0;
-const fmtNum = (n: number) => n.toLocaleString('pt-BR');
+// Seção 8: a campanha em andamento no admin (#41), uma por vez. O Pix é da instituição,
+// e o projeto não vê quanto entrou: sem barra de progresso, só a meta.
+const campanha = (await campanhasPublicadas()).find((c) => c.situacao === 'ativa') ?? null;
+const reais = (centavos: number) =>
+  (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 
 const statusLabel: Record<string, string> = {
   lancamento: 'No lançamento',
@@ -197,25 +191,28 @@ const site = Astro.site!;
   <!-- 8. Campanha ativa (só se houver) -->
   {
     campanha && (
-      <section class="section" aria-labelledby="campanha-titulo">
+      <section
+        class="section"
+        id="campanha-ativa"
+        aria-labelledby="campanha-titulo"
+        data-inicio={campanha.inicio}
+        data-fim={campanha.fim}
+      >
         <div class="container">
           <div class="card campanha">
             <span class="eyebrow">Campanha ativa</span>
             <h2 id="campanha-titulo">{campanha.titulo}</h2>
-            <p>{campanha.descricao}</p>
-            <label for="campanha-progresso" class="muted">
-              {fmtNum(campanha.arrecadado)} de {fmtNum(campanha.meta)} {campanha.unidade ?? ''} ({pct}%)
-            </label>
-            <progress id="campanha-progresso" max="100" value={pct}>
-              {pct}%
-            </progress>
-            {campanha.url && (
-              <p>
-                <a class="link-arrow" href={campanha.url}>
-                  Saiba como participar
-                </a>
-              </p>
-            )}
+            <p class="muted">
+              Com {campanha.instituicao.nome}, até {dataCampanha(campanha.fim)}.
+              {campanha.meta_centavos != null && <> Meta: {reais(campanha.meta_centavos)}.</>}
+            </p>
+            <p>{resumir(campanha.texto, 240)}</p>
+            <p class="muted">A doação vai direto para a instituição, pelo Pix dela. O Centelha não recebe nada.</p>
+            <p>
+              <a class="link-arrow" href={urlCampanha(campanha.slug)}>
+                Como doar
+              </a>
+            </p>
           </div>
         </div>
       </section>
@@ -243,6 +240,16 @@ const site = Astro.site!;
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // O site é gerado no build e regerado a cada dia (#42); se a campanha terminar antes
+  // disso, a seção some no navegador, como na página da campanha.
+  const secao = document.getElementById('campanha-ativa');
+  if (secao) {
+    const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+    secao.hidden = hoje < secao.dataset.inicio! || hoje > secao.dataset.fim!;
+  }
+</script>
 
 <style>
   .hero {
@@ -410,13 +417,6 @@ const site = Astro.site!;
     .kids .two-col {
       grid-template-columns: 0.6fr 1.4fr;
     }
-  }
-
-  .campanha progress {
-    width: 100%;
-    height: 14px;
-    accent-color: var(--accent);
-    margin-block: var(--space-2) var(--space-4);
   }
 
   .narrow {
