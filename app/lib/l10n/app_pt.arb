@@ -284,5 +284,40 @@
     }
   },
   "kidsTitulo": "Centelhar Kids",
-  "kidsVazio": "As histórias da Clara estão chegando. Volte em breve!"
+  "kidsVazio": "As histórias da Clara estão chegando. Volte em breve!",
+  "conta": "Conta",
+  "contaExplicacao": "A conta é opcional: o app funciona inteiro sem ela. Guardamos só o seu e-mail.",
+  "contaEmail": "E-mail",
+  "contaPedirCodigo": "Receber código",
+  "contaCodigoEnviado": "Mandamos um código de 6 dígitos para {email}.",
+  "@contaCodigoEnviado": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contaCodigo": "Código",
+  "contaEntrar": "Entrar",
+  "contaOutroCodigo": "Mandar outro código",
+  "contaCodigoInvalido": "Código inválido ou vencido.",
+  "contaMuitosPedidos": "Muitos pedidos. Tente de novo mais tarde.",
+  "contaErro": "Não deu agora. Confira a internet e tente de novo.",
+  "contaEntrouComo": "Você entrou como {email}",
+  "@contaEntrouComo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contaSair": "Sair",
+  "contaExcluir": "Excluir conta",
+  "contaExcluirPergunta": "Excluir a conta? O e-mail e tudo ligado a ele saem do servidor.",
+  "contaExportacaoLiberada": "Download em formato aberto liberado: cada capítulo tem o botão para baixar.",
+  "contaExportacaoComoPedir": "Precisa ouvir em outro player por acessibilidade? Entre com a conta e peça pelo suporte.",
+  "formatoAberto": "Baixar em formato aberto",
+  "formatoAbertoBaixando": "Baixando em formato aberto…",
+  "formatoAbertoLimite": "Limite de downloads de hoje atingido. Tente amanhã.",
+  "formatoAbertoRevogado": "O download em formato aberto não está mais liberado nesta conta."
 }

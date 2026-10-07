@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'api/catalogo_api.dart';
+import 'conta/conta.dart';
 import 'idioma/preferencia_idioma.dart';
 import 'l10n/app_localizations.dart';
 import 'player/controle_player.dart';
@@ -14,11 +15,15 @@ class CentelhaApp extends StatelessWidget {
     required this.api,
     required this.idioma,
     required this.player,
+    this.conta,
   });
 
   final CatalogoApi api;
   final PreferenciaIdioma idioma;
   final ControlePlayer player;
+
+  /// Conta opcional (#43); null nos testes que não a usam.
+  final Conta? conta;
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +44,13 @@ class CentelhaApp extends StatelessWidget {
         ],
         localeListResolutionCallback: resolverLocale,
         // Acima das rotas: o player continua o mesmo ao navegar entre telas.
-        builder: (context, filho) =>
-            EscopoPlayer(player: player, child: filho!),
+        builder: (context, filho) {
+          final comPlayer = EscopoPlayer(player: player, child: filho!);
+          final c = conta;
+          return c == null
+              ? comPlayer
+              : EscopoConta(conta: c, child: comPlayer);
+        },
         home: TelaInicio(api: api, idioma: idioma),
       ),
     );

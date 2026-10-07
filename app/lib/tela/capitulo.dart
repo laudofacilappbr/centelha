@@ -9,6 +9,7 @@ import '../player/reprodutor.dart';
 import '../tema/centelha_tema.dart';
 import 'comum.dart';
 import 'compartilhar.dart';
+import 'conta.dart';
 import 'trocar_edicao.dart';
 
 /// Texto do capítulo por segmento. Com [questao], rola até ela e a destaca.
@@ -114,6 +115,12 @@ class _TelaCapituloState extends State<TelaCapitulo> {
               tooltip: t.lerEmOutroIdioma,
               onPressed: () => _trocarEdicao(origem),
             ),
+          BotaoFormatoAberto(
+            capituloId: widget.resumo.id,
+            edicaoId: () async =>
+                (widget.pronto ?? await widget.api.capitulo(widget.resumo.id))
+                    .edicaoId,
+          ),
         ],
       ),
       body: Carregavel<Capitulo>(

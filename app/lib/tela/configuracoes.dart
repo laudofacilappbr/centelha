@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../api/catalogo_api.dart';
+import '../conta/conta.dart';
 import '../idioma/preferencia_idioma.dart';
 import '../l10n/app_localizations.dart';
 import '../player/controle_player.dart';
 import 'apoio.dart';
 import 'baixados.dart';
+import 'conta.dart';
 
 class TelaConfiguracoes extends StatelessWidget {
   const TelaConfiguracoes({super.key, required this.idioma, required this.api});
@@ -42,6 +44,20 @@ class TelaConfiguracoes extends StatelessWidget {
                 ],
               ),
             ),
+            if (EscopoConta.maybeOf(context) case final conta?) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: Text(t.conta),
+                subtitle: conta.email == null ? null : Text(conta.email!),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => TelaConta(conta: conta),
+                  ),
+                ),
+              ),
+            ],
             if (EscopoPlayer.of(context).downloads case final d?) ...[
               const Divider(),
               ListTile(
