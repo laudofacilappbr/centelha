@@ -89,6 +89,42 @@ final _rotas = <String, Object>{
     'capitulos': [_capitulo(20, 1, 'Chapitre premier — Dieu')],
   },
   '/v1/capitulos/10': capituloLongo,
+  '/v1/planos': [
+    {
+      'slug': 'teste',
+      'titulo': 'Plano de teste',
+      'descricao': 'Três dias para o teste.',
+      'dias': 3,
+    },
+  ],
+  '/v1/planos/teste': {
+    'slug': 'teste',
+    'titulo': 'Plano de teste',
+    'descricao': 'Três dias para o teste.',
+    'dias': [
+      {
+        'dia': 1,
+        'titulo': 'A questão 88',
+        'leituras': [
+          {'sigla': 'LE', 'capitulo': null, 'de': 88, 'ate': 90},
+        ],
+      },
+      {
+        'dia': 2,
+        'titulo': 'O capítulo II',
+        'leituras': [
+          {'sigla': 'LE', 'capitulo': 'LE-C002', 'de': null, 'ate': null},
+        ],
+      },
+      {
+        'dia': 3,
+        'titulo': 'Uma obra que o catálogo não tem',
+        'leituras': [
+          {'sigla': 'ESE', 'capitulo': 'ESE-C003', 'de': null, 'ate': null},
+        ],
+      },
+    ],
+  },
   '/v1/capitulos/20': {
     ..._capitulo(20, 1, 'Chapitre premier — Dieu'),
     'edicao_id': 2,

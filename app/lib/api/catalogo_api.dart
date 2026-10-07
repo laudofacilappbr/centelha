@@ -131,6 +131,17 @@ class CatalogoApi {
   Future<Apoio> apoio() async =>
       Apoio.deJson(await _get('/v1/apoio') as Map<String, dynamic>);
 
+  /// Planos de estudo (#43): roteiros fixos, servidos pela API.
+  Future<List<PlanoResumo>> planos() async {
+    final dados = await _get('/v1/planos') as List;
+    return [
+      for (final p in dados) PlanoResumo.deJson(p as Map<String, dynamic>),
+    ];
+  }
+
+  Future<Plano> plano(String slug) async =>
+      Plano.deJson(await _get('/v1/planos/$slug') as Map<String, dynamic>);
+
   /// A campanha de caridade em andamento, pela data do servidor; null sem nenhuma.
   Future<Campanha?> campanhaAtiva() async {
     for (final j in await _get('/v1/campanhas') as List) {
@@ -403,6 +414,86 @@ class Questao {
   final numero = int.parse(m.group(1)!);
   if (numero < 1) return null;
   return (numero: numero, sub: m.group(2));
+}
+
+/// Uma leitura do plano, pela referência canônica: faixa de questões do LE ou
+/// capítulo ("ESE-C003"). O app a resolve na edição do idioma de quem lê.
+class Leitura {
+  Leitura({required this.sigla, this.capitulo, this.de, this.ate});
+
+  factory Leitura.deJson(Map<String, dynamic> j) => Leitura(
+    sigla: j['sigla'] as String,
+    capitulo: j['capitulo'] as String?,
+    de: j['de'] as int?,
+    ate: j['ate'] as int?,
+  );
+
+  final String sigla;
+  final String? capitulo;
+  final int? de;
+  final int? ate;
+}
+
+class DiaPlano {
+  DiaPlano({required this.dia, required this.titulo, required this.leituras});
+
+  factory DiaPlano.deJson(Map<String, dynamic> j) => DiaPlano(
+    dia: j['dia'] as int,
+    titulo: j['titulo'] as String,
+    leituras: [
+      for (final l in j['leituras'] as List)
+        Leitura.deJson(l as Map<String, dynamic>),
+    ],
+  );
+
+  final int dia;
+  final String titulo;
+  final List<Leitura> leituras;
+}
+
+class PlanoResumo {
+  PlanoResumo({
+    required this.slug,
+    required this.titulo,
+    required this.descricao,
+    required this.dias,
+  });
+
+  factory PlanoResumo.deJson(Map<String, dynamic> j) => PlanoResumo(
+    slug: j['slug'] as String,
+    titulo: j['titulo'] as String,
+    descricao: j['descricao'] as String,
+    dias: j['dias'] as int,
+  );
+
+  final String slug;
+  final String titulo;
+  final String descricao;
+  final int dias;
+}
+
+class Plano {
+  Plano({
+    required this.slug,
+    required this.titulo,
+    required this.descricao,
+    required this.dias,
+  });
+
+  factory Plano.deJson(Map<String, dynamic> j) => Plano(
+    slug: j['slug'] as String,
+    titulo: j['titulo'] as String,
+    descricao: j['descricao'] as String,
+    dias: [
+      for (final d in j['dias'] as List)
+        DiaPlano.deJson(d as Map<String, dynamic>),
+    ],
+  );
+
+  final String slug;
+  final String titulo;
+  final String descricao;
+  final List<DiaPlano> dias;
 }
 
 /// GET /v1/config: o que o app mostra além do catálogo. Tudo desligado por padrão.

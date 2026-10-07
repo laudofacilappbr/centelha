@@ -88,5 +88,13 @@
   "baixadoRenovar": "{edicao} · conéctate para renovar antes del {data}",
   "baixadoVencido": "{edicao} · conéctate para volver a escucharlo",
   "avisoBaixadosVencendo": "{n, plural, =1{1 capítulo descargado necesita} other{{n} capítulos descargados necesitan}} internet pronto para seguir sonando.",
-  "ouvirBaixados": "Escuchar los descargados"
+  "ouvirBaixados": "Escuchar los descargados",
+  "planosDeEstudo": "Planes de estudio",
+  "planosDeEstudoChamada": "Un itinerario de lectura, día a día",
+  "planoDias": "{n} días",
+  "planoDia": "Día {n}",
+  "planoLer": "Leer",
+  "planoProgresso": "{lidos} de {total} días leídos",
+  "leituraIndisponivel": "Esta lectura aún no está publicada en este idioma.",
+  "questoesDeAte": "preguntas {de} a {ate}"
 }

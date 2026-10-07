@@ -14,6 +14,7 @@ import 'capitulo.dart';
 import 'comum.dart';
 import 'configuracoes.dart';
 import 'obra.dart';
+import 'planos.dart';
 
 /// Início: as obras publicadas.
 class TelaInicio extends StatefulWidget {
@@ -136,6 +137,24 @@ class _TelaInicioState extends State<TelaInicio> {
                   ),
                 if (EscopoPlayer.of(context).armazem.ultimo() case final u?)
                   _ContinuarOuvindo(api: widget.api, ultimo: u),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: ListTile(
+                      leading: const Icon(Icons.event_note_outlined),
+                      title: Text(t.planosDeEstudo),
+                      subtitle: Text(t.planosDeEstudoChamada),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              TelaPlanos(api: widget.api, obras: obras),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 for (final obra in obras)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),

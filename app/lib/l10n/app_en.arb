@@ -88,5 +88,13 @@
   "baixadoRenovar": "{edicao} · go online to renew by {data}",
   "baixadoVencido": "{edicao} · go online to play it again",
   "avisoBaixadosVencendo": "{n, plural, =1{1 downloaded chapter needs} other{{n} downloaded chapters need}} internet soon to keep playing.",
-  "ouvirBaixados": "Listen to downloads"
+  "ouvirBaixados": "Listen to downloads",
+  "planosDeEstudo": "Study plans",
+  "planosDeEstudoChamada": "A reading plan, day by day",
+  "planoDias": "{n} days",
+  "planoDia": "Day {n}",
+  "planoLer": "Read",
+  "planoProgresso": "{lidos} of {total} days read",
+  "leituraIndisponivel": "This reading is not published in this language yet.",
+  "questoesDeAte": "questions {de} to {ate}"
 }
