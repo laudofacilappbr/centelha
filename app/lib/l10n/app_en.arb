@@ -71,5 +71,13 @@
   "trechoCopiado": "Passage copied.",
   "segurarParaCompartilhar": "share or copy",
   "citacaoQuestao": "{obra}, question {numero}",
-  "citacaoTradutor": "Translated by {tradutor}."
+  "citacaoTradutor": "Translated by {tradutor}.",
+  "baixarCapitulo": "Download to listen offline",
+  "baixadoApagar": "Downloaded. Tap to remove from this device",
+  "baixando": "Downloading, {pct}%",
+  "downloadFalhou": "Couldn't download right now. Check your connection and try again.",
+  "apagarDownloadTitulo": "Remove the downloaded chapter?",
+  "apagarDownloadTexto": "It stays in the app to listen online.",
+  "apagar": "Remove",
+  "cancelar": "Cancel"
 }

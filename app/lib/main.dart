@@ -6,6 +6,7 @@ import 'api/catalogo_api.dart';
 import 'app.dart';
 import 'chave/chaves.dart';
 import 'idioma/preferencia_idioma.dart';
+import 'offline/downloads.dart';
 import 'player/controle_player.dart';
 import 'player/progresso.dart';
 import 'player/reprodutor.dart';
@@ -16,12 +17,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _registrarLicencasDasFontes();
   final atestador = atestadorDoAparelho();
+  final chaves = atestador == null
+      ? null
+      : ClienteChaves(atestador: atestador, cofre: CofreSeguro());
   final player = ControlePlayer(
     await ReprodutorAudioService.iniciar(),
     ArmazemProgresso(await SharedPreferences.getInstance()),
-    chaves: atestador == null
-        ? null
-        : ClienteChaves(atestador: atestador, cofre: CofreSeguro()),
+    chaves: chaves,
+    downloads: chaves == null ? null : await Downloads.abrir(chaves),
   );
   runApp(
     CentelhaApp(
