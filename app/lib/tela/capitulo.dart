@@ -21,6 +21,7 @@ class TelaCapitulo extends StatelessWidget {
     this.questao,
     this.subquestao,
     this.citacao,
+    this.pronto,
   });
 
   final CatalogoApi api;
@@ -36,12 +37,15 @@ class TelaCapitulo extends StatelessWidget {
   /// compartilhar.
   final Citacao? citacao;
 
+  /// Capítulo já em mãos (o baixado): abre sem pedir à API, sem internet.
+  final Capitulo? pronto;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(resumo.titulo)),
       body: Carregavel<Capitulo>(
-        carregar: () => api.capitulo(resumo.id),
+        carregar: () async => pronto ?? await api.capitulo(resumo.id),
         construir: (context, capitulo) => Column(
           children: [
             Expanded(

@@ -104,7 +104,11 @@ class _BarraPlayerState extends State<BarraPlayer> {
               ? Row(
                   children: [
                     Expanded(child: conteudo),
-                    BotaoDownload(downloads: downloads, faixa: faixa),
+                    BotaoDownload(
+                      downloads: downloads,
+                      capitulo: widget.capitulo,
+                      info: widget.info,
+                    ),
                   ],
                 )
               : conteudo,
@@ -318,11 +322,15 @@ class BotaoDownload extends StatelessWidget {
   const BotaoDownload({
     super.key,
     required this.downloads,
-    required this.faixa,
+    required this.capitulo,
+    required this.info,
   });
 
   final Downloads downloads;
-  final Faixa faixa;
+  final Capitulo capitulo;
+  final InfoFaixa info;
+
+  Faixa get faixa => capitulo.faixa!;
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +367,7 @@ class BotaoDownload extends StatelessWidget {
           onPressed: () async {
             final mensagens = ScaffoldMessenger.of(context);
             try {
-              await downloads.baixar(faixa);
+              await downloads.baixar(faixa, capitulo: capitulo, info: info);
             } on ErroDownload {
               mensagens
                 ..hideCurrentSnackBar()

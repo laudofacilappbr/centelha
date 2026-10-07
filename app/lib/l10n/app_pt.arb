@@ -190,5 +190,46 @@
   "apagarDownloadTitulo": "Apagar o capítulo baixado?",
   "apagarDownloadTexto": "Ele continua no app para ouvir com internet.",
   "apagar": "Apagar",
-  "cancelar": "Cancelar"
+  "cancelar": "Cancelar",
+  "baixados": "Baixados",
+  "baixadosVazio": "Nenhum capítulo baixado. Use o botão de download no player do capítulo.",
+  "baixadoValeAte": "{edicao} · ouve sem internet até {data}",
+  "@baixadoValeAte": {
+    "placeholders": {
+      "edicao": {
+        "type": "String"
+      },
+      "data": {
+        "type": "String"
+      }
+    }
+  },
+  "baixadoRenovar": "{edicao} · conecte-se para renovar até {data}",
+  "@baixadoRenovar": {
+    "placeholders": {
+      "edicao": {
+        "type": "String"
+      },
+      "data": {
+        "type": "String"
+      }
+    }
+  },
+  "baixadoVencido": "{edicao} · conecte-se para ouvir de novo",
+  "@baixadoVencido": {
+    "placeholders": {
+      "edicao": {
+        "type": "String"
+      }
+    }
+  },
+  "avisoBaixadosVencendo": "{n, plural, =1{1 capítulo baixado precisa} other{{n} capítulos baixados precisam}} de internet em breve para continuar tocando.",
+  "@avisoBaixadosVencendo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ouvirBaixados": "Ouvir os baixados"
 }

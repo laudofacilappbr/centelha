@@ -79,5 +79,12 @@
   "apagarDownloadTitulo": "Supprimer le chapitre téléchargé ?",
   "apagarDownloadTexto": "Il reste dans l’app pour l’écouter en ligne.",
   "apagar": "Supprimer",
-  "cancelar": "Annuler"
+  "cancelar": "Annuler",
+  "baixados": "Téléchargés",
+  "baixadosVazio": "Aucun chapitre téléchargé. Utilisez le bouton de téléchargement du lecteur.",
+  "baixadoValeAte": "{edicao} · écoute hors ligne jusqu’au {data}",
+  "baixadoRenovar": "{edicao} · connectez-vous pour renouveler avant le {data}",
+  "baixadoVencido": "{edicao} · connectez-vous pour l’écouter à nouveau",
+  "avisoBaixadosVencendo": "{n, plural, =1{1 chapitre téléchargé a} other{{n} chapitres téléchargés ont}} bientôt besoin d’internet pour continuer.",
+  "ouvirBaixados": "Écouter les téléchargés"
 }

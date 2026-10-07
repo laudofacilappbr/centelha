@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -20,12 +22,18 @@ Future<void> main() async {
   final chaves = atestador == null
       ? null
       : ClienteChaves(atestador: atestador, cofre: CofreSeguro());
+  // Na web não há pasta privada nem arquivo local: lá o download não existe.
+  final downloads = chaves == null || kIsWeb
+      ? null
+      : await Downloads.abrir(chaves);
   final player = ControlePlayer(
     await ReprodutorAudioService.iniciar(),
     ArmazemProgresso(await SharedPreferences.getInstance()),
     chaves: chaves,
-    downloads: chaves == null ? null : await Downloads.abrir(chaves),
+    downloads: downloads,
   );
+  // Com internet, renova as chaves dos baixados que vencem em até 7 dias.
+  unawaited(downloads?.renovarChaves());
   runApp(
     CentelhaApp(
       api: CatalogoApi(),
