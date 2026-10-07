@@ -1,0 +1,36 @@
+# Teste do site-construtor (#42): bash site/regenerar/teste/testar.sh
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment: { POSTGRES_USER: centelha, POSTGRES_PASSWORD: centelha, POSTGRES_DB: centelha }
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U centelha -d centelha"]
+      interval: 2s
+      retries: 30
+
+  api:
+    build: { context: ../../../api, target: api }
+    environment:
+      CENTELHA_DATABASE_URL: postgresql+psycopg://centelha:centelha@postgres:5432/centelha
+      CENTELHA_LOG_FORMATO: texto
+    depends_on: { postgres: { condition: service_healthy } }
+
+  site:
+    build: { context: ../.. }
+    volumes: [site:/srv/site]
+
+  site-construtor:
+    build: { context: ../.., target: construtor }
+    environment:
+      CATALOGO_API_URL: http://api:8000
+      REGENERAR_INTERVALO: "3"
+      SITE_URL: https://centelha.exemplo
+      PUBLIC_API_URL: https://api.centelha.exemplo
+      AUDIO_URL: https://audio.centelha.exemplo
+    volumes: [site:/srv/site]
+    depends_on:
+      site: { condition: service_healthy }
+      api: { condition: service_healthy }
+
+volumes:
+  site:

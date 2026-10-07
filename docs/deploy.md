@@ -5,7 +5,8 @@ Um container por serviço, com a Cloudflare na frente ([ADR 0001](decisoes/0001-
 | Serviço | O que faz | Rede |
 | --- | --- | --- |
 | `caddy` | TLS com Origin Certificate e proxy para `site` e `api`; serve o áudio | borda (80/443 só para a Cloudflare) |
-| `site` | Site estático (nginx) | borda |
+| `site` | Site estático (nginx), servido do volume `site` | borda |
+| `site-construtor` | Regera o site quando o conteúdo muda: lê `GET /v1/site/marca` a cada minuto e, com a marca nova estável, faz o build contra a API interna e troca a versão servida (#42). Build com falha mantém o site no ar; o motivo fica em `docker compose logs site-construtor` | interna |
 | `api` | FastAPI; roda as migrações na partida | borda, interna |
 | `worker` | Fila de áudio (TTS e ffmpeg) | interna, saída |
 | `piper` | TTS local | interna |

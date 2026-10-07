@@ -22,6 +22,7 @@ jobs:
           - { servico: api, contexto: api, alvo: api }
           - { servico: worker, contexto: api, alvo: worker }
           - { servico: site, contexto: site, alvo: "" }
+          - { servico: site-construtor, contexto: site, alvo: construtor }
           - { servico: piper, contexto: infra/piper, alvo: "" }
           - { servico: backup, contexto: infra/backup, alvo: "" }
     steps:

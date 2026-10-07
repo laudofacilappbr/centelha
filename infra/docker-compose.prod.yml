@@ -38,7 +38,28 @@ services:
     image: ghcr.io/laudofacilappbr/centelha-site:${TAG:-latest}
     restart: unless-stopped
     # Healthcheck vem da imagem (site/Dockerfile), como o da api.
+    # Serve /srv/site/atual: o site da imagem até o site-construtor gerar outro (#42).
+    volumes: [site:/srv/site]
     networks: [borda]
+
+  # Regera o site quando o conteúdo publicado muda (#42): lê a marca da API interna,
+  # faz o build e troca a versão que o site serve. Build quebrado não derruba o site.
+  site-construtor:
+    logging: *logs
+    image: ghcr.io/laudofacilappbr/centelha-site-construtor:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      CATALOGO_API_URL: http://api:8000
+      # Os mesmos endereços públicos da imagem do site; o do áudio entra na CSP.
+      SITE_URL: https://${DOMINIO}
+      PUBLIC_API_URL: https://api.${DOMINIO}
+      AUDIO_URL: https://audio.${DOMINIO}
+    volumes: [site:/srv/site]
+    depends_on:
+      site: { condition: service_healthy }
+      api: { condition: service_healthy }
+    # Só a rede interna: fala com a api e não precisa de internet.
+    networks: [interna]
 
   api:
     logging: *logs
@@ -150,6 +171,8 @@ volumes:
   caddy_data:
   # Faixas geradas pelo worker; entra no backup junto com o banco (#26).
   audio:
+  # Versões do site geradas pelo site-construtor; refeitas a partir da API, sem backup.
+  site:
 
 networks:
   borda:
