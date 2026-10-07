@@ -354,3 +354,60 @@ def test_titulo_que_abre_o_capitulo_fica_mesmo_com_o_cabecalho_igual():
     lidos = [p.texto for p in limpar_paginas("\f".join(paginas))]
     assert lidos[:2] == ["CHAPITRE V", "BIENHEUREUX LES AFFLIGÉS."]
     assert not any(t.endswith("CHAPITRE V.") for t in lidos)
+
+
+def _livro_com_deslocamento(paginas_extras: dict[int, str], primeira: int = 47) -> str:
+    """Páginas do PDF a partir da 1, com o número impresso = página do PDF - 46 (como no
+    Évangile: PDF 135, página 89) e cabeçalho corrido numerado, mais páginas extras."""
+    paginas = []
+    for pdf in range(1, 70):
+        if pdf in paginas_extras:
+            paginas.append(paginas_extras[pdf])
+        elif pdf >= primeira:
+            n = pdf - 46
+            paginas.append(f"{n} CHAPITRE I.\n\nTexte de la page {n}, avec une phrase finie.\n")
+        else:
+            paginas.append(f"Page préliminaire {pdf}, sans en-tête, avec du texte.\n")
+    return "\f".join(paginas)
+
+
+def test_cabecalho_que_nao_se_repete_sai_quando_o_numero_e_o_da_pagina():
+    """No Évangile, o cabeçalho do capítulo curto aparece 2 vezes, e o OCR leu o ponto
+    como vírgula ("LE CHRIST CONSOLATEUR, 89"): a repetição não pega. O número na ponta
+    ser o da página (PDF menos o deslocamento) pega. Título com número que não é o da
+    página fica."""
+    livro = _livro_com_deslocamento(
+        {
+            60: "LE CHRIST CONSOLATEUR, 14\n\nLe Christ promet un autre consolateur.\n",
+            61: "LE CHRIST CONSOLATEUR. 15\n\nC'est l'Esprit de Vérité.\n",
+            62: "LES 40 MARTYRS\n\nTitre avec un nombre qui n'est pas la page.\n",
+            63: "ANNÉE 1860\n\nTitre en haut, nombre loin de la page 17.\n",
+        }
+    )
+    lidos = [p.texto for p in limpar_paginas(livro)]
+    texto = " ".join(lidos)
+    assert "CONSOLATEUR" not in texto
+    assert "Le Christ promet un autre consolateur." in texto
+    assert "LES 40 MARTYRS" in texto and "ANNÉE 1860" in texto
+
+
+def test_sujeira_curta_sai_junto_com_o_cabecalho_mas_sozinha_fica():
+    """ "|" e "Us" acima do cabeçalho (p. 129 e 211 do Évangile) o escondiam da borda."""
+    livro = _livro_com_deslocamento(
+        {
+            60: "|\n|\nAIMEZ VOS ENNEMIS. 14\n\nAimez vos ennemis, dit Jésus.\n",
+            61: "Us\n\nAh\n\nLa ligne courte du haut reste quand rien ne la suit.\n",
+        }
+    )
+    texto = " ".join(p.texto for p in limpar_paginas(livro))
+    assert "AIMEZ" not in texto and "|" not in texto
+    assert "Aimez vos ennemis, dit Jésus." in texto
+    assert " Us " in f" {texto} " and " Ah " in f" {texto} "
+
+
+def test_hifen_com_sujeira_da_margem_depois_ainda_junta():
+    """ "recevez les hu-. |" + "miliations": o ponto solto não é fim de frase."""
+    pagina = "fustigez votre orgueil ; recevez les hu-. |\nmiliations sans murmurer.\n"
+    assert [p.texto for p in limpar_paginas(pagina)] == [
+        "fustigez votre orgueil ; recevez les humiliations sans murmurer."
+    ]
