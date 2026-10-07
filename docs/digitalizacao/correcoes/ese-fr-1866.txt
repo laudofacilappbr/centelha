@@ -1,0 +1,25 @@
+# L'Évangile selon le Spiritisme, 3e éd., Paris, 1866 (#45)
+# Fac-símile da Library of Congress, domínio público: ficha em
+# docs/juridico/fichas/evangile-selon-le-spiritisme-fr.md.
+#
+# Cada linha foi conferida na imagem da página do exemplar.pdf (página do PDF = p. N).
+# Parágrafo que vira a página usa a página onde começa, como no revisao.md.
+# Formato e regras: api/src/centelha_api/pipeline/digitalizacao/correcoes.py.
+#
+#   centelha-digitalizar processar saida/paginas.txt --saida saida --idioma fra \
+#     --referencia archive-djvu.txt --correcoes docs/digitalizacao/correcoes/ese-fr-1866.txt
+
+# Cap. VI, Le Christ consolateur
+p. 133: autre consoläteur => autre consolateur
+p. 133: vous le connaïîtrez => vous le connaîtrez
+p. 133: ch.xrv, => ch.xiv,
+p. 133: 26.) Du => 26.)
+p. 133: c’est l’Æsprit => c’est l’Esprit
+p. 133: pas mür pour => pas mûr pour
+p. 133: n’a pas toutdit; => n’a pas tout dit;
+p. 133: l’aura foublié => l’aura oublié
+p. 133: sansfigures => sans figures
+p. 133: illève => il lève
+
+# Cap. XXVIII, Recueil de prières spirites
+p. 422: CHAPITRE XXVIIT => CHAPITRE XXVIII

@@ -29,6 +29,8 @@ _DIGITO_NA_PALAVRA = re.compile(r"\b(?=\w*\d)(?=\w*[a-zà-ÿ])\w{2,}\b", re.IGNO
 _ESPERADOS = re.compile(
     r"[\wÀ-ÿ\s.,;:!?¡¿'’‘\"“”«»()\[\]\-–—…/§ºª°*&%$+=]",
 )
+_HIFEN_DA_REFERENCIA = re.compile(r"(\w)-\s+([a-zà-ÿ])")
+_APOSTROFO_SOLTO = re.compile(r"\b([cdjlmnst]|qu) ['’](\w)", re.IGNORECASE)
 _ORDINAIS = re.compile(r"^\d+[ºªo°]$|^\d+[a-z]$")
 
 
@@ -157,19 +159,40 @@ def vocabulario_de(texto: str) -> set[str]:
 
 
 def _normal(palavra: str) -> str:
-    sem = unicodedata.normalize("NFD", palavra.lower())
+    sem = unicodedata.normalize("NFD", palavra.lower().replace("’", "'"))
     return "".join(c for c in sem if unicodedata.category(c) != "Mn")
 
 
-def diferencas(paragrafos: list[Paragrafo], referencia: str, limite: int = 500) -> list[Achado]:
+def _referencia_limpa(referencia: str) -> str:
+    """Tira da referência o que não é texto do livro, para a diferença apontar só o OCR.
+
+    - Cabeçalho corrido: linha em maiúsculas que, sem os números, se repete 3 ou mais
+      vezes ("BIENHEUREUX LES AFFLIGÉS. 77"). O texto do archive.org não separa páginas.
+    - Hifenização de fim de linha mantida ("mo- rales") e apóstrofo com espaço
+      ("l 'agonie"): é a mesma palavra."""
+    linhas = referencia.splitlines()
+    chave = [" ".join(re.sub(r"\d", "", linha).split()) for linha in linhas]
+    vezes = Counter(c for c in chave if c and c.isupper())
+    texto = "\n".join(
+        linha for linha, c in zip(linhas, chave, strict=True) if not (c.isupper() and vezes[c] >= 3)
+    )
+    texto = _HIFEN_DA_REFERENCIA.sub(r"\1\2", texto)
+    return _APOSTROFO_SOLTO.sub(r"\1'\2", texto)
+
+
+def diferencas(
+    paragrafos: list[Paragrafo], referencia: str, limite: int | None = None
+) -> list[Achado]:
     """Palavra a palavra, sem acento e sem caixa (a referência costuma ter outra grafia).
 
     O que sobra é diferença de palavra: erro de OCR, ou revisão que a referência fez e
-    o exemplar não tem — por isso só aponta, nunca corrige."""
+    o exemplar não tem — por isso só aponta, nunca corrige. Apóstrofo tipográfico e reto
+    contam como iguais. Sem limite por padrão: o antigo, de 500, cobria só até a p. 83 do
+    Évangile (de 496) e escondia o resto sem aviso."""
     palavras: list[tuple[str, int]] = [
         (w, p.pagina) for p in paragrafos for w in _PALAVRA.findall(p.texto)
     ]
-    ref = _PALAVRA.findall(referencia)
+    ref = _PALAVRA.findall(_referencia_limpa(referencia))
     a = [_normal(w) for w, _ in palavras]
     b = [_normal(w) for w in ref]
     achados: list[Achado] = []
@@ -181,7 +204,7 @@ def diferencas(paragrafos: list[Paragrafo], referencia: str, limite: int = 500) 
         ocr_trecho = " ".join(w for w, _ in palavras[i1:i2]) or "∅"
         ref_trecho = " ".join(ref[j1:j2]) or "∅"
         achados.append(Achado(pagina, f"diferença ({op})", ocr_trecho, f"referência: {ref_trecho}"))
-        if len(achados) >= limite:
+        if limite is not None and len(achados) >= limite:
             break
     return achados
 
