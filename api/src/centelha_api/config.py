@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     # exige a chave-mestra: 32 bytes em base64, só no .env da VPS e no backup.
     audio_cifrar: bool = False
     audio_chave_mestra: str = ""
+    # Purga do cache da Cloudflare quando um arquivo publicado muda de lugar (recifrar,
+    # #73). Token só com a permissão "Cache Purge" da zona. Vazio = sem purga: o
+    # comando lista o que limpar à mão.
+    cloudflare_zona: str = ""
+    cloudflare_token: str = ""
+    # URL pública da API (https://api.<domínio>), para purgar o JSON do capítulo.
+    api_url_publica: str = ""
     # Entrega da chave ao app atestado (ADR 0004). A chave vale 90 dias (decisão 2B):
     # depois disso o app precisa ficar online uma vez para renovar.
     chave_validade_dias: int = 90

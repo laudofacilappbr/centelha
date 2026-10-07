@@ -56,6 +56,10 @@ Nunca cole IP, chave, senha ou certificado em issue ou PR: o repositório é pú
 - **Voltar uma versão:** Actions → Deploy → Run workflow, com o SHA de um commit anterior em `tag`.
 - **Logs:** `docker compose -f docker-compose.prod.yml logs -f api worker`, com rotação de 20 MB × 5 por serviço.
 - **Restaurar o backup:** cabeçalho de [`infra/backup/restaurar.sh`](../infra/backup/restaurar.sh).
+- **Ligar o áudio cifrado (ADR 0004, #73)**, só quando o app decifrar a `.cent`:
+  1. no `.env`, `CENTELHA_AUDIO_CIFRAR=true` (com a chave-mestra no backup) e, para a purga automática, `CENTELHA_CLOUDFLARE_ZONA` e `CENTELHA_CLOUDFLARE_TOKEN`; depois `up -d worker`;
+  2. `docker compose -f docker-compose.prod.yml exec worker python -m centelha_api.pipeline.recifrar --simular` mostra quantas faixas `.m4a` existem;
+  3. sem `--simular`, cada uma vira `.cent`, o `.m4a` é apagado e o cache dele e do JSON do capítulo é purgado. Sem o token, o comando lista as URLs para purgar no painel. Pode ser interrompido e rodado de novo.
 - **IPs da Cloudflare:** `centelha-firewall-cloudflare` baixa a lista a cada partida do Docker. Para atualizar na hora, rode `sudo systemctl restart centelha-firewall`.
 
 ## Testar sem VPS
