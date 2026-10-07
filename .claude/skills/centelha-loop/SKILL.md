@@ -1,6 +1,6 @@
 ---
 name: centelha-loop
-description: Uma volta do ciclo de desenvolvimento do Centelha — sincroniza a main, limpa o que já entrou, escolhe a próxima issue elegível do GitHub, implementa, valida em Docker (ci/validar.sh) e roda de verdade, e abre a PR. Use com /centelha-loop para uma volta, ou /loop /centelha-loop para repetir. Para sozinha quando não há issue elegível ou quando há PRs demais esperando merge.
+description: Uma volta do ciclo de desenvolvimento do Centelhar — sincroniza a main, limpa o que já entrou, escolhe a próxima issue elegível do GitHub, implementa, valida em Docker (ci/validar.sh) e roda de verdade, e abre a PR. Use com /centelha-loop para uma volta, ou /loop /centelha-loop para repetir. Para sozinha quando não há issue elegível ou quando há PRs demais esperando merge.
 ---
 
 # /centelha-loop — uma volta do ciclo

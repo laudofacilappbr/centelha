@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepara a VPS (Ubuntu 24.04) para o Centelha (#26). Roda como root, uma vez, e pode
+# Prepara a VPS (Ubuntu 24.04) para o Centelhar (#26). Roda como root, uma vez, e pode
 # ser repetido sem estragar nada.
 #
 #   CHAVE_DEPLOY="ssh-ed25519 AAAA… deploy-github" bash preparar.sh
@@ -102,7 +102,7 @@ passo "80/443 só para a Cloudflare"
 install -m 755 "$aqui/firewall-cloudflare.sh" /usr/local/sbin/centelha-firewall-cloudflare
 cat >/etc/systemd/system/centelha-firewall.service <<'CONF'
 [Unit]
-Description=Centelha: 80/443 só para a Cloudflare (cadeia DOCKER-USER)
+Description=Centelhar: 80/443 só para a Cloudflare (cadeia DOCKER-USER)
 After=docker.service
 Requires=docker.service
 PartOf=docker.service

@@ -1,6 +1,6 @@
 ---
 name: dossie-direitos
-description: Levanta os direitos de uma obra, tradução ou voz de TTS antes de entrar no Centelha e produz a ficha para o cadastro de direitos da edição, com fonte para cada fato e o que pede confirmação jurídica. Use ao avaliar uma obra ou tradução nova (Catálogo 2, outros idiomas, adaptações), ao trocar de motor ou de voz de TTS, ou quando o dono perguntar "podemos publicar X?". Não substitui o parecer de advogado(a): prepara o material para ele.
+description: Levanta os direitos de uma obra, tradução ou voz de TTS antes de entrar no Centelhar e produz a ficha para o cadastro de direitos da edição, com fonte para cada fato e o que pede confirmação jurídica. Use ao avaliar uma obra ou tradução nova (Catálogo 2, outros idiomas, adaptações), ao trocar de motor ou de voz de TTS, ou quando o dono perguntar "podemos publicar X?". Não substitui o parecer de advogado(a): prepara o material para ele.
 ---
 
 # Dossiê de direitos de uma obra ou voz
