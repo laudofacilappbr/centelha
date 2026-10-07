@@ -12,6 +12,23 @@ import { questoesDoLivroDosEspiritos } from './questoes';
 
 export const QUESTAO_DEMO = 88;
 
+/** Respiro da amostra antes da questão: o mesmo MARGEM_MS de api/.../pipeline/amostra.py. */
+const MARGEM_AMOSTRA_MS = 150;
+
+/** Amostra aberta da questão, ao lado da faixa: <faixa>.q<N>.m4a (pipeline/amostra.py). */
+export function urlDaAmostra(urlFaixa: string, questao: number): string {
+  return `${urlFaixa.replace(/\.[^./]+$/, '')}.q${questao}.m4a`;
+}
+
+/** A amostra existe? Só a faixa cifrada precisa dela; sem rede no build, não há. */
+async function existe(url: string): Promise<boolean> {
+  try {
+    return (await fetch(url, { method: 'HEAD' })).ok;
+  } catch {
+    return false;
+  }
+}
+
 export interface SegmentoDemo {
   /** Segundos, relativos ao início da questão. */
   inicio: number;
@@ -55,8 +72,15 @@ export async function demoQ88(): Promise<Demo> {
   const tempos = new Map(faixa?.marcacoes.map((m) => [m.segmento_id, m]) ?? []);
   // Áudio só se cada segmento da questão tiver marcação: com buraco, o destaque do
   // texto sairia do compasso da voz, e é isso que a demonstração quer mostrar.
-  // Faixa cifrada (ADR 0004) não toca no navegador: fica só o texto.
-  const comAudio = audioAberto(faixa) && q.segmentos.every((s) => tempos.has(s.id));
+  // Faixa cifrada (ADR 0004) não toca no navegador: toca a amostra aberta da questão,
+  // se alguém a gerou (pipeline/amostra.py); sem ela, fica só o texto.
+  const marcada = !!faixa && q.segmentos.every((s) => tempos.has(s.id));
+  const aberta = audioAberto(faixa);
+  // Formato pelo campo, não pelo guard: negar o guard deixaria `faixa` como never.
+  const cifrada = !!faixa && (faixa.formato ?? 'm4a') !== 'm4a';
+  const candidata = cifrada ? urlDaAmostra(faixa!.url, QUESTAO_DEMO) : null;
+  const amostra = marcada && candidata && (await existe(candidata)) ? candidata : null;
+  const comAudio = marcada && (aberta || amostra !== null);
   const inicioMs = comAudio ? Math.min(...q.segmentos.map((s) => tempos.get(s.id)!.inicio_ms)) : 0;
   const fimMs = comAudio ? Math.max(...q.segmentos.map((s) => tempos.get(s.id)!.fim_ms)) : 0;
   const rel = (ms: number) => (ms - inicioMs) / 1000;
@@ -80,7 +104,15 @@ export async function demoQ88(): Promise<Demo> {
     obra: dados.ed.titulo,
     referencia: q.capitulo.titulo,
     traducao: dados.ed.tradutor ? `Tradução de ${dados.ed.tradutor}` : q88.traducao,
-    audio: comAudio ? { url: faixa!.url, inicio: inicioMs / 1000, fim: fimMs / 1000 } : null,
+    audio: !comAudio
+      ? null
+      : amostra
+        ? // A amostra começa na questão, menos a margem: os tempos passam a contar dela.
+          (() => {
+            const zero = Math.max(0, inicioMs - MARGEM_AMOSTRA_MS);
+            return { url: amostra, inicio: (inicioMs - zero) / 1000, fim: (fimMs - zero) / 1000 };
+          })()
+        : { url: faixa!.url, inicio: inicioMs / 1000, fim: fimMs / 1000 },
     segmentos,
     origem: 'api',
   };
