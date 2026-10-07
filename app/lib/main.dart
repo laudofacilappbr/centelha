@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import 'api/catalogo_api.dart';
 import 'app.dart';
+import 'chave/chaves.dart';
 import 'idioma/preferencia_idioma.dart';
 import 'player/controle_player.dart';
 import 'player/progresso.dart';
@@ -14,9 +15,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _registrarLicencasDasFontes();
+  final atestador = atestadorDoAparelho();
   final player = ControlePlayer(
     await ReprodutorAudioService.iniciar(),
     ArmazemProgresso(await SharedPreferences.getInstance()),
+    chaves: atestador == null
+        ? null
+        : ClienteChaves(atestador: atestador, cofre: CofreSeguro()),
   );
   runApp(
     CentelhaApp(

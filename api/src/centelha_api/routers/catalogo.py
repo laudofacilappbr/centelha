@@ -85,6 +85,8 @@ class SegmentoOut(_Base):
 
 
 class FaixaOut(_Base):
+    # O app pede a chave da faixa cifrada por este id (POST /v1/faixas/{id}/chave).
+    id: int
     url: str
     versao: int
     duracao_ms: int

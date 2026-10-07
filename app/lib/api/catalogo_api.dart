@@ -264,6 +264,7 @@ class Marcacao {
 
 class Faixa {
   Faixa({
+    this.id,
     required this.url,
     required this.versao,
     required this.duracaoMs,
@@ -272,6 +273,7 @@ class Faixa {
   });
 
   factory Faixa.deJson(Map<String, dynamic> j) => Faixa(
+    id: j['id'] as int?,
     url: j['url'] as String,
     versao: j['versao'] as int,
     duracaoMs: j['duracao_ms'] as int,
@@ -282,13 +284,16 @@ class Faixa {
     formato: j['formato'] as String? ?? 'm4a',
   );
 
+  /// Para pedir a chave da faixa cifrada; null em API anterior à #73.
+  final int? id;
   final String url;
 
   /// "m4a" (aberto) ou "cent1" (cifrado, #73). Sem o campo, a API é anterior à #73.
   final String formato;
 
-  /// Este app só toca o formato aberto; a decifragem do .cent vem depois.
+  /// Toca sem chave. A .cent toca quando o aparelho tem atestador (ControlePlayer).
   bool get tocavel => formato == 'm4a';
+  bool get cifrada => formato == 'cent1';
 
   /// Regenerar o áudio cria versão nova, com outros tempos.
   final int versao;

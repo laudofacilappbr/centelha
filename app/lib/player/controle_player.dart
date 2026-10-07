@@ -5,11 +5,12 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../api/catalogo_api.dart';
+import '../chave/chaves.dart';
 import 'progresso.dart';
 import 'reprodutor.dart';
 
 class ControlePlayer extends ChangeNotifier {
-  ControlePlayer(this._reprodutor, this._armazem) {
+  ControlePlayer(this._reprodutor, this._armazem, {this._chaves}) {
     _velocidade = _armazem.velocidade;
     _inscricoes = [
       _reprodutor.posicao.listen(_aoMudarPosicao),
@@ -26,6 +27,9 @@ class ControlePlayer extends ChangeNotifier {
 
   final Reprodutor _reprodutor;
   final ArmazemProgresso _armazem;
+
+  /// Sem atestador no aparelho, null: a faixa .cent fica indisponível.
+  final ClienteChaves? _chaves;
   late final List<StreamSubscription<Object?>> _inscricoes;
 
   Capitulo? _capitulo;
@@ -47,22 +51,28 @@ class ControlePlayer extends ChangeNotifier {
 
   bool carregado(int capituloId) => _capitulo?.resumo.id == capituloId;
 
+  bool podeTocar(Faixa faixa) =>
+      faixa.tocavel || (faixa.cifrada && _chaves != null);
+
   /// Segmento tocando agora (para a leitura acompanhada, #32).
   int? get segmentoAtual => faixa?.segmentoEm(_posicao.inMilliseconds);
 
   /// Carrega o capítulo na posição em que parou. Não começa a tocar.
+  /// ErroChave quando a faixa é .cent e a chave não veio (sem internet, por exemplo).
   Future<void> abrir(Capitulo capitulo, InfoFaixa info) async {
     final faixa = capitulo.faixa;
-    if (faixa == null || !faixa.tocavel || carregado(capitulo.resumo.id)) {
+    if (faixa == null || !podeTocar(faixa) || carregado(capitulo.resumo.id)) {
       return;
     }
+    // Antes de trocar o capítulo: sem chave, o que tocava continua carregado.
+    final chave = faixa.cifrada ? await _chaves!.chave(faixa) : null;
     await _gravar();
     final salva = _armazem.posicao(capitulo.resumo.id);
     final inicio = Duration(milliseconds: salva?.naFaixa(faixa) ?? 0);
     _capitulo = capitulo;
     _posicao = _ultimaGravada = inicio;
     notifyListeners();
-    await _reprodutor.carregar(faixa, info, inicio);
+    await _reprodutor.carregar(faixa, info, inicio, chave: chave);
     await _reprodutor.velocidade(_velocidade);
     await _armazem.salvarUltimo(
       UltimoOuvido(capitulo: capitulo.resumo, info: info),
