@@ -111,3 +111,35 @@ def test_diferencas_ignoram_cabecalho_corrido_da_referencia_mas_nao_titulo_unico
         "qu 'ils consolent\nBIENHEUREUX   LES  AFFLIGÉS.  81\ncar"
     )
     assert diferencas(paragrafos, ref) == []
+
+
+def test_apagar_cabecalho_e_juntar_a_continuacao_ao_paragrafo_de_antes():
+    """Cabeçalho com número mal lido ("96 CHAPITRE III.") ficava entre os dois pedaços
+    do parágrafo. Juntar sem apagar uniria o texto ao cabeçalho."""
+    paragrafos = [
+        Paragrafo(72, "Au fond de l'intelligence gît, latente,"),
+        Paragrafo(72, "96 CHAPITRE III."),
+        Paragrafo(72, "la vague intuition d'un Être suprême."),
+    ]
+    correcoes = ler(
+        "p. 72: juntar: la vague intuition\np. 72: apagar: 36 CHAPITRE\np. 72: 96 CHAP => 36 CHAP"
+    )
+    assert aplicar(paragrafos, correcoes) == [
+        Paragrafo(
+            72, "Au fond de l'intelligence gît, latente, la vague intuition d'un Être suprême."
+        )
+    ]
+
+
+def test_apagar_que_nao_acha_o_paragrafo_e_erro():
+    with pytest.raises(ErroCorrecao, match="0 parágrafo"):
+        aplicar(PARAGRAFOS, ler("p. 340: apagar: 96 CHAPITRE"))
+    with pytest.raises(ErroCorrecao, match="linha 1"):
+        ler("p. 3: apagar:")
+
+
+def test_juntar_palavra_partida_na_virada_tira_o_hifen():
+    paragrafos = [Paragrafo(28, "le parti-"), Paragrafo(28, "culier, et ils adoptèrent")]
+    assert aplicar(paragrafos, ler("p. 28: juntar: culier")) == [
+        Paragrafo(28, "le particulier, et ils adoptèrent")
+    ]
