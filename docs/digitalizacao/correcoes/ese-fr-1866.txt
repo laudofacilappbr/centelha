@@ -547,3 +547,44 @@ p. 441: {mauvais => mauvais
 p. 441: {sont => sont
 p. 443: {sources => sources
 p. 445: {notre => notre
+
+# Parágrafos partidos: cabeçalho com número mal lido ou sujeira entre os dois pedaços
+# (apagar) e a continuação devolvida ao parágrafo de antes (juntar) (#45).
+p. 19: apagar: a, x INTRODUCTION.
+p. 28: apagar: XVIII INTRODUCTION.
+p. 28: juntar: culier, et adoptèrent
+p. 34: apagar: v
+p. 39: même | chose. => même chose.
+p. 39: be VIII. Si l’âme => VIII. Si l’âme
+p. 51: annoncé, (p CHAPITRE I. => annoncé,
+p. 52: juntar: et préparer l'accomplissement
+p. 72: apagar: 96 CHAPITRE III.
+p. 72: juntar: de l'intelligence git
+p. 73: tendres et 28 CHAPITRE lil. => tendres et
+p. 74: juntar: élevés de Ja nature
+p. 87: apagar: ll
+p. 91: apagar: pl à '
+p. 104: remède doit . => remède doit
+p. 104: juntar: être énergique.
+p. 118: apagar: T2 CHAPITRE V.
+p. 118: juntar: dre que le bien
+p. 126: apagar: S0 CHAPITRE V.
+p. 126: juntar: accomplir votre mission
+p. 126: vrai ci- ! => vrai ci-
+p. 126: juntar: lice de bénédiction
+p. 139: providentielle 94 CHAPITRE Vil: => providentielle
+p. 140: juntar: sur les choses de ce monde
+p. 142: apagar: SG CHAPITRE VII.
+p. 142: juntar: pour servir et donner
+p. 146: à votre ! => à votre
+p. 146: juntar: amélioration. Que
+p. 181: apagar: x
+p. 228: la modes: => la modes-
+p. 228: juntar: tie; il y a des gens
+p. 268: logement, ou: => logement, ou
+p. 268: juntar: sans habits, ou malade
+p. 341: apagar: LES OUVRIERS DE LA DERNIÈRE HEURE. 29:
+p. 341: juntar: les Pères de l'Eglise
+p. 416: ll y a dans cette idée => Il y a dans cette idée
+p. 444: apagar: a
+p. 457: juntar: elle ne peut faire que

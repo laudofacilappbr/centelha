@@ -35,6 +35,7 @@ from .limpeza import Paragrafo
 _LINHA = re.compile(r"^p\.\s*(\d+)\s*:\s*(.+)$")
 _JUNTAR = "juntar:"
 _APAGAR = "apagar:"
+_HIFEN_FINAL = re.compile(r"\w-$")
 _ORDEM = {"trocar": 0, "apagar": 1, "juntar": 2}
 _SETA = "=>"
 
@@ -119,7 +120,12 @@ def aplicar(paragrafos: list[Paragrafo], correcoes: list[Correcao]) -> list[Para
                 erros.append(f"{c}: não há parágrafo antes para juntar")
                 continue
             anterior = antes[-1]
-            textos[anterior] = f"{textos[anterior]} {textos[i]}"
+            # Palavra partida na virada ("parti-" + "culier"): junta sem espaço e sem o
+            # hífen, como a limpeza faz dentro da página.
+            if _HIFEN_FINAL.search(textos[anterior]) and textos[i][:1].islower():
+                textos[anterior] = textos[anterior][:-1] + textos[i]
+            else:
+                textos[anterior] = f"{textos[anterior]} {textos[i]}"
             textos[i] = None
     if erros:
         raise ErroCorrecao("\n".join(erros))

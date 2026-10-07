@@ -136,3 +136,10 @@ def test_apagar_que_nao_acha_o_paragrafo_e_erro():
         aplicar(PARAGRAFOS, ler("p. 340: apagar: 96 CHAPITRE"))
     with pytest.raises(ErroCorrecao, match="linha 1"):
         ler("p. 3: apagar:")
+
+
+def test_juntar_palavra_partida_na_virada_tira_o_hifen():
+    paragrafos = [Paragrafo(28, "le parti-"), Paragrafo(28, "culier, et ils adoptèrent")]
+    assert aplicar(paragrafos, ler("p. 28: juntar: culier")) == [
+        Paragrafo(28, "le particulier, et ils adoptèrent")
+    ]
