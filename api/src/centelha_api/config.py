@@ -57,6 +57,19 @@ class Settings(BaseSettings):
     log_formato: str = "json"
     log_nivel: str = "info"
     ambiente: str = "desenvolvimento"
+    # Conta opcional de quem lê (#43). Envio do código por e-mail: vazio = provedor falso,
+    # que só existe fora de produção; em produção, sem provedor, o pedido responde 503.
+    email_provedor: Literal["", "resend"] = ""
+    email_remetente: str = ""
+    email_resend_chave: str = ""
+    conta_codigo_minutos: int = 15
+    conta_codigo_tentativas: int = 5
+    # Códigos pedidos por e-mail e por IP na janela: um e-mail não vira alvo de spam e um
+    # IP não varre muitos e-mails.
+    conta_codigo_limite: int = 5
+    conta_codigo_janela_segundos: int = 3600
+    # A sessão do app dura; sair ou excluir a conta a revoga.
+    conta_sessao_dias: int = 180
     # Vazio = Sentry desligado. Ligar é decisão do dono (terceiro recebendo dados).
     sentry_dsn: str = ""
 
