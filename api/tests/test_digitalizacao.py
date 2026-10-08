@@ -160,10 +160,15 @@ def test_revisao_de_questoes_faltando_e_repetidas():
         + ["4. Pergunta?", "“R.”"]
     ]
     rel = revisar(paragrafos, perfil="perguntas")
-    assert rel.questoes["questoes_faltando"] == [3]
+    # O "2." repetido está onde falta a 3: vira a 3, e o relatório aponta as duas coisas.
+    assert rel.questoes["questoes_faltando"] == []
+    assert rel.questoes["questoes_inferidas"] == {3: "impresso 2"}
     assert rel.questoes["questoes_repetidas"] == [2]
     md = como_markdown(rel, "teste")
-    assert "Faltando: 3" in md and "Repetidas: 2" in md
+    assert "Repetidas: 2" in md and "conferir no exemplar: 3 (impresso 2)" in md
+
+    sem_vizinha = [Paragrafo(1, t) for t in ["1. P?", "“R.”", "4. P?", "“R.”"]]
+    assert revisar(sem_vizinha, perfil="perguntas").questoes["questoes_faltando"] == [2, 3]
 
 
 def test_diferencas_contra_referencia_ignoram_acento_e_caixa():

@@ -89,6 +89,70 @@ def test_resumo_aponta_questao_faltando(paragrafos_le):
     assert r["caracteres"] > 0
 
 
+def _perguntas(caps):
+    return [
+        (s.numero_questao, s.texto, s.numero_inferido)
+        for c in caps
+        for s in c.segmentos
+        if s.tipo == TipoSegmento.PERGUNTA
+    ]
+
+
+def test_milhar_e_sumario_do_capitulo_nao_viram_questao():
+    # PDF da FEB (#166): "2.000 léguas" fazia a guarda recusar a 1 e a 2 de verdade, e o
+    # sumário numerado do capítulo não pode ocupar o lugar da questão 1.
+    paragrafos = [
+        "INTRODUÇÃO",
+        "2.000 léguas além-mar e no seio de um povo tão diferente.",
+        "CAPÍTULO I",
+        "DE DEUS",
+        "1. Deus e o infinito. - 2. Provas da existência de Deus.",
+        "1. Que é Deus?",
+        "“Deus é a inteligência suprema.”",
+        "2. Que se deve entender por infinito?",
+        "“O que não tem começo nem fim.”",
+    ]
+    caps = estruturar(paragrafos, "perguntas")
+    assert _perguntas(caps) == [
+        (1, "Que é Deus?", None),
+        (2, "Que se deve entender por infinito?", None),
+    ]
+    assert caps[-1].segmentos[1].tipo == TipoSegmento.PARAGRAFO
+
+
+def test_numero_trocado_ou_ausente_deduzido_pela_posicao():
+    # PDF da FEB (#166): imprime "647." entre a 673 e a 675, e a 1011 sem número.
+    paragrafos = [
+        "CAPÍTULO I",
+        "673. Pergunta?",
+        "“Resposta.”",
+        "647. A necessidade do trabalho é lei da Natureza?",
+        "“O trabalho é lei da Natureza.”",
+        "675. Outra?",
+        "“Resposta.”",
+        "- Assim, a própria Igreja ensina a doutrina?",
+        "“É evidente.”",
+        "677. Mais uma?",
+        "“Sim.”",
+        # Sem buraco de exatamente um número adiante, número fora de ordem continua
+        # sendo comentário (lista dentro do texto de Kardec).
+        "3. Item de lista?",
+        "678. Última?",
+    ]
+    caps = estruturar(paragrafos, "perguntas")
+    assert _perguntas(caps) == [
+        (673, "Pergunta?", None),
+        (674, "A necessidade do trabalho é lei da Natureza?", "impresso 647"),
+        (675, "Outra?", None),
+        (676, "Assim, a própria Igreja ensina a doutrina?", "sem número"),
+        (677, "Mais uma?", None),
+        (678, "Última?", None),
+    ]
+    r = resumo(caps)
+    assert r["questoes_faltando"] == []
+    assert r["questoes_inferidas"] == {674: "impresso 647", 676: "sem número"}
+
+
 def test_perfil_generico_nao_inventa_perguntas(paragrafos_le):
     caps = estruturar(paragrafos_le, "generico")
     tipos = {s.tipo for c in caps for s in c.segmentos}
