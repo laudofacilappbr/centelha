@@ -59,6 +59,21 @@ def test_leitor_txt_junta_linhas_e_hifenizacao(paragrafos_le):
     )
 
 
+def test_leitor_txt_mantem_hifen_de_palavra_composta(tmp_path):
+    # #45: "elle-|même" virava "ellemême". O hífen fica quando o texto escreve a
+    # palavra com hífen no meio de alguma linha; a quebra comum continua juntando.
+    arquivo = tmp_path / "x.txt"
+    arquivo.write_text(
+        "Elle-même parle, et elle-\nmême répond; tornar-se é bom.\n"
+        "Há que tor-\nnar-se forte e fra-\nse longa.\n",
+        encoding="utf-8",
+    )
+    assert leitores.ler_txt(arquivo) == [
+        "Elle-même parle, et elle-même répond; tornar-se é bom. "
+        "Há que tornar-se forte e frase longa."
+    ]
+
+
 def test_estrutura_perfil_perguntas(paragrafos_le):
     caps = estruturar(paragrafos_le, "perguntas")
     assert [c.titulo for c in caps] == [

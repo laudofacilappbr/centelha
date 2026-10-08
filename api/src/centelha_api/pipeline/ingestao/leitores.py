@@ -10,18 +10,45 @@ from dataclasses import dataclass
 from pathlib import Path
 
 _ESPACOS = re.compile(r"[ \t   ]+")
-# "pala-\nvra" → "palavra"; quebra simples de linha vira espaço.
-_HIFENIZACAO = re.compile(r"(\w)-[ \t]*\n\s*(\w+)")
+# "pala-\nvra" → "palavra"; quebra simples de linha vira espaço. As duas pontas vêm
+# inteiras ("c'est-" + "à-dire") para decidir se o hífen é da palavra.
+_HIFENIZACAO = re.compile(r"(\w+(?:['’-]\w+)*)-[ \t]*\n\s*(\w+(?:['’-]\w+)*)")
 # Exceção: pronome depois de verbo com acento ("avaliá-\nla", "dê-\nse") é hífen de
-# verdade. Sem acento não dá para saber ("fra-\nse" é "frase", "pode-\nse" é "pode-se"):
-# fica sem hífen e a revisão corrige.
+# verdade. Sem acento não dá para saber ("fra-\nse" é "frase", "pode-\nse" é "pode-se"),
+# a não ser que o texto escreva a palavra com hífen em outro lugar (compostos).
 _ENCLITICO = re.compile(r"(?:l[oa]s?|se|lhes?|me|te|nos|vos)")
 _VOGAL_ACENTUADA = "áéíóúâêô"
+# Palavra composta no meio da linha: "nous-mêmes", "c'est-à-dire", "disse-lhe".
+_COMPOSTO = re.compile(r"\w+(?:['’]\w+)*(?:-\w+(?:['’]\w+)*)+")
+# "a-|t-il", "possède-|t-elle": o t eufônico do francês só existe com o hífen.
+_T_EUFONICO = re.compile(r"t-(?:il|elle|on)\b", re.IGNORECASE)
 
 
-def _desfazer_hifenizacao(m: re.Match) -> str:
-    antes, depois = m[1], m[2]
-    if antes in _VOGAL_ACENTUADA and _ENCLITICO.fullmatch(depois):
+def _chave(palavra: str) -> str:
+    return palavra.lower().replace("’", "'")
+
+
+def compostos(linhas: list[str]) -> set[str]:
+    """Palavras com hífen que o próprio texto escreve no meio da linha: lá o hífen não é
+    quebra de linha, é da palavra. O fim da linha não conta: ali não se sabe."""
+    vistos = set()
+    for linha in linhas:
+        linha = linha.rstrip()
+        for m in _COMPOSTO.finditer(linha):
+            if m.end() < len(linha):
+                vistos.add(_chave(m.group()))
+    return vistos
+
+
+def juntar_hifen(antes: str, depois: str, conhecidos: set[str] = frozenset()) -> str:
+    """Junta a palavra partida no fim da linha. O hífen fica se a palavra, com ele, está
+    em `conhecidos` (compostos do texto), se é o "-t-il" francês, ou se é pronome depois
+    de verbo com acento: "nous-|mêmes" não vira "nousmêmes"."""
+    if (
+        _chave(f"{antes}-{depois}") in conhecidos
+        or _T_EUFONICO.match(depois)
+        or (antes[-1:] in _VOGAL_ACENTUADA and _ENCLITICO.fullmatch(depois))
+    ):
         return f"{antes}-{depois}"
     return antes + depois
 
@@ -33,17 +60,18 @@ _CONTROLE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 _HIFEN_DISCRICIONARIO_NA_QUEBRA = re.compile(r"\u00ad[ \t]*\n")
 
 
-def limpar(texto: str) -> str:
+def limpar(texto: str, conhecidos: set[str] = frozenset()) -> str:
     texto = _CONTROLE.sub(" ", texto)
     texto = _HIFEN_DISCRICIONARIO_NA_QUEBRA.sub("-\n", texto).replace("\u00ad", "")
-    texto = _HIFENIZACAO.sub(_desfazer_hifenizacao, texto)
+    texto = _HIFENIZACAO.sub(lambda m: juntar_hifen(m[1], m[2], conhecidos), texto)
     texto = _QUEBRA.sub(" ", texto)
     return _ESPACOS.sub(" ", texto).strip()
 
 
 def ler_txt(caminho: Path) -> list[str]:
     bruto = caminho.read_text(encoding="utf-8-sig").replace("\r\n", "\n")
-    return [p for p in (limpar(b) for b in re.split(r"\n\s*\n", bruto)) if p]
+    conhecidos = compostos(bruto.split("\n"))
+    return [p for p in (limpar(b, conhecidos) for b in re.split(r"\n\s*\n", bruto)) if p]
 
 
 def ler_docx(caminho: Path) -> list[str]:
@@ -281,6 +309,7 @@ def ler_pdf(caminho: Path, paginas: tuple[int, int] | None = None) -> list[str]:
         ]
 
     corpo = _corpo([linha for _, linhas in por_pagina for linha in linhas])
+    conhecidos = compostos([lin.texto for _, linhas in por_pagina for lin in linhas])
     na_margem: Counter[str] = Counter()
     for altura, linhas in por_pagina:
         na_margem.update(
@@ -371,7 +400,7 @@ def ler_pdf(caminho: Path, paginas: tuple[int, int] | None = None) -> list[str]:
             m[0] for lin in rodape if (m := _CHAMADA_ENTRE_PARENTESES.match(lin.texto.strip()))
         }
         for bloco in blocos:
-            texto = limpar("\n".join(linha.texto for linha in bloco))
+            texto = limpar("\n".join(linha.texto for linha in bloco), conhecidos)
             for chamada in chamadas:
                 texto = re.sub(rf"\s?{re.escape(chamada)}(?=[\s.,;:!?”\"]|$)", "", texto)
             if not texto:
@@ -381,7 +410,7 @@ def ler_pdf(caminho: Path, paginas: tuple[int, int] | None = None) -> list[str]:
                 # sumário centralizado do ESE): o anterior ficou sem ponto final, este começa
                 # em minúscula, e o corpo de letra é o mesmo. O "capítulo xxviii" em
                 # versalete (11) depois de texto (12) não é continuação.
-                paragrafos[-1] = limpar(f"{paragrafos[-1]}\n{texto}")
+                paragrafos[-1] = limpar(f"{paragrafos[-1]}\n{texto}", conhecidos)
             else:
                 paragrafos.append(texto)
             # Corpo de letra do parágrafo se ele ficou aberto; senão, nada a continuar.
@@ -399,7 +428,7 @@ def ler_pdf(caminho: Path, paginas: tuple[int, int] | None = None) -> list[str]:
 
     # De trás para a frente, para as posições anteriores continuarem valendo.
     for posicao, linhas_da_nota in reversed(notas):
-        texto = limpar("\n".join(linhas_da_nota))
+        texto = limpar("\n".join(linhas_da_nota), conhecidos)
         if texto and not _NOTA_DA_EDITORA.search(texto):
             paragrafos.insert(posicao, Nota(texto))
     return paragrafos

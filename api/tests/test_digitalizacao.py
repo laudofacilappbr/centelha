@@ -418,6 +418,26 @@ def test_hifen_com_sujeira_da_margem_depois_ainda_junta():
     ]
 
 
+def test_hifen_de_palavra_composta_fica_ao_juntar():
+    """Évangile de 1866 (#45): "nous-|mêmes" virava "nousmêmes". O hífen fica quando o
+    livro escreve a palavra com hífen no meio de alguma linha, ou no "-t-il"; a quebra
+    comum continua juntando sem ele."""
+    pagina = (
+        "Aimez-vous les uns les autres, et vous-mêmes ; c'est-à-dire, sans\n"
+        "orgueil. Connaissez-vous vous-\n"
+        "mêmes, c'est-\n"
+        "à-dire votre âme ; a-\n"
+        "t-il dit autre chose ? Il parle de la souf-\n"
+        "france, et de lui-\n"
+        "même.\n"
+    )
+    assert [p.texto for p in limpar_paginas(pagina)] == [
+        "Aimez-vous les uns les autres, et vous-mêmes ; c'est-à-dire, sans orgueil. "
+        "Connaissez-vous vous-mêmes, c'est-à-dire votre âme ; a-t-il dit autre chose ? "
+        "Il parle de la souffrance, et de luimême."
+    ]
+
+
 def test_barra_colada_na_palavra_sai_e_o_hifen_junta():
     """Fac-símile da Library of Congress (#45): a borda da página vizinha entra colada
     na palavra, sem espaço. O "{" no começo da palavra fica: é "1" ou "t" mal lido."""
