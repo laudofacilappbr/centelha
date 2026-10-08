@@ -195,6 +195,7 @@ class CapituloResumo {
     required this.ordem,
     required this.titulo,
     required this.referencia,
+    this.temAudio = true,
   });
 
   factory CapituloResumo.deJson(Map<String, dynamic> j) => CapituloResumo(
@@ -202,6 +203,8 @@ class CapituloResumo {
     ordem: j['ordem'] as int,
     titulo: j['titulo'] as String,
     referencia: j['referencia_canonica'] as String,
+    // Só a lista da edição traz o campo; nas outras respostas, quem decide é a faixa.
+    temAudio: j['tem_audio'] as bool? ?? true,
   );
 
   final int id;
@@ -210,6 +213,9 @@ class CapituloResumo {
 
   /// Liga o mesmo capítulo entre idiomas, ex.: "LE-C001".
   final String referencia;
+
+  /// Falso quando o capítulo está publicado só com texto (#167).
+  final bool temAudio;
 }
 
 class Edicao {

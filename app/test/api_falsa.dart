@@ -86,7 +86,10 @@ final _rotas = <String, Object>{
     'publicada_em': '2026-10-02T12:00:00Z',
     'obra_slug': 'o-livro-dos-espiritos',
     'fonte': 'Didier, 1860',
-    'capitulos': [_capitulo(20, 1, 'Chapitre premier — Dieu')],
+    'capitulos': [
+      // Edição só de texto: a lista avisa e o capítulo não tem player (#167).
+      {..._capitulo(20, 1, 'Chapitre premier — Dieu'), 'tem_audio': false},
+    ],
   },
   '/v1/capitulos/10': capituloLongo,
   '/v1/planos': [

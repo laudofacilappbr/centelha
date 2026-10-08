@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_session
-from ..dominio.publicacao import faixa_atual
+from ..dominio.publicacao import capitulos_com_audio, faixa_atual
 from ..dominio.seo import CamposSeo
 from ..models import (
     Campanha,
@@ -69,10 +69,16 @@ class CapituloResumo(_Base, CamposSeo):
     referencia_canonica: str
 
 
+class CapituloNaEdicao(CapituloResumo):
+    # Capítulo publicado só com texto (edição sem narração, ou narração por vir): o app
+    # avisa em vez de mostrar um player que não toca (#167).
+    tem_audio: bool
+
+
 class EdicaoOut(EdicaoResumo):
     obra_slug: str
     fonte: str
-    capitulos: list[CapituloResumo]
+    capitulos: list[CapituloNaEdicao]
 
 
 class SegmentoOut(_Base):
@@ -164,11 +170,17 @@ def obter_edicao(edicao_id: int, response: Response, session: Session = Depends(
     edicao = _edicao_publicada(session, edicao_id)
     _cache(response)
     capitulos = [c for c in edicao.capitulos if c.estado == EstadoCapitulo.PUBLICADO]
+    com_audio = set(session.scalars(capitulos_com_audio([c.id for c in capitulos])))
     return EdicaoOut(
         **EdicaoResumo.model_validate(edicao).model_dump(),
         obra_slug=edicao.obra.slug,
         fonte=edicao.fonte,
-        capitulos=[CapituloResumo.model_validate(c) for c in capitulos],
+        capitulos=[
+            CapituloNaEdicao(
+                **CapituloResumo.model_validate(c).model_dump(), tem_audio=c.id in com_audio
+            )
+            for c in capitulos
+        ],
     )
 
 

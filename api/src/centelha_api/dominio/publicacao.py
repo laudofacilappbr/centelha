@@ -27,6 +27,19 @@ def faixa_atual(capitulo_id: int) -> Select[tuple[FaixaAudio]]:
     )
 
 
+def capitulos_com_audio(capitulo_ids: list[int]) -> Select[tuple[int]]:
+    """Dos capítulos dados, os que têm faixa que pode ir ao ar, pela regra de faixa_atual."""
+    return (
+        select(FaixaAudio.capitulo_id)
+        .join(Voz, Voz.id == FaixaAudio.voz_id)
+        .where(
+            FaixaAudio.capitulo_id.in_(capitulo_ids),
+            Voz.motor.not_in(get_settings().tts_motores_sem_licenca),
+        )
+        .distinct()
+    )
+
+
 def _motores_sem_licenca(edicao: Edicao) -> list[int]:
     """Capítulos cuja faixa mais recente é de motor sem licença liberada."""
     bloqueados = get_settings().tts_motores_sem_licenca

@@ -1,6 +1,7 @@
 import 'package:centelha/api/catalogo_api.dart';
 import 'package:centelha/app.dart';
 import 'package:centelha/idioma/preferencia_idioma.dart';
+import 'package:centelha/player/barra_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -114,6 +115,27 @@ void main() {
     expect(find.text('Le Livre des Esprits'), findsOneWidget);
     expect(find.text('Chapitre premier — Dieu'), findsOneWidget);
     expect(find.text('Capítulo I — De Deus'), findsNothing);
+  });
+
+  testWidgets('capítulo só com texto avisa na lista e no lugar do player', (
+    tester,
+  ) async {
+    await _abrirApp(tester, apiFalsa());
+    await _abrirObra(tester);
+    expect(find.text('Só texto, sem narração'), findsNothing);
+
+    await tester.tap(find.text('Français'));
+    await tester.pumpAndSettle();
+    expect(find.text('Só texto, sem narração'), findsOneWidget);
+
+    await tester.tap(find.text('Chapitre premier — Dieu'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paragraphe d’exemple sur Dieu.'), findsOneWidget);
+    expect(
+      find.text('Este capítulo ainda não tem narração. Você pode ler o texto.'),
+      findsOneWidget,
+    );
+    expect(find.byType(BarraPlayer), findsNothing);
   });
 
   testWidgets('capítulo que falha ao carregar oferece tentar de novo', (
