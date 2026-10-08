@@ -20,6 +20,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 from ..ingestao.estrutura import estruturar, resumo
+from ..ingestao.leitores import compostos, juntar_hifen
 from .limpeza import Paragrafo
 from .ortografia import Troca, a_conferir
 
@@ -29,7 +30,7 @@ _DIGITO_NA_PALAVRA = re.compile(r"\b(?=\w*\d)(?=\w*[a-zà-ÿ])\w{2,}\b", re.IGNO
 _ESPERADOS = re.compile(
     r"[\wÀ-ÿ\s.,;:!?¡¿'’‘\"“”«»()\[\]\-–—…/§ºª°*&%$+=]",
 )
-_HIFEN_DA_REFERENCIA = re.compile(r"(\w)-\s+([a-zà-ÿ])")
+_HIFEN_DA_REFERENCIA = re.compile(r"(\w+(?:['’-]\w+)*)-\s+([a-zà-ÿ]\w*(?:['’-]\w+)*)")
 _APOSTROFO_SOLTO = re.compile(r"\b([cdjlmnst]|qu) ['’](\w)", re.IGNORECASE)
 _ORDINAIS = re.compile(r"^\d+[ºªo°]$|^\d+[a-z]$")
 
@@ -176,7 +177,10 @@ def _referencia_limpa(referencia: str) -> str:
     texto = "\n".join(
         linha for linha, c in zip(linhas, chave, strict=True) if not (c.isupper() and vezes[c] >= 3)
     )
-    texto = _HIFEN_DA_REFERENCIA.sub(r"\1\2", texto)
+    # Com a mesma regra do OCR: "nous- mêmes" fica "nous-mêmes", senão a diferença
+    # aponta a palavra certa do OCR como erro.
+    conhecidos = compostos(texto.split("\n"))
+    texto = _HIFEN_DA_REFERENCIA.sub(lambda m: juntar_hifen(m[1], m[2], conhecidos), texto)
     return _APOSTROFO_SOLTO.sub(r"\1'\2", texto)
 
 

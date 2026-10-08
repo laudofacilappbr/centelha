@@ -12,7 +12,9 @@ Saída: parágrafos com a página de origem, para o relatório apontar onde conf
 - Linha em branco no meio do parágrafo, que o Tesseract põe, não o parte quando a frase
   está aberta e a linha seguinte começa em minúscula.
 - Número de página sozinho na linha sai.
-- Palavra hifenizada no fim da linha, ou no fim da página, é juntada.
+- Palavra hifenizada no fim da linha, ou no fim da página, é juntada. O hífen fica
+  quando a palavra é composta ("nous-|mêmes"): o livro a escreve com hífen no meio de
+  alguma linha, ou é o "-t-il" do francês.
 - Ligaduras e espaços estranhos são normalizados; aspas ficam como no exemplar.
 - Ruído da margem sai: "|", "|}" e "|n" no começo ou no fim da linha são a borda da
   página vizinha que entrou no escaneado (fac-símile da Library of Congress, #45).
@@ -22,6 +24,8 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 
+from ..ingestao.leitores import compostos, juntar_hifen
+
 _LIGADURAS = str.maketrans({"ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi", "ﬄ": "ffl", "ſ": "s"})
 _ESPACOS = re.compile(r"[ \t   ]+")
 _NUMERO_PAGINA = re.compile(r"^[\s\-–—.]*\d{1,4}[\s\-–—.]*$")
@@ -29,6 +33,9 @@ _ROMANO_PAGINA = re.compile(r"^\s*[ivxlc]{1,7}\s*$", re.IGNORECASE)
 # Fim de linha com hífen depois de letra: "pala-" + "vra". Ponto ou vírgula soltos depois
 # do hífen são sujeira da margem ("hu-. |" no Évangile), não fim de frase.
 _HIFEN_FINAL = re.compile(r"(\w)[-¬][.,]?$")
+# As pontas de uma palavra partida no fim da linha: "c'est-" + "à-dire".
+_FIM_DE_PALAVRA = re.compile(r"\w+(?:['’-]\w+)*$")
+_COMECO_DE_PALAVRA = re.compile(r"\w+(?:['’-]\w+)*")
 # Token que começa com barra ou chave, na ponta da linha. Nenhum livro do acervo usa
 # "|" nem chaves: é a lombada ou a página ao lado. Palavra antes da barra ("à|m") fica.
 _RUIDO_INICIO = re.compile(r"^(?:[|{}\\]+\S?\s+)+")
@@ -154,6 +161,16 @@ def _sem_ruido(linha: str) -> str:
     return _MARGEM_INICIO.sub("", linha)
 
 
+def _juntar_hifen(anterior: str, inicio: int, seguinte: str, conhecidos: set[str]) -> str:
+    """Junta "pala-" + "vra"; o hífen fica quando é da palavra (juntar_hifen)."""
+    primeira = anterior[: inicio + 1]
+    m = _FIM_DE_PALAVRA.search(primeira)
+    s = _COMECO_DE_PALAVRA.match(seguinte)
+    if m and s and juntar_hifen(m.group(), s.group(), conhecidos) != m.group() + s.group():
+        return f"{primeira}-{seguinte}"
+    return primeira + seguinte
+
+
 def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
     paginas = [
         [
@@ -166,6 +183,7 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
     nao_vazias = [[linha for linha in p if linha] for p in paginas]
     repetidas, numeradas = _repetidas(nao_vazias)
     deslocamentos = _deslocamentos(nao_vazias)
+    conhecidos = compostos([linha for p in nao_vazias for linha in p])
 
     paragrafos: list[Paragrafo] = []
     atual: list[str] = []
@@ -223,7 +241,9 @@ def limpar_paginas(texto_ocr: str) -> list[Paragrafo]:
                     fechar()
             hifen = _HIFEN_FINAL.search(atual[-1]) if atual else None
             if hifen and linha[:1].islower():
-                atual[-1] = atual[-1][: hifen.start() + 1] + linha.split(" ", 1)[0]
+                atual[-1] = _juntar_hifen(
+                    atual[-1], hifen.start(), linha.split(" ", 1)[0], conhecidos
+                )
                 resto = linha.split(" ", 1)[1:] if " " in linha else []
                 if resto:
                     atual.append(resto[0])
