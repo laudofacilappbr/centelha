@@ -790,3 +790,18 @@ p. 437: 40. Prière — Dieu => 10. Prière. — Dieu
 p. 440: 43. (Autre). => 13. (Autre).
 p. 455: 471. Prière. => 47. Prière.
 p. 477: 19. Prière. (Pour le malade) => 79. Prière. (Pour le malade)
+
+# Dígito no meio da palavra (#45), lido na página: "1" no lugar de "i" ou "l", número
+# de página e citação mal lidos. Na p. 227 a imagem mostrou também o capítulo errado
+# da citação do leproso (Mateus 8, não 6) e o versículo inicial da anterior (1, não 4).
+p. 39: communi- 1quent => communiquent
+p. 98: dire : S3 j'avais => dire : Si j'avais
+p. 172: Ï1 ne suffit => Il ne suffit
+p. 227: ch. vi, », de 4 à 4.) => ch. vi, v. de 1 à 4.)
+p. 227: Matl'hieu, ch. vi, v. de 1 à4.) => Matthieu, ch. viii, v. de 1 à 4.)
+p. 237: (Soeur RosaL1e. Paris, 4860.) => (SŒUR ROSALIE. Paris, 1860.)
+p. 344: de la 1eme -2) => de la terre. »
+p. 364: 3LR CHAPITRE XXII ils => ils
+p. 364: juntar: ils disparaîtront avec
+p. 368: chap. x1v, => chap. xiv,
+p. 380: (Chap. x1x, => (Chap. xix,
