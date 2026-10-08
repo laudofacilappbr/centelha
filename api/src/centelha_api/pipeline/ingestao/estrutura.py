@@ -24,6 +24,8 @@ class SegmentoBruto:
     texto: str
     numero_questao: int | None = None
     subquestao: str | None = None
+    # Número deduzido pela posição, não lido no texto ("impresso 647", "sem número").
+    numero_inferido: str | None = None
 
 
 @dataclass
@@ -64,7 +66,15 @@ _SO_ANTES_DOS_CAPITULOS = {"preâmbulo", "préambule"}
 # Título espaçado da FEB: "I N T R O D U Ç Ã O".
 _LETRAS_ESPACADAS = re.compile(r"^(?:\w ){3,}\w$")
 
-_RE_PERGUNTA = re.compile(r"^(?P<n>\d{1,4})\s*[.)–-]\s*(?P<texto>.+)$")
+# "(?!\d)": "2.000 léguas", na Introdução, é milhar, não a questão 2.
+_RE_PERGUNTA = re.compile(r"^(?P<n>\d{1,4})\s*[.)–-](?!\d)\s*(?P<texto>.+)$")
+# Sumário do capítulo na FEB: "1. Deus e o infinito. - 2. Provas da existência de Deus."
+# No começo do livro, sem questão anterior, ele tomaria o lugar da questão 1.
+_RE_SUMARIO = re.compile(r"^1\s*\.\s.*\s[-–]\s*2\s*\.\s")
+# Pergunta sem número, aberta por hífen: a 1011 no PDF da FEB ("- Assim, pelo dogma...?").
+_RE_SEM_NUMERO = re.compile(r"^[-–]\s*(?P<texto>.+\?)$")
+# Até onde procurar a próxima questão numerada ao deduzir um número que falta.
+_ALCANCE_PROXIMA = 40
 _RE_SUBQUESTAO = re.compile(
     r"^(?:(?P<n>\d{1,4})\s*[.\-–]?\s*)?(?P<letra>[a-z])\)\s*[—–-]?\s*(?P<texto>.+)$"
 )
@@ -101,6 +111,35 @@ def _titulo_composto(rotulo: str, resto: str, proximo: str | None) -> tuple[str,
         if not (_RE_CAPITULO.match(proximo) or _RE_DIVISAO.match(proximo)):
             return f"{rotulo} — {proximo}", True
     return rotulo, False
+
+
+def _proxima_numerada(paragrafos: list[str], inicio: int, acima_de: int) -> int | None:
+    for p in paragrafos[inicio : inicio + _ALCANCE_PROXIMA]:
+        if (m := _RE_PERGUNTA.match(p)) and int(m["n"]) > acima_de:
+            return int(m["n"])
+    return None
+
+
+def _numero_que_falta(
+    paragrafos: list[str], i: int, ultima_questao: int | None
+) -> tuple[str, str] | None:
+    """Pergunta com número trocado na impressão ("647." entre a 673 e a 675) ou sem
+    número ("- Assim...?" entre a 1010 e a 1012). Só quando falta exatamente um número e
+    ela está no lugar dele; devolve o texto e o motivo, que vai para o resumo."""
+    p = paragrafos[i]
+    if ultima_questao is None or not p.rstrip().endswith("?"):
+        return None
+    if m := _RE_PERGUNTA.match(p):
+        if int(m["n"]) > ultima_questao:
+            return None
+        texto, motivo = m["texto"], f"impresso {m['n']}"
+    elif m := _RE_SEM_NUMERO.match(p):
+        texto, motivo = m["texto"], "sem número"
+    else:
+        return None
+    if _proxima_numerada(paragrafos, i + 1, ultima_questao) != ultima_questao + 2:
+        return None
+    return texto, motivo
 
 
 def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[CapituloBruto]:
@@ -197,10 +236,23 @@ def estruturar(paragrafos: list[str], perfil: str = "generico") -> list[Capitulo
                 esperando_resposta, dentro_da_resposta = True, False
                 i += 1
                 continue
+            if deduzida := _numero_que_falta(paragrafos, i, ultima_questao):
+                texto, motivo = deduzida
+                ultima_questao += 1
+                atual.segmentos.append(
+                    SegmentoBruto(
+                        TipoSegmento.PERGUNTA, texto, ultima_questao, numero_inferido=motivo
+                    )
+                )
+                esperando_resposta, dentro_da_resposta = True, False
+                i += 1
+                continue
             # A numeração das questões só cresce: "1. D'où vient..." dentro de um
             # comentário de Kardec é lista, não a questão 1 de novo.
-            if (m := _RE_PERGUNTA.match(p)) and (
-                ultima_questao is None or int(m["n"]) > ultima_questao
+            if (
+                (m := _RE_PERGUNTA.match(p))
+                and (ultima_questao is None or int(m["n"]) > ultima_questao)
+                and not _RE_SUMARIO.match(p)
             ):
                 ultima_questao = int(m["n"])
                 atual.segmentos.append(
@@ -246,6 +298,10 @@ def resumo(capitulos: list[CapituloBruto]) -> dict:
         "primeira_questao": min(questoes, default=None),
         "ultima_questao": max(questoes, default=None),
         "questoes_faltando": faltando,
+        # Conferir no fac-símile: o número foi deduzido pela posição.
+        "questoes_inferidas": {
+            s.numero_questao: s.numero_inferido for s in segmentos if s.numero_inferido
+        },
         "caracteres": sum(len(s.texto) for s in segmentos),
         "por_tipo": {
             t.value: sum(1 for s in segmentos if s.tipo == t)

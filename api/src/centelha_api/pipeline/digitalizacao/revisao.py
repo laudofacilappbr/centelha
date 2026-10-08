@@ -245,6 +245,8 @@ def como_markdown(rel: Relatorio, titulo: str) -> str:
             f"- Total: {q['questoes']} (de {q['primeira_questao']} a {q['ultima_questao']})",
             f"- Faltando: {', '.join(map(str, q['questoes_faltando'])) or 'nenhuma'}",
             f"- Repetidas: {', '.join(map(str, q['questoes_repetidas'])) or 'nenhuma'}",
+            "- Número deduzido pela posição, conferir no exemplar: "
+            + (", ".join(f"{n} ({m})" for n, m in q["questoes_inferidas"].items()) or "nenhum"),
             "",
         ]
     linhas += [f"## Achados ({len(rel.achados)})", ""]
