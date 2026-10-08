@@ -805,3 +805,24 @@ p. 364: 3LR CHAPITRE XXII ils => ils
 p. 364: juntar: ils disparaîtront avec
 p. 368: chap. x1v, => chap. xiv,
 p. 380: (Chap. x1x, => (Chap. xix,
+
+# Romanos de citação lidos com dígito (ch. 11, chap. 1x), conferidos no recorte da
+# linha (#45). A TABLE DES MATIÈRES fica de fora: a ingestão a corta.
+p. 37: (Ch. 11, n°8.) => (Ch. ii, n° 5.)
+p. 37: 1° partie, ch. 11; 2° partie, ch. 1.) => 1re partie, ch. ii; 2e partie, ch. i.)
+p. 40: (Ciel et Enfer, 2 partie, ch. 1.) => (Ciel et Enfer, 2e partie, ch. i.)
+p. 88: chap. 11, K par => chap. ii, par
+p. 257: (Chap. 11 et iii.) => (Chap. ii et iii.)
+p. 257: Saint Marc, ch. 11, v. 20 => Saint Marc, ch. iii, v. 20
+p. 349: épitre 1e, chap. 1v => épître 1re, chap. iv
+p. 369: Saint Luc, chap. 1x => Saint Luc, chap. ix
+p. 380: sans da lumière de la raison:, => sans la lumière de la raison,
+p. 435: (Actes, ch. 11, v. 17 => (Actes, ch. ii, v. 17
+p. 461: 2e part., ch. 1, Le passage => 2e part., ch. i, Le passage
+
+# Margem da encadernação comeu a primeira letra das linhas da p. 363 (lido no recorte).
+p. 363: utile, nécesaire, mais => utile, nécessaire, mais
+p. 363: mais tien, absolument => mais rien, absolument
+p. 363: soit le porollaire => soit le corollaire
+p. 363: et non le la loi civile => et non de la loi civile
+p. 363: vivaces, nt déjà => vivaces, ont déjà
