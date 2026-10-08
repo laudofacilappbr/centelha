@@ -81,6 +81,8 @@
   "apagar": "Supprimer",
   "cancelar": "Annuler",
   "lerEmOutroIdioma": "Lire dans une autre langue",
+  "capituloSoTexto": "Texte seul, sans narration",
+  "semNarracao": "Ce chapitre n'a pas encore de narration. Vous pouvez lire le texte.",
   "posicaoNaoEncontrada": "Ce passage n’est pas dans {edicao}.",
   "baixados": "Téléchargés",
   "baixadosVazio": "Aucun chapitre téléchargé. Utilisez le bouton de téléchargement du lecteur.",

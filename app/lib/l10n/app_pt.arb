@@ -192,6 +192,8 @@
   "apagar": "Apagar",
   "cancelar": "Cancelar",
   "lerEmOutroIdioma": "Ler em outro idioma",
+  "capituloSoTexto": "Só texto, sem narração",
+  "semNarracao": "Este capítulo ainda não tem narração. Você pode ler o texto.",
   "posicaoNaoEncontrada": "Esta parte não está em {edicao}.",
   "@posicaoNaoEncontrada": {
     "placeholders": {

@@ -153,7 +153,9 @@ class _TelaCapituloState extends State<TelaCapitulo> {
                   edicao: widget.edicao,
                   autor: widget.autor,
                 ),
-              ),
+              )
+            else
+              const AvisoSemNarracao(),
           ],
         ),
       ),
@@ -499,6 +501,38 @@ class _Segmento extends StatelessWidget {
                 child: caixa,
               ),
             ),
+    );
+  }
+}
+
+/// No lugar do player, quando o capítulo está publicado só com texto (#167): sem ele,
+/// quem procura o play acha que o áudio quebrou.
+class AvisoSemNarracao extends StatelessWidget {
+  const AvisoSemNarracao({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final esquema = Theme.of(context).colorScheme;
+    return Material(
+      color: esquema.surfaceContainerHigh,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(Icons.menu_book_outlined, color: esquema.onSurfaceVariant),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).semNarracao,
+                  style: TextStyle(color: esquema.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

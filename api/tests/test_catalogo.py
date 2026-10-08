@@ -196,3 +196,19 @@ def test_capitulo_so_com_faixa_sem_licenca_sai_sem_faixa(client, session, catalo
     r = client.get(f"/v1/capitulos/{catalogo['c1'].id}").json()
     assert r["faixa"] is None
     assert r["segmentos"]
+
+
+def test_edicao_diz_quais_capitulos_tem_audio(client, session, catalogo):
+    """Capítulo publicado só com texto aparece na lista sem áudio, e o app avisa (#167).
+    Faixa de motor sem licença liberada não conta como áudio."""
+    edicao, c2 = catalogo["publicada"], catalogo["c2"]
+    c2.estado = EstadoCapitulo.PUBLICADO
+    session.commit()
+    url = f"/v1/edicoes/{edicao.id}"
+    tem = {c["referencia_canonica"]: c["tem_audio"] for c in client.get(url).json()["capitulos"]}
+    assert tem == {"LE-C001": True, "LE-C002": False}
+
+    session.query(Voz).update({Voz.motor: "piper"})
+    session.commit()
+    tem = {c["referencia_canonica"]: c["tem_audio"] for c in client.get(url).json()["capitulos"]}
+    assert tem == {"LE-C001": False, "LE-C002": False}

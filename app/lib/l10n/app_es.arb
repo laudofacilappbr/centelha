@@ -81,6 +81,8 @@
   "apagar": "Borrar",
   "cancelar": "Cancelar",
   "lerEmOutroIdioma": "Leer en otro idioma",
+  "capituloSoTexto": "Solo texto, sin narración",
+  "semNarracao": "Este capítulo aún no tiene narración. Puedes leer el texto.",
   "posicaoNaoEncontrada": "Esta parte no está en {edicao}.",
   "baixados": "Descargados",
   "baixadosVazio": "No hay capítulos descargados. Usa el botón de descarga en el reproductor del capítulo.",

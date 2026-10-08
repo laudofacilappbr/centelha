@@ -68,6 +68,7 @@ class _TelaObraState extends State<TelaObra> {
               for (final c in edicao.capitulos)
                 ListTile(
                   title: Text(c.titulo),
+                  subtitle: c.temAudio ? null : Text(t.capituloSoTexto),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => abrirCapitulo(
                     context,

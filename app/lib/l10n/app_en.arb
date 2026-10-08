@@ -81,6 +81,8 @@
   "apagar": "Remove",
   "cancelar": "Cancel",
   "lerEmOutroIdioma": "Read in another language",
+  "capituloSoTexto": "Text only, no narration",
+  "semNarracao": "This chapter has no narration yet. You can read the text.",
   "posicaoNaoEncontrada": "This part is not in {edicao}.",
   "baixados": "Downloads",
   "baixadosVazio": "No downloaded chapters. Use the download button in a chapter's player.",
